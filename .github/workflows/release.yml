@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        shell: pwsh
+        run: dotnet publish -c Release
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.dll
+              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.exp
+              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.lib
+              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.pdb
+              ${{github.workspace}}/LICENSE
