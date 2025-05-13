@@ -18,7 +18,9 @@ jobs:
         run: dotnet publish -c Release
       - name: Copy libraries to lib directory
         shell: pwsh
-        run: Copy-Item -Path "${{github.workspace}}\bin\Release\net9.0\win-x64\native\*" -Destination "${{github.workspace}}\bin\lib\" -Recurse -Force
+        run: |
+            New-Item -ItemType Directory -Force -Path "${{github.workspace}}\bin\lib\"
+            Copy-Item -Path "${{github.workspace}}\bin\Release\net9.0\win-x64\native\*" -Destination "${{github.workspace}}\bin\lib\" -Recurse -Force
       - name: Zip release
         shell: pwsh
         run: Compress-Archive -Path '${{github.workspace}}\include','${{github.workspace}}\bin\lib' -DestinationPath '${{github.workspace}}\release.zip' -Force
