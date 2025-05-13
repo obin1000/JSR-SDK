@@ -16,12 +16,17 @@ jobs:
       - name: Build
         shell: pwsh
         run: dotnet publish -c Release
+      - name: Copy libraries to lib directory
+        shell: pwsh
+        run: Copy-Item -Path "${{github.workspace}}/bin/Release/net9.0/win-x64/native/*" -Destination "${{github.workspace}}/bin/lib/" -Recurse -Force
+      - name: Zip release
+        shell: pwsh
+        run: Compress-Archive -Path '${{github.workspace}}/include','${{github.workspace}}/bin/lib' -DestinationPath '${{github.workspace}}/release.zip' -Force
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           files: |
-              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.dll
-              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.exp
-              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.lib
-              ${{github.workspace}}/bin/Release/net9.0/win-x64/native/JSR-SDK.pdb
+             ${{github.workspace}}/release.zip
               ${{github.workspace}}/LICENSE
