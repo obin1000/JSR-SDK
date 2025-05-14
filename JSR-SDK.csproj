@@ -24,4 +24,8 @@
     <None Include=".github\workflows\release.yml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="external\" />
+  </ItemGroup>
+
 </Project>

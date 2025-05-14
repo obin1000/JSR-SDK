@@ -1,0 +1,1054 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="GENERATOR" content="VSdocman - documentation generator; http://www.helixoft.com" />
+	<title>PulserSettingInfo Methods</title>
+
+	<link rel="stylesheet" type="text/css" href="msdn10_lightweight/msdn10_lightweight.css"></link>
+	<script src="msdn10_lightweight/msdn10_lightweight.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shCore_helixoft.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushVb.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCSharp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCpp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushJScript.js" type="text/javascript"></script>
+	<link href="SyntaxHighlighter/styles/shCore.css" rel="stylesheet" type="text/css" />
+	<link href="SyntaxHighlighter/styles/shThemeMsdnLW.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript">
+		SyntaxHighlighter.all();
+	</script>				
+
+	<script type="text/javascript">
+<!--
+if (self.name != "vbdocright") {
+	if (location.search != "?toc=no") {
+		var filename = location.pathname.replace(/\\/g, "/");
+		filename = filename.substring(filename.lastIndexOf('/')+1);
+		location.replace("index.html#" + filename);
+	} 
+}
+
+function replaceTitleAndUrl(win, title, url) {
+	if(history.replaceState) {
+		win.history.replaceState(null, title, url);
+	} else {
+		win.document.title = document.title;
+		win.location.replace(url);
+	}
+}
+//-->
+	</script>	
+</head>
+
+<body style="direction: ltr;">
+	<script type="text/javascript">
+		try {
+			if (location.search != "?toc=no") {
+				parent.document.title = document.title;
+				var filename = location.pathname.replace(/\\/g, "/");
+				filename = filename.substring(filename.lastIndexOf('/')+1);
+				if (window.parent.location.search == null || window.parent.location.search != "?" + filename) {
+					if (window.parent.location.hash == null || window.parent.location.hash != "#" + filename) {
+						replaceTitleAndUrl(window.parent, document.title, "index.html#" + filename);
+					}
+				}
+			}
+		} catch (ex) {}
+	</script>
+	<div id="topic">
+<!--HEADER START-->
+  <div id="header">
+  	<div id="runningHeaderText">JSRDotNETSDK Reference</div>
+  	<h1 class="title">PulserSettingInfo Methods</h1>
+  	<div id="headerLinks">
+              <a href="topic_00000000000004DD.html">PulserSettingInfo Class</a>
+            &nbsp;<a href="#seeAlsoSection">See Also</a>
+		</div>
+		<hr />
+	</div>
+<!--HEADER END-->
+    
+		<div id="mainSection">
+      <div id="mainBody">
+        <p />
+        <p>
+          The following tables list the members exposed by the  
+              <a href="topic_00000000000004DD.html">PulserSettingInfo</a>
+             type.
+        </p>
+
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Methods</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="MethodsSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004DE.html">CreateListOfPulserProperties</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Creates list of pulser properties.   It takes an IPulserReceiver object as an argument.
+          Reflection is used to look for properties in the object which have the PulserSettingAttribute
+          in the metadata.   It then analyzes the information from the PulserSettingAttribute to
+          create the PulserSettingInfo objects in order to build the list.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+		
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.equals.aspx">Equals</a>
+
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+		Determines whether the specified <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> is equal to the current <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004DF.html">ExtractPulserProperties</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Creates list of pulser properties.   It takes an IPulserReceiver object as an argument.
+          Reflection is used to look for properties in the object which have the PulserSettingAttribute
+          in the metadata.   It then analyzes the information from the PulserSettingAttribute to
+          create the PulserSettingInfo objects in order to build the list.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.finalize.aspx">Finalize</a>
+
+	
+	  </td>
+	  <td>
+	
+		Allows an <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> to attempt to free resources and perform other cleanup operations before the <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> is reclaimed by garbage collection.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.gethashcode.aspx">GetHashCode</a>
+
+	
+	  </td>
+	  <td>
+	
+		Serves as a hash function for a particular type.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F9.html">GetNearestIndexValue</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets nearest index value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_0000000000000508_overloads--.html">GetPropertyValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	Gets the value of a property such as GainMin.   While the setting name is 'Gain',
+ there are possibly many properties associated with the gain setting.   This method
+ allows the reading of those properties, even if they aren't defined in the
+ IPulserReceiver interface.  For example, to read the GainIndex property, this method
+ could be used like: pulserSettingInfo.GetPropertyValue(pulser, PulserPropertyRole.Index);
+ The index is used for accessing properties when the pulser object has several
+ properties with the same role, such as ReceiverModeEchoSupported,
+ ReceiverModeThruSupported.  For those, the index specifies the value of ReceiverMode
+ that the property applies to, I.E. the numerical values of the RECEIVER_MODE
+ enumeration.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004FA.html">GetReturnType</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets return type for the read method of a specific property role.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004EF.html">GetRoleReadMethod</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets role read method.  This is a way to read the value of a property, even if the
+ property is not defined in the IPulserReceiver interface.  It can also be used to read the
+ properties which are defined also.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F0.html">GetRoleWriteMethod</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets role write method.  This is a way to write the value of a property, even if the
+ property is not defined in the IPulserReceiver interface.  It can also be used to write to the
+ properties which are defined also.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004E1.html">GetSettingNameAndRoleFromName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Takes a full property name like &quot;HVSupplyIndexMax&quot; and returns the role
+ (PulserPropertyRole.INDEXMAX) and the setting name: HVSupply.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+		
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.gettype.aspx">GetType</a>
+
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+		Gets the <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.type.aspx">Type</a> of the current instance.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004ED.html">GetUnitsAsString</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets units of measure as string.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F2.html">GetValueAsString</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a string representation of this property in the current pulser receiver device.
+ If this property is not supported, then null is returned.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F3.html">GetValuesAsStrings</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a string representation of this property in the current pulser receiver device.
+ If this property is not supported, then null is returned.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000500.html">IsDirectValueValid</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Query if 'value' is a valid value to be used for the Direct Value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004FC.html">IsEnumValueSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Query if 'idx' is a supported/valid index value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F6.html">IsIndexValueSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Query if 'idx' is a supported/valid index value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_0000000000000509_overloads--.html">IsPropertySupported</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	True if property supported.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004EE.html">IsRoleSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Query if 'role' is role supported.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004E2.html">MakePropertyName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Takes a full property role and setting name and creates a properth name. Given a role
+ of PulserPropertyRole.INDEXMAX and the setting name: HVSupply, this function will
+ return HVSupplyIndexMax.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.memberwiseclone.aspx">MemberwiseClone</a>
+
+	
+	  </td>
+	  <td>
+	
+		Creates a shallow copy of the current <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.referenceequals.aspx">ReferenceEquals</a>
+
+	
+	  </td>
+	  <td>
+	
+		Determines whether the specified <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> instances are the same instance.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_000000000000050A_overloads--.html">SetPropertyValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	Sets the value of a property such as GainMin.   While the setting name is 'Gain',
+ there are possibly many properties associated with the gain setting.   This method
+ allows the writing of those properties, even if they aren't defined in the
+ IPulserReceiver interface.  For example, to write to the GainIndex property, this method
+ could be used like: pulserSettingInfo.SetPropertyValue(pulser, PulserPropertyRole.Index, (object)1);
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000050F.html">ToString</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns a <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.string.aspx">String</a> that represents the current
+ <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004E0.html">getPulserPropertyName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	creates a pulser property name out of the general setting name and standard text used
+ to specified a role.   For example, if this PulserSettingInfo.SettingName == &quot;Gain&quot;, and the
+ the role was PulserPropertyRole.MAX, this method would return the string &quot;GainMax&quot;;
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000004F1.html">getRoleInfo</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets role write method.  This is a way to write the value of a property, even if the
+ property is not defined in the IPulserReceiver interface.  It can also be used to write to the
+ properties which are defined also.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000507.html">objectToString</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Converts a returned object to string representation. This is mainly used to format
+ double return types to an appropriate value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">See Also</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="seeAlsoSection" class="section">	
+		<div>
+			<h4 class="subHeading">
+				Reference</h4>
+			<a href="topic_00000000000004DD.html">PulserSettingInfo Class</a><br />
+	<a href="topic_0000000000000000.html">JSRDotNETSDK Namespace</a><br />
+
+
+			
+
+		</div>
+	</div>					
+</div>
+			</div>
+			</div>
+      <div id="footer">
+      	<p></p>
+      </div>
+    </div>
+  	<script type="text/javascript">
+<!--
+	try {
+		parent.frames["vbdocswitch"].expandLinkInToc(location.href);
+	} catch (ex) {}
+//-->
+		</script>	
+  </body>
+</html>
+

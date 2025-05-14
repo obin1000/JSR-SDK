@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="GENERATOR" content="VSdocman - documentation generator; http://www.helixoft.com" />
+	<title>PulserPropertyRole Enumeration</title>
+
+	<link rel="stylesheet" type="text/css" href="msdn10_lightweight/msdn10_lightweight.css"></link>
+	<script src="msdn10_lightweight/msdn10_lightweight.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shCore_helixoft.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushVb.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCSharp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCpp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushJScript.js" type="text/javascript"></script>
+	<link href="SyntaxHighlighter/styles/shCore.css" rel="stylesheet" type="text/css" />
+	<link href="SyntaxHighlighter/styles/shThemeMsdnLW.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript">
+		SyntaxHighlighter.all();
+	</script>				
+
+	<script type="text/javascript">
+<!--
+if (self.name != "vbdocright") {
+	if (location.search != "?toc=no") {
+		var filename = location.pathname.replace(/\\/g, "/");
+		filename = filename.substring(filename.lastIndexOf('/')+1);
+		location.replace("index.html#" + filename);
+	} 
+}
+
+function replaceTitleAndUrl(win, title, url) {
+	if(history.replaceState) {
+		win.history.replaceState(null, title, url);
+	} else {
+		win.document.title = document.title;
+		win.location.replace(url);
+	}
+}
+//-->
+	</script>	
+</head>
+
+<body style="direction: ltr;">
+	<script type="text/javascript">
+		try {
+			if (location.search != "?toc=no") {
+				parent.document.title = document.title;
+				var filename = location.pathname.replace(/\\/g, "/");
+				filename = filename.substring(filename.lastIndexOf('/')+1);
+				if (window.parent.location.search == null || window.parent.location.search != "?" + filename) {
+					if (window.parent.location.hash == null || window.parent.location.hash != "#" + filename) {
+						replaceTitleAndUrl(window.parent, document.title, "index.html#" + filename);
+					}
+				}
+			}
+		} catch (ex) {}
+	</script>
+	<div id="topic">
+<!--HEADER START-->
+  <div id="header">
+  	<div id="runningHeaderText">JSRDotNETSDK Reference</div>
+  	<h1 class="title">PulserPropertyRole Enumeration</h1>
+  	<div id="headerLinks">
+
+	<a href="#seeAlsoSection">See Also</a>
+
+		</div>
+		<hr />
+	</div>
+<!--HEADER END-->
+    
+		<div id="mainSection">
+      <div id="mainBody">
+        <p />
+       
+        A JSRDotNET Property consists of a group of .NET properties in IPulserReceiver.
+This enum specifies which role one specific .NET property has.  For example,
+one of the properties in IPulserReceiver associated with Gain, is the boolean
+property 'GainIndexSupported'.   Thus the role of that .NET property is
+INDEXSUPPORTED.
+
+
+        <p /><strong>Namespace:</strong>
+<a href="topic_0000000000000000.html">JSRDotNETSDK</a>
+
+
+
+
+        <br /><strong>Assembly:</strong> JSRDotNETSDK (in JSRDotNETSDK.dll)
+
+
+
+
+
+
+
+	
+	
+	<div id="syntaxCodeBlocks">
+		
+
+		
+		
+	</div>
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Members</a></span>
+		<div><hr /></div>
+	</div>
+
+<div id="membersSection" class="section">
+	<table>
+		<tr>
+			<th>&nbsp;
+			</th>
+			<th>
+				Member name
+			</th>
+			<th>
+				Description
+			</th>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				DIRECT
+			</td>
+			<td>
+				This Property is for directly setting or getting the value, such as pulser.Gain = 10.0;
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				DIRECTSUPPORTED
+			</td>
+			<td>
+				This property's direct mode property is supported.  If false, then the indexed mode must be used.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				SPECIFICVALUESUPPORTED
+			</td>
+			<td>
+				Some properties such as ReceiverMode can have several integer values, 0, 1 or 2, which correspond
+to Echo, Thru or Slave mode.   However not all Receivers support all three modes.  To determine if
+ReceiverMode supports Echo mode, the property ReceiverModeEchoSupported is implemented.   This property
+indicates whether a specific value of a ReceiverMode property is supported.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				DIRECTVALUES
+			</td>
+			<td>
+				If the Direct value expects a list of possible values that are set directly, then this property
+will be provided to include a list of key value pairs corresponding to the value and a display
+string for each value that is supported.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				STEPSIZE
+			</td>
+			<td>
+				If a setting supports direct setting, such as gain,  it may be true that the actual attainable
+values may have a constant amount of db between them.   For example, if the pulser.GainMin == -10.0,
+the attainable gain values may be -10.0, -9.5, -9.0, -8.5, ...  In this case, if the application sets
+the gain to -9.7,  the receiver would actually set the gain to the closest available, or -9.5.   This
+property indicates that the actual value increment.   Not all settings would have an even stepsize,
+such as the PulseRepetitionFrequency.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				STEPSIZESUPPORTED
+			</td>
+			<td>
+				Indicates the stepsize between actual setting values is fixed, and that the stepsize property is
+meaningful.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				INDEX
+			</td>
+			<td>
+				In settings that are read and written by modifying an integer index,  settings that support index
+mode are read and modified using this property.  For example, as an alternative to setting the
+gain directly,  the property with the Index role can set the gain by index such as,
+pulser.GainIndex = 0;   This should be equivalent to pulser.Gain = pulser.GainMin;   Settings can
+support the index method and the direct method, but many support only one or the other.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				INDEXMAX
+			</td>
+			<td>
+				This property role indicates the maximum legal value of the index for this setting.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				INDEXSUPPORTED
+			</td>
+			<td>
+				This property role indicates if the index mode for this property is supported.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				MAX
+			</td>
+			<td>
+				This property role indicates the maximum legal value for this setting
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				MIN
+			</td>
+			<td>
+				This property role indicates the minimum legal value for this setting
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				INDEXVALUES
+			</td>
+			<td>
+				For properties that support the index this is an array containing the actual values of the
+setting for all the indices.   For example,  pulser.GainValues is a read-only array of
+doubles.    pulser.GainValues[0] == -10.0,  pulser.GainValues[1] == -9.5;  etc.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				NUMERATOR
+			</td>
+			<td>
+				For the PulseRepetitionFrequency setting, the actual attainable values are sometimes
+calculated using a formula of something like 12,000,000 / n.   So if the value of n is
+12,000,  that would correspond to a frequency of 1000 Hz.  The value of this property would
+be the numerator used, which in the example above would be 12,000,000.
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
+				OTHER
+			</td>
+			<td>
+				Used for roles that don't fit into any of the other categories.
+			</td>
+		</tr>
+		
+	</table>
+</div>					
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">See Also</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="seeAlsoSection" class="section">	
+		<div>
+			<h4 class="subHeading">
+				Reference</h4>
+			
+<a href="topic_0000000000000000.html">JSRDotNETSDK Namespace</a><br />
+
+
+			
+
+		</div>
+	</div>					
+</div>
+			</div>
+			</div>
+      <div id="footer">
+      	<p></p>
+      </div>
+    </div>
+  	<script type="text/javascript">
+<!--
+	try {
+		parent.frames["vbdocswitch"].expandLinkInToc(location.href);
+	} catch (ex) {}
+//-->
+		</script>	
+  </body>
+</html>

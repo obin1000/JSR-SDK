@@ -1,0 +1,6553 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="GENERATOR" content="VSdocman - documentation generator; http://www.helixoft.com" />
+	<title>PulserReceiverImpl Members</title>
+
+	<link rel="stylesheet" type="text/css" href="msdn10_lightweight/msdn10_lightweight.css"></link>
+	<script src="msdn10_lightweight/msdn10_lightweight.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shCore_helixoft.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushVb.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCSharp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushCpp.js" type="text/javascript"></script>
+	<script src="SyntaxHighlighter/scripts/shBrushJScript.js" type="text/javascript"></script>
+	<link href="SyntaxHighlighter/styles/shCore.css" rel="stylesheet" type="text/css" />
+	<link href="SyntaxHighlighter/styles/shThemeMsdnLW.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript">
+		SyntaxHighlighter.all();
+	</script>				
+
+	<script type="text/javascript">
+<!--
+if (self.name != "vbdocright") {
+	if (location.search != "?toc=no") {
+		var filename = location.pathname.replace(/\\/g, "/");
+		filename = filename.substring(filename.lastIndexOf('/')+1);
+		location.replace("index.html#" + filename);
+	} 
+}
+
+function replaceTitleAndUrl(win, title, url) {
+	if(history.replaceState) {
+		win.history.replaceState(null, title, url);
+	} else {
+		win.document.title = document.title;
+		win.location.replace(url);
+	}
+}
+//-->
+	</script>	
+</head>
+
+<body style="direction: ltr;">
+	<script type="text/javascript">
+		try {
+			if (location.search != "?toc=no") {
+				parent.document.title = document.title;
+				var filename = location.pathname.replace(/\\/g, "/");
+				filename = filename.substring(filename.lastIndexOf('/')+1);
+				if (window.parent.location.search == null || window.parent.location.search != "?" + filename) {
+					if (window.parent.location.hash == null || window.parent.location.hash != "#" + filename) {
+						replaceTitleAndUrl(window.parent, document.title, "index.html#" + filename);
+					}
+				}
+			}
+		} catch (ex) {}
+	</script>
+	<div id="topic">
+<!--HEADER START-->
+  <div id="header">
+  	<div id="runningHeaderText">JSRDotNETSDK Reference</div>
+  	<h1 class="title">PulserReceiverImpl Members</h1>
+  	<div id="headerLinks">
+              <a href="topic_00000000000003DD.html">PulserReceiverImpl Class</a>
+              &nbsp;<a href="#ConstructorsSection">Constructors</a>
+
+              &nbsp;<a href="#EventsSection">Events</a>
+
+              &nbsp;<a href="#MethodsSection">Methods</a>
+              
+              &nbsp;<a href="#FieldsSection">Fields</a>
+							
+              &nbsp;<a href="#PropertiesSection">Properties</a>
+
+            &nbsp;<a href="#seeAlsoSection">See Also</a>
+		</div>
+		<hr />
+	</div>
+<!--HEADER END-->
+    
+		<div id="mainSection">
+      <div id="mainBody">
+        <p />
+        Interface for pulser receiver.  An instrument can have multiple pulser receivers.
+
+        <p>
+          The following tables list the members exposed by the  
+              <a href="topic_00000000000003DD.html">PulserReceiverImpl</a>
+             type.
+        </p>
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Constructors</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="ConstructorsSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+	<tr class="
+	
+	
+	">
+	  <td>
+      <img alt="Protected constructor" src="msdn10_lightweight/protmethod.gif"></img>
+
+    
+
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000471.html">PulserReceiverImpl</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Specialised default constructor for use only by derived class.
+	
+	
+		</td>
+	</tr>
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Properties</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="PropertiesSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000418.html">DampingIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the pulser damping. The actual damping value
+ corresponding to the available indices can be read from the DampingValues array.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000419.html">DampingIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the damping index maximum.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000417.html">DampingIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the damping index property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041A.html">DampingValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the damping values in Ohms.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000453.html">EnergyPerPulse</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the energy per pulse in Joules.  This property is simply the amount of energy
+ stored in the pulser's capacitor which is used to create the outgoing pulse.   Not
+ all of these energy is necessarily delivered to the pulser, since there may be some
+ losses.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E8.html">Gain</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the gain in dB.  Chooses the closest legal gain value.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003EE.html">GainIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based gain index.  To find the value, see GainValues property.
+ This property will only have an effect if GainIndexPropertySupported is true for this
+ particular model of instrument.  Otherwise, use the Gain property to get or set the
+ gain.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003EF.html">GainIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the gain index maximum.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003ED.html">GainIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the gain index property is enabled.  For receivers
+ which have only a few possible values of gain, this alternative method for setting
+ gain can be used to select the gain from the GainValues array.  Some instruments do
+ not allow this method because they support a range of closely spaced gain values
+ which makes the list of allowed gains less useful.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003EA.html">GainMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the gain maximum in dB.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E9.html">GainMin</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the gain minimum in dB.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003EC.html">GainStepSize</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the size of the gain step. For example if the gain step size is 0.5, and the
+ GainMin is -22.0 dB, then the next valid gain value is -21.5 dB.  This property only
+ has a meaningful value if GainStepSizeSupported is true.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003EB.html">GainStepSizeSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the gain step size is supported by a receiver. If an
+ instrument does not have regular increments between min and max gain, then this
+ property indicates that the GainStepSize property should be ignored.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E7.html">GainSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the gain supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F0.html">GainValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets an array of gain values in dB corresponding to the GainIndex property.  This
+ property will only have values if the GainIndexSupported property is true.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000436.html">HVMeasurement</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns current floating point voltages of HV Supply in Volts.  Only accurate to nearest 1/10th of a volt.  Not all
+instruments support this property.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000435.html">HVMeasurementSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns True if HVMeasurement property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040F.html">HVSupply</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the voltage of the pulser high voltage supply.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000045B.html">HVSupplyEnable</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets a value indicating whether this Pulser's High Voltage power supply is
+ enabled.  Only some instruments have this capability.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000045A.html">HVSupplyEnableSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the hv supply enable supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000413.html">HVSupplyIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the pulser volts, if this property is available
+ for this pulser receiver.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000414.html">HVSupplyIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulser volts index maximum value.  If the HVSupplyIndex property is not
+ available in this pulser receiver, zero will be returned.   The number of available
+ pulser voltages is this value minus one.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000412.html">HVSupplyIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the high voltage value can be selected by index;
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000411.html">HVSupplyMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulser high voltage supply maximum voltage.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000410.html">HVSupplyMin</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulser high voltage supply minimum voltage.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040E.html">HVSupplySupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the pulser HVSupply property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000415.html">HVSupplyValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the voltages which can be selected by HVSupplyIndex property.   If this property
+ is not supported for this pulser receiver, this is an array of zero elements.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E6.html">HasManualControls</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether this object has physical controls.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FD.html">HighPassFilterIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the high pass filter.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FE.html">HighPassFilterIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	The maximum allowed index for the low pass filter selection. The number of low pass
+ filter selections is equal to this plus one.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FC.html">HighPassFilterIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the high pass filter index supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FF.html">HighPassFilterValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the high pass cutoff frequencies in MHz for each possible index.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E0.html">Id</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the identification object of the pulser receiver.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000454.html">Info</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the hardware and or connection information for this pulser receiver and the
+ instrument.  Note not all pulser receivers have the same information available.
+ Possible element names are InstrumentModel, InstrumentSerialNum, InstrumentAddress,
+ InstrumentFWRevision, InstrumentHWRevision, PulserModel, ReceiverModel,
+ PulserSerialNum, ReceiverSerialNum, PulserHWRevision, ReceiverHWRevision,
+ SerialPortName, InstrumentAddress,.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000430.html">IsPulserPresent</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if a pulser is attached to this PulserReceiver.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042F.html">IsPulserPresentSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if IsPulserPresent property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E2.html">LEDBlinkModeIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the LED blink mode.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E3.html">LEDBlinkModeIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the LED blink mode index maximum.  The number of possible LED blink modes is
+ this minus one.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E1.html">LEDBlinkModeIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the LED blink mode index property is enabled.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E4.html">LEDBlinkModeValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the names of all the possible LED blink modes available by setting the
+ LEDBlinkModeIndex property.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F8.html">LowPassFilterIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the current selected low pass filter selection.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F9.html">LowPassFilterIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	The maximum allowed index for the low pass filter selection. The number of low pass
+ filter selections is equal to this plus one.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F7.html">LowPassFilterIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the low pass filter index supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FA.html">LowPassFilterValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the low pass cutoff frequencies in MHz for each possible index.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044C.html">MaxFrequency</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the the base receiver max frequency in Mhz.  This a fixed characteristic of the
+ receiver hardware and does not change when the low pass or high pass filter settings
+ are changed.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041D.html">PulseEnergyIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the pulse energy selection.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041E.html">PulseEnergyIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulse energy index maximum.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041C.html">PulseEnergyIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the pulser energy index property is enabled.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041F.html">PulseEnergyValueNames</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a list of names of the available pulse energy values.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000405.html">PulseRepetitionFrequency</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the pulse repetition frequency if an internal trigger is available in
+ this pulser receiver.  If the specified frequency is not attainable, the closest
+ attainable frequency will be chosen.   After setting this property, the property can
+ be read to determine the frequency actually attained.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040A.html">PulseRepetitionFrequencyIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the internally generated pulse repetition
+ frequency if the TriggerSource property is set to Internal.   See the
+ PulserRepetitionFreqValues property for the list of actually attainable frequencies.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040B.html">PulseRepetitionFrequencyIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	The maximum number allowed for the PulseRepetitionFrequencyIndex property, or zero if
+ this property cannot be used with this pulser receiver.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000409.html">PulseRepetitionFrequencyIndexSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the pulser repetition frequency index property can be
+ used on this pulser receiver.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000407.html">PulseRepetitionFrequencyMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the maximum possible pulse repetition frequency maximum in Hz.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000406.html">PulseRepetitionFrequencyMin</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the minimum possible pulse repetition frequency maximum in Hz.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000408.html">PulseRepetitionFrequencyNumerator</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulse repetition frequency numerator.  The Pulse Repetition Frequency is
+ determined by calculating PRF_Numerator/PRF_Denominator, where the Numerator is fixed
+ and the Denominator varies.  The get and set values returned by this interface use
+ the fraction value.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000404.html">PulseRepetitionFrequencySupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the pulse repetition frequency supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040C.html">PulseRepetitionFrequencyValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets an array of attainable PRF values if this pulser receiver supports the
+ PulseRepetionFrequencyIndex property.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000434.html">PulserEnergyCapacitorValues</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns a list of pulser energy capacitor values in micro-farads.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000433.html">PulserEnergyCapacitorValuesSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if the PulserEnergyCapacitorValues property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044A.html">PulserFirmwareVer</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Pulser Firmware Version string
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000449.html">PulserFirmwareVerSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the PulserFirmwareVer property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000446.html">PulserHWRev</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Pulser Hardware Revision String
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000445.html">PulserHWRevSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the PulserHWRev property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000451.html">PulserImpedance</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the pulser output impedance.  Currently only implemented in the DPR300,
+ the LOW_Z option provides a higher pulse energy but with a side effect of lessening
+ the effect of the damping resistor, resulting in less damping. (See the DampingIndex
+ property)
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000450.html">PulserImpedanceSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the PulserImpedance property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000456.html">PulserIsPulsing</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the pulser is currently being triggered.  Some
+ instruments do not have the ability to detect this when using an external trigger.
+ When such instruments are set to external trigger, a value of UNKNOWN will be
+ returned.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000432.html">PulserMaxPRFs</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns an array of max PRF frequencies in Hz, one for each energy setting of the pulser.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000431.html">PulserMaxPRFsSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if the PulserMaxPRFs property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043E.html">PulserModelName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Pulser Model name string
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043D.html">PulserModelNameSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the PulserModelName property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043A.html">PulserOEMData</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the OEM Data for a remote pulser.  OEM data is a byte array of exactly 8 bytes.  It is stored in EEPROM and will be
+preserved if unit is powered down.  It will remain set until overwritten with something else.  This data is not used
+by the product's firmware, it is meant as a convenience for developers who may wish to authenticate the identity of this
+particular unit.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042C.html">PulserOEMDataSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a bool value which indicates if the pulser OEM Data property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000457.html">PulserPowerLimitStatus</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the current pulser power limit status.  Some pulsers can be damaged or suffer a
+ reduction in performance when the combination pulser voltage and pulse repetition
+ frequency is too high.   This property returns an integer based on the current
+ settings of the instrument. Some instruments cannot detect the pulse repetition
+ frequency when an external trigger source is used.  In this case, this property will
+ return UNKNOWN.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000441.html">PulserSerialNum</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Pulser serial num if supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000442.html">PulserSerialNumSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if PulserSerialNum property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046E.html">PulserSettings</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns a collection of PulserSettingInfo structures.   Each PulserSettingInfo object
+ in the collection corresponds to a setting such as Gain, TriggerEnable, or
+ LowPassFilter, etc.
+ Note that a PulserSettingInfo object describes a setting, which in turn is usually
+ implemented as a number of properties.  For example, the setting 'LowPassFilter' is
+ implemented in pulser objects as LowPassFilterIndex, LowPassFilterIndexMax,  and
+ LowPassFilterValues.   The PulserSettingInfo object returns information about the
+ LowPassFilter setting in general, and information about the three actual properties
+ can be discovered from that PulserSettingInfo object. Note that in addition to the
+ standard properties always implemented in the IPulserReceiver interface, there may be
+ additional settings such as custom features.  For example, the PulserReceiver_DPR
+ object implements IPulserReceiver.  But in addition, there is an additional read-only
+ setting called IsPulserPresent, because the DPR500 is unique in that the instrument
+ can still be connected while one of its remote pulsers is disconnected. Thus, even
+ though the property IsPulserPresent is not in the IPulserReceiver interface,
+ application software can still read the value of this by calling the
+ GetPropertyValue() method on the PulserSettingInfo object, or by using the
+ GetPulserPropertyValue() method of the IPulserReceiver while using the appropriate
+ setting name and role.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000459.html">PulserTriggerCount</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the accumulated trigger count since the device was power cycled.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000458.html">PulserTriggerCountSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the PulserTriggerCount property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000420.html">PulserTriggerSourceIndex</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the zero-based index of the trigger source selection.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000421.html">PulserTriggerSourceIndexMax</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the pulser trigger source index maximum.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000422.html">PulserTriggerSourceValueNames</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a list of names of the available pulse energy values.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000448.html">ReceiverFirmwareVer</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Receiver Firmware Version string
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000447.html">ReceiverFirmwareVerSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the ReceiverFirmwareVer property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000444.html">ReceiverHWRev</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Receiver Hardware Revision string
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000443.html">ReceiverHWRevSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the ReceiverHWRev property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F5.html">ReceiverMode</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets or the receiver signal input mode.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F4.html">ReceiverModeBothSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the signal select both mode supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F2.html">ReceiverModeEchoSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the signal select echo mode supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F3.html">ReceiverModeThruSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the signal select thru mode supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043C.html">ReceiverModelName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Receiver Model name string
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043B.html">ReceiverModelNameSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value which indicates if the ReceiverModelName property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000439.html">ReceiverOEMData</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the OEM Data for a unit.  OEM data is a byte array of exactly 8 bytes.  It is stored in EEPROM and will be
+preserved if unit is powered down.  It will remain set until overwritten with something else.  This data is not used
+by the product's firmware, it is meant as a convenience for developers who may wish to authenticate the identity of this
+particular unit.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042B.html">ReceiverOEMDataSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a bool value which indicates if the OEMValue property is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000043F.html">ReceiverSerialNum</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the Receiver serial num if supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000440.html">ReceiverSerialNumSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns true if ReceiverSerialNum property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000437.html">ReceiverSupplyVoltages</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the supply voltages.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000438.html">ReceiverSupplyVoltagesSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets if the supply voltage property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003DF.html">State</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the present state of this pulser/receiver instance.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046D.html">StatusChangePropertyCriteria</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the status change property filter.  If this property is never set, it
+ remains its default value, null.  If the filter is null, then all property changes
+ will generate change events.  If not null, then only properties which are included in
+ the filter will generate property change events.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000402.html">TriggerEdgePolarity</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	The trigger fires on rising or falling edge.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000401.html">TriggerEdgePolaritySupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the trigger edge polarity property is enabled.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000424.html">TriggerEnable</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the trigger enable.  Note: The DPR300 may report this property
+ incorrectly if this property has not been written to since the last time the
+ instrument was power cycled.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044E.html">TriggerImpedance</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the trigger impedance.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044D.html">TriggerImpedanceSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the TriggerImpedance property is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000428.html">TriggerSource</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the trigger source.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000425.html">TriggerSourceExternalSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	<strong>WARNING: TriggerSource is DEPRECATED.  Please use PulserTriggerSource instead.</strong>
+ Gets a value indicating whether the external trigger is supported on this instrument.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000426.html">TriggerSourceInternalSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	<strong>WARNING: TriggerSource is DEPRECATED.  Please use PulserTriggerSource instead.</strong>
+ Gets a value indicating whether the internal triggers are supported on this
+ instrument.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000427.html">TriggerSourceSlaveSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	<strong>WARNING: TriggerSource is DEPRECATED.  Please use PulserTriggerSource instead.</strong>
+ Gets a value indicating whether the trigger source slave mode is supported.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042E.html">UnitModelName</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the model name for a unit.  Setting this property will fail unless unit is in factory mode.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042A.html">UnitModelNameSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a bool value which indicates if the UnitModelName propery is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000042D.html">UnitSerialNum</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets or sets the serial number for a unit.  Setting the serial number will fail unless unit is in factory mode.
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public property" src="msdn10_lightweight/pubproperty.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000429.html">UnitSerialNumSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a bool value which indicates if the UnitSerialNum propery is supported
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected property" src="msdn10_lightweight/protproperty.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000475.html">cacheMode</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a value indicating whether the cache is enabled.
+	
+	
+		</td>
+	</tr>
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Methods</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="MethodsSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+		
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.equals.aspx">Equals</a>
+
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+		Determines whether the specified <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> is equal to the current <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.finalize.aspx">Finalize</a>
+
+	
+	  </td>
+	  <td>
+	
+		Allows an <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> to attempt to free resources and perform other cleanup operations before the <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> is reclaimed by garbage collection.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046C.html">ForceDetach</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Causes this pulser receiver object to fire a Status Change event indicating the
+ pulser receiver has been detached.   The pulser receiver object will be removed from
+ the library's lists.   If the library's InstrumentDiscoveryEnable property is true, a
+ new Pulser Receiver object will be created, and a InstrumentDiscoveredEvent will be
+ fired and the pulser receiver object will be available for use.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046A.html">GetCustomSettings</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets a list of the custom settings supported by this pulser/receiver.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.gethashcode.aspx">GetHashCode</a>
+
+	
+	  </td>
+	  <td>
+	
+		Serves as a hash function for a particular type.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000460.html">GetPulserPropertyAttributes</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns an integer of logical or'd bitflags indicating various properties of a
+ setting such as whether it is indexed or readonly etc.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000461.html">GetPulserPropertyUnits</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns the unit of measure for the setting.  The setting name is the base prefix for
+ the property using the values from the SettingNames class.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000462.html">GetPulserPropertyUnitsAsString</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Returns the unit of measure for the setting.  The setting name is the base prefix for
+ the property using the values from the SettingNames class.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_000000000000045E_overloads--.html">GetPulserPropertyValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	An alternative method for reading the value of a property is to provide a string
+ prefix name. The result will be an integer, double, string or array boxed into an
+ object.   The prefix name consists of begining characters of the specific properties.
+ For example,  there are many .NET properties associated with gain, such as GainIndex,
+ GainMax, etc.  The prefix name for all these properties is SettingNames.Gain.   In
+ this case, to get the gain using this method: double gain = (double)
+ GetPulserPropertyValue(SettingNames.Gain, JSRDotNETPropRole.DIRECT);
+ If there is no .NET property with this role, a null will be returned.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000045D.html">GetPulserSettingInfo</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Given the pulser setting name (such as 'Gain' or 'HVSupply'), this method returns an
+ object with info about which .NET properties exist which are associated with this
+ pulser property.   This method will return the standard properties guaranteed by the
+ interface but also can return new properties which are not in the interface, but
+ might be only present for a specific model.  To get a list of prefix names, see the
+ static function PulserPropertyInfo.CreateListOfPulserProperties() method.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+		
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.gettype.aspx">GetType</a>
+
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+		Gets the <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.type.aspx">Type</a> of the current instance.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000469.html">IsPulserSettingSupported</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	A quick way to see if the pulser receiver supports this pulser setting.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.memberwiseclone.aspx">MemberwiseClone</a>
+
+	
+	  </td>
+	  <td>
+	
+		Creates a shallow copy of the current <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.referenceequals.aspx">ReferenceEquals</a>
+
+	
+	  </td>
+	  <td>
+	
+		Determines whether the specified <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a> instances are the same instance.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046B.html">Refresh</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Refreshes this pulser/receiver instance.  If the pulser/receiver is in the error
+ state, it will attempt to re-initialize the connection.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_0000000000000466_overloads--.html">SetPulserPropertyValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	As an alternative to directly setting a pulser property (as in pulser.Gain = 10.0), a
+ setting can be set with the following method where the property is selected by name.
+ For example:
+     SetPulserPropertyValue(PRPropertyNames.Gain, (object) 10.0);
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+		inheritedMember 
+	
+	
+	">
+	  <td>
+	    <img alt="Public method" src="msdn10_lightweight/pubmethod.gif"></img>
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.tostring.aspx">ToString</a>
+
+	
+	  </td>
+	  <td>
+	
+		Returns a <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.string.aspx">String</a> that represents the current <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>.
+	
+		(inherited from <a target="_top" href="http://msdn2.microsoft.com/en-us/library/system.object.aspx">Object</a>).
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000046F.html">buildSettingsList</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Builds the settings list if null, otherwise does nothing.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000468.html">checkException</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Check exception.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000476.html">clearCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Clears the cache of Pulser/Receiver values
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000487.html">eventThreadClear</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Work item cancel.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000489.html">eventThreadPost</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Event thread post.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000488.html">eventThreadStop</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Event thread stop.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000048A.html">eventThreadTaskLoop</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Event thread task loop.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000465.html">getCustomPulserPropertyValue</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets custom pulser property value.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000464.html">getSettingInfo</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets setting information.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_000000000000047C_overloads--.html">getValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	Gets a value from the instrument pulser/receiver subclass.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000472.html">initialize</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Initializes this pulser/receiver instance.  This must be called in the subclass'
+ constructor.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000047B.html">instrumentClearCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Clears the cache in the instrument.  This is provided for the subclass to implement
+ in case there is any cached values that need to be cleared when the PulserReceiver
+ cache is cleared.  NOTE: This function will be called during the construction of the
+ PulserReceiverImpl object. By default, this function does nothing.
+ NOTE: Cache is already locked before entering this function
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000479.html">instrumentForceDetach</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Notifies the instrument that a force detach was requested for this instance.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000477.html">instrumentGetValue</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Gets the value from the instrument.This method is to be implemented in the subclass
+ of this PulserReceiver class.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000047A.html">instrumentRefresh</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Requests a refresh of the instrument to refresh its current device info. This is also
+ required to exit the ERROR state. To provide the success/fail response, call the
+ refreshComplete function with the success and optional exception.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000478.html">instrumentSetValue</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Set value in the instrument. This method is to be implemented in the subclass of this
+ PulserReceiver class.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_0000000000000481_overloads--.html">isStatusChangeRegistered</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	Queries if a particular property is registered to report status changes.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000480.html">notifyStatusChange</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Notifies the status change.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000474.html">refreshComplete</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Function called to indicate that the refresh is complete and update the state
+ accordingly.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000041B.html">resetDampingCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the damping cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F1.html">resetGainCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the gain cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000416.html">resetHVSupplyCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the hv supply cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000045C.html">resetHVSupplyEnableCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the hv supply enable cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000400.html">resetHighPassFilterCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the high pass filter cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003E5.html">resetLEDBlinkModeCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the LED blink mode cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003FB.html">resetLowPassFilterCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the low pass filter cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000423.html">resetPulseEnergyCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the pulse energy cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000040D.html">resetPulseRepetitionFreqencyCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the pulse repetition freqency cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000452.html">resetPulserImpedanceCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the pulser impedance cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000455.html">resetPulserInfoCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the pulser information cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_00000000000003F6.html">resetReceiverModeCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the receiver mode cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000403.html">resetTriggerEdgePolarityCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the trigger edge polarity cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044F.html">resetTriggerImpedanceCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the trigger impedance cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_000000000000044B.html">resetTriggerSourceCache</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Resets the trigger source cache.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000484.html">sendDetachedEvent</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Sends the detached event.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000485.html">sendFaultEvent</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Sends a fault event.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000486.html">sendStateUpdate</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Sends a fault event.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000483.html">sendStatusChange</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Executes the status change on a different thread, and waits for the result.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000473.html">setState</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Updates the state described by newState.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	      <img alt="Protected method" src="msdn10_lightweight/protmethod.gif"></img>
+	
+	    
+		  
+	
+	    
+	  </td>
+	  <td>
+			    <a href="topic_000000000000047E_overloads--.html">setValue</a>
+	
+	
+	  </td>
+	  <td>
+		(Overloaded)
+	
+	
+	Sets a value in the instrument pulser/receiver subclass.
+	
+	
+		</td>
+	</tr>
+
+
+
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Events</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="EventsSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+	<tr class="
+	
+	
+	">
+	  <td>
+    <img alt="Public event" src="msdn10_lightweight/pubevent.gif"></img>
+
+	
+	    
+	  </td>
+	  <td>
+	
+	    <a href="topic_0000000000000470.html">StatusChangeEventHandler</a>
+
+	
+	  </td>
+	  <td>
+	
+	
+	Event queue for all listeners interested in StatusChangeEventHandler events.
+	
+	
+		</td>
+	</tr>
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+  
+
+<!-- Classes -->
+
+<!-- Classes End -->
+
+<!-- Standard Modules -->
+
+<!-- Standard Modules End -->
+
+  
+
+
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Enumerations</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="EnumerationSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+	<tr class="
+	
+	
+	">
+	  <td>
+    <img alt="Public enumeration" src="msdn10_lightweight/pubenum.gif"></img>
+    
+
+    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000048B.html">CacheMode</a>
+	  </td>
+	  <td>
+
+
+
+		</td>
+	</tr>
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">Fields</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="FieldsSection" class="section">	
+  <table class="memberListTable">
+    <tr>
+      <th></th>
+      <th>
+        Name
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+		    <img alt="Static" src="msdn10_lightweight/static.gif"></img>
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000003DE.html">CACHE_MUTEX_TIMEOUT</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C2.html">m_DampingIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C1.html">m_DampingIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C3.html">m_DampingValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049E.html">m_Gain</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A4.html">m_GainIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A3.html">m_GainIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A5.html">m_GainIndexValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A0.html">m_GainMax</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049F.html">m_GainMin</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A1.html">m_GainStepSize</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A2.html">m_GainStepSizeSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049D.html">m_GainSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BB.html">m_HVSupply</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004D4.html">m_HVSupplyEnable</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004D3.html">m_HVSupplyEnableSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BF.html">m_HVSupplyIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BE.html">m_HVSupplyIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BC.html">m_HVSupplyMax</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BD.html">m_HVSupplyMin</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004BA.html">m_HVSupplySupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C0.html">m_HVSupplyValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049C.html">m_HasManualControls</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AE.html">m_HighPassFilterIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AD.html">m_HighPassFilterIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AF.html">m_HighPassFilterValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049B.html">m_LEDBlinkModeIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000499.html">m_LEDBlinkModeIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000049A.html">m_LEDBlinkModeValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AB.html">m_LowPassFilterIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AA.html">m_LowPassFilterIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004AC.html">m_LowPassFilterValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CC.html">m_MaxFrequency</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C5.html">m_PulseEnergyIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C4.html">m_PulseEnergyIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C6.html">m_PulseEnergyValueNames</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B3.html">m_PulseRepetitionFrequency</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B8.html">m_PulseRepetitionFrequencyIndex</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B7.html">m_PulseRepetitionFrequencyIndexSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B9.html">m_PulseRepetitionFrequencyIndexValues</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B5.html">m_PulseRepetitionFrequencyMax</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B4.html">m_PulseRepetitionFrequencyMin</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B6.html">m_PulseRepetitionFrequencyNumerator</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B2.html">m_PulseRepetitionFrequencySupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004D0.html">m_PulserImpedance</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CF.html">m_PulserImpedanceSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004D1.html">m_PulserInfo</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004D2.html">m_PulserTriggerCountSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C7.html">m_PulserTriggerSourceValueNames</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A9.html">m_ReceiverMode</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A8.html">m_ReceiverModeBothSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A6.html">m_ReceiverModeEchoSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004A7.html">m_ReceiverModeThruSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B1.html">m_TriggerEdgePolarity</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004B0.html">m_TriggerEdgePolaritySupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CE.html">m_TriggerImpedance</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CD.html">m_TriggerImpedanceSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C8.html">m_TriggerSource</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004C9.html">m_TriggerSourceExternalSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CA.html">m_TriggerSourceInternalSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_00000000000004CB.html">m_TriggerSourceSlaveSupported</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000497.html">m_cacheLock</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000492.html">m_customSettingsList</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000495.html">m_eventThread</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000496.html">m_eventThreadRunning</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000491.html">m_listSettingInfo</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_000000000000048F.html">m_prId</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000490.html">m_state</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000498.html">m_stateLock</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000494.html">m_statusEvent</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+	<tr class="
+	
+	
+	">
+	  <td>
+	  	    <img alt="Protected field" src="msdn10_lightweight/protfield.gif"></img>
+	
+	    
+	    
+	
+	    
+	  </td>
+	  <td>
+	    <a href="topic_0000000000000493.html">m_statusEvents</a>
+	  </td>
+	  <td>
+	
+	
+	
+		</td>
+	</tr>
+
+  </table>
+
+  <a href="#mainBody">
+    Top
+  </a>
+
+	</div>					
+</div>
+
+
+<div class="section_container">
+	<div class="section_heading">
+		<span><a href="javascript:void(0)" title="Collapse" onclick="toggleSection(this);">See Also</a></span>
+		<div><hr /></div>
+	</div>
+
+	<div id="seeAlsoSection" class="section">	
+		<div>
+			<h4 class="subHeading">
+				Reference</h4>
+			<a href="topic_00000000000003DD.html">PulserReceiverImpl Class</a><br />
+	<a href="topic_0000000000000000.html">JSRDotNETSDK Namespace</a><br />
+
+
+			
+	<a href="topic_0000000000000136.html">IPulserReceiver</a>
+<br />
+
+		</div>
+	</div>					
+</div>
+			</div>
+			</div>
+      <div id="footer">
+      	<p></p>
+      </div>
+    </div>
+  	<script type="text/javascript">
+<!--
+	try {
+		parent.frames["vbdocswitch"].expandLinkInToc(location.href);
+	} catch (ex) {}
+//-->
+		</script>	
+  </body>
+</html>
+
