@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">
-      <HintPath>lib\JSRDotNETSDK.dll</HintPath>
+      <HintPath>external\JSRDotNETSDK_1.2.14\Libs\JSRDotNETSDK.dll</HintPath>
     </Reference>
   </ItemGroup>
 
