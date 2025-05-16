@@ -28,7 +28,6 @@ if(JSR_SDK_USE_DYNAMIC_LIB)
     IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/dynamic/JSR-SDK.lib"
     INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}"
    )
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/dynamic/JSRDotNETSDK.dll" DESTINATION ${CMAKE_INSTALL_BINDIR})
 else()
     message(STATUS "Adding JSR-SDK static library ${ARCH_DIR}")
     set_target_properties(JSR-SDK PROPERTIES
@@ -36,14 +35,68 @@ else()
       IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/static/JSR-SDK.lib"
       INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}"
     )
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/static/JSRDotNETSDK.dll" DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 target_include_directories(JSR-SDK INTERFACE "${JSR_SDK_INCLUDE_DIR}")
 
 install(IMPORTED_RUNTIME_ARTIFACTS JSR-SDK DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-file(GLOB JRS_SDK_PLUGINS CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/*.dll")
-install(FILES ${JRS_SDK_PLUGINS} DESTINATION ${CMAKE_INSTALL_BINDIR}/plugins)
 
+add_library(CyUSB SHARED IMPORTED GLOBAL)
+set_target_properties(CyUSB PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/CyUSB.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/CyUSB.lib")
+
+target_link_libraries(JSR-SDK INTERFACE CyUSB)
+
+add_library(JSRDotNET_Diag SHARED IMPORTED GLOBAL)
+set_target_properties(JSRDotNET_Diag PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_Diag.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_Diag.lib")
+
+target_link_libraries(JSR-SDK INTERFACE JSRDotNET_Diag)
+
+
+add_library(JSRDotNET_USB_Common SHARED IMPORTED GLOBAL)
+set_target_properties(JSRDotNET_USB_Common PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_Common.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_Common.lib")
+
+target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_Common)
+
+add_library(JSRDotNET_USB_DPR650 SHARED IMPORTED GLOBAL)
+set_target_properties(JSRDotNET_USB_DPR650 PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_DPR650.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_DPR650.lib")
+
+target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_DPR650)
+
+add_library(JSRDotNET_USB_PureViewHid SHARED IMPORTED GLOBAL)
+set_target_properties(JSRDotNET_USB_PureViewHid PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_PureViewHid.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNET_USB_PureViewHid.lib")
+
+target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_PureViewHid)
+
+add_library(JSRDotNETDPR SHARED IMPORTED GLOBAL)
+set_target_properties(JSRDotNETDPR PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNETDPR.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/JSRDotNETDPR.lib")
+
+target_link_libraries(JSR-SDK INTERFACE JSRDotNETDPR)
+
+
+add_library(Newtonsoft.Json SHARED IMPORTED GLOBAL)
+set_target_properties(Newtonsoft.Json PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/Newtonsoft.Json.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/Newtonsoft.Json.lib")
+
+target_link_libraries(JSR-SDK INTERFACE Newtonsoft.Json)
+
+
+add_library(SimpleHID SHARED IMPORTED GLOBAL)
+set_target_properties(SimpleHID PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/SimpleHID.dll"
+    IMPORTED_IMPLIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins/SimpleHID.lib")
+
+target_link_libraries(JSR-SDK INTERFACE SimpleHID)

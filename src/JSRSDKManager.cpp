@@ -15,10 +15,9 @@ public:
             m_manager = gcnew JSRDotNETManager("");
             String^ dllPath = Assembly::GetExecutingAssembly()->Location;
             String^ dllFolder = Path::GetDirectoryName(dllPath);
-            String^ pluginsDir = Path::Combine(dllFolder, "plugins");
 
-            Console::WriteLine("Reading plugins from: " + pluginsDir);
-            m_manager->LoadPlugins(pluginsDir);
+            Console::WriteLine("Reading plugins from: " + dllFolder);
+            m_manager->LoadPlugins(dllFolder);
         }
         catch (System::Exception^ exception) {
             std::string msg = msclr::interop::marshal_as<std::string>(exception->Message);
