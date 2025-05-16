@@ -7,26 +7,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JSR-SDK", "JSR-SDK.vcxproj"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release-dynamic|x64 = Release-dynamic|x64
-		Release-dynamic|x86 = Release-dynamic|x86
-		Release-static|x64 = Release-static|x64
-		Release-static|x86 = Release-static|x86
+		dynamic|Win32 = dynamic|Win32
+		dynamic|x64 = dynamic|x64
+		static|Win32 = static|Win32
+		static|x64 = static|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Debug|x64.ActiveCfg = Debug|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Debug|x64.Build.0 = Debug|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Debug|x86.ActiveCfg = Debug|Win32
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Debug|x86.Build.0 = Debug|Win32
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-dynamic|x64.ActiveCfg = Release-dynamic|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-dynamic|x64.Build.0 = Release-dynamic|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-dynamic|x86.ActiveCfg = Release-dynamic|Win32
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-dynamic|x86.Build.0 = Release-dynamic|Win32
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-static|x64.ActiveCfg = Release-static|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-static|x64.Build.0 = Release-static|x64
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-static|x86.ActiveCfg = Release-static|Win32
-		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.Release-static|x86.Build.0 = Release-static|Win32
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.dynamic|Win32.ActiveCfg = static|Win32
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.dynamic|Win32.Build.0 = static|Win32
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.dynamic|x64.ActiveCfg = dynamic|x64
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.dynamic|x64.Build.0 = dynamic|x64
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|Win32.ActiveCfg = static|Win32
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|Win32.Build.0 = static|Win32
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|x64.ActiveCfg = static|x64
+		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|x64.Build.0 = static|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
