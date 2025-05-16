@@ -47,64 +47,22 @@ endif()
 
 target_include_directories(JSR-SDK INTERFACE "${JSR_SDK_INCLUDE_DIR}")
 
-install(IMPORTED_RUNTIME_ARTIFACTS JSR-SDK DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(RUNTIME_DEPENDENCY_SET JSR-SDK DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+function(register_jsr_dll dll_name)
+    add_library(${dll_name} SHARED IMPORTED GLOBAL)
+    set_target_properties(${dll_name} PROPERTIES
+        IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/${dll_name}.dll"
+        IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/${dll_name}.lib")
 
-add_library(CyUSB SHARED IMPORTED GLOBAL)
-set_target_properties(CyUSB PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/CyUSB.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/CyUSB.lib")
+    target_link_libraries(JSR-SDK INTERFACE ${dll_name})
+endfunction()
 
-target_link_libraries(JSR-SDK INTERFACE CyUSB)
-
-add_library(JSRDotNET_Diag SHARED IMPORTED GLOBAL)
-set_target_properties(JSRDotNET_Diag PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_Diag.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_Diag.lib")
-
-target_link_libraries(JSR-SDK INTERFACE JSRDotNET_Diag)
-
-
-add_library(JSRDotNET_USB_Common SHARED IMPORTED GLOBAL)
-set_target_properties(JSRDotNET_USB_Common PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_Common.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_Common.lib")
-
-target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_Common)
-
-add_library(JSRDotNET_USB_DPR650 SHARED IMPORTED GLOBAL)
-set_target_properties(JSRDotNET_USB_DPR650 PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_DPR650.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_DPR650.lib")
-
-target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_DPR650)
-
-add_library(JSRDotNET_USB_PureViewHid SHARED IMPORTED GLOBAL)
-set_target_properties(JSRDotNET_USB_PureViewHid PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_PureViewHid.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/JSRDotNET_USB_PureViewHid.lib")
-
-target_link_libraries(JSR-SDK INTERFACE JSRDotNET_USB_PureViewHid)
-
-add_library(JSRDotNETDPR SHARED IMPORTED GLOBAL)
-set_target_properties(JSRDotNETDPR PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/JSRDotNETDPR.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/JSRDotNETDPR.lib")
-
-target_link_libraries(JSR-SDK INTERFACE JSRDotNETDPR)
-
-
-add_library(Newtonsoft.Json SHARED IMPORTED GLOBAL)
-set_target_properties(Newtonsoft.Json PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/Newtonsoft.Json.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/Newtonsoft.Json.lib")
-
-target_link_libraries(JSR-SDK INTERFACE Newtonsoft.Json)
-
-
-add_library(SimpleHID SHARED IMPORTED GLOBAL)
-set_target_properties(SimpleHID PROPERTIES
-    IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/SimpleHID.dll"
-    IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/SimpleHID.lib")
-
-target_link_libraries(JSR-SDK INTERFACE SimpleHID)
+register_jsr_dll("CyUSB")
+register_jsr_dll("JSRDotNET_Diag")
+register_jsr_dll("JSRDotNET_USB_Common")
+register_jsr_dll("JSRDotNET_USB_DPR650")
+register_jsr_dll("JSRDotNET_USB_PureViewHid")
+register_jsr_dll("JSRDotNETDPR")
+register_jsr_dll("Newtonsoft.json")
+register_jsr_dll("SimpleHID")
