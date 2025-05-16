@@ -47,7 +47,9 @@ endif()
 
 target_include_directories(JSR-SDK INTERFACE "${JSR_SDK_INCLUDE_DIR}")
 
-install(RUNTIME_DEPENDENCY_SET JSR-SDK DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(IMPORTED_RUNTIME_ARTIFACTS JSR-SDK DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(IMPORTED_RUNTIME_ARTIFACTS JSRDotNETSDK DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 
 function(register_jsr_dll dll_name)
     add_library(${dll_name} SHARED IMPORTED GLOBAL)
@@ -56,6 +58,9 @@ function(register_jsr_dll dll_name)
         IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/${dll_name}.lib")
 
     target_link_libraries(JSR-SDK INTERFACE ${dll_name})
+    install(IMPORTED_RUNTIME_ARTIFACTS
+        ${dll_name}
+        DESTINATION "${CMAKE_INSTALL_BINDIR}") 
 endfunction()
 
 register_jsr_dll("CyUSB")
