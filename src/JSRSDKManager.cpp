@@ -5,11 +5,25 @@
 using namespace System;
 using namespace JSRDotNETSDK;
 using namespace msclr::interop;
+using namespace System::Reflection;
+using namespace System::IO;
 
 class JSRSDKManagerWrapper : public JSRSDKManager {
 public:
     JSRSDKManagerWrapper() {
-        m_manager = gcnew JSRDotNETManager("");
+        try {
+            m_manager = gcnew JSRDotNETManager("");
+            String^ dllPath = Assembly::GetExecutingAssembly()->Location;
+            String^ dllFolder = Path::GetDirectoryName(dllPath);
+            String^ pluginsDir = Path::Combine(dllFolder, "plugins");
+
+            Console::WriteLine("Reading plugins from: " + pluginsDir);
+            m_manager->LoadPlugins(pluginsDir);
+        }
+        catch (System::Exception^ exception) {
+            std::string msg = msclr::interop::marshal_as<std::string>(exception->Message);
+            throw msg;
+        }
     }
 
     ~JSRSDKManagerWrapper() override {
@@ -17,18 +31,6 @@ public:
             m_manager->Shutdown();
             m_manager = nullptr;
         }
-    }
-    int LoadPlugins(const std::string& pluginPath) override {
-        String^ path = marshal_as<String^>(pluginPath);
-        Console::WriteLine("Reading plugins from: " + path);
-        try {
-            m_manager->LoadPlugins(path);
-        }
-        catch (System::Exception^ exception) {
-            std::string msg = msclr::interop::marshal_as<std::string>(exception->Message);
-            throw msg;
-        }
-        return GetNumberOfPlugins();
     }
 
     int GetNumberOfPlugins() override {
