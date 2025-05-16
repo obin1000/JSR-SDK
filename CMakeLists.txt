@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(JSR-SDK LANGUAGES C CXX)
 
-option(JSR_SDK_USE_DYNAMIC_LIB "Use the dynamic library instead of the static" OFF)
+option(JSR_SDK_USE_DYNAMIC_LIB "Use the dynamic library instead of the static" ON)
 
 
 if(NOT WIN32)
