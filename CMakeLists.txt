@@ -32,6 +32,7 @@ else()
     message(STATUS "Adding JSR-SDK static library ${ARCH_DIR}")
     set_target_properties(JSR-SDK PROPERTIES
       IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/static/JSR-SDK.lib"
+      IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/${ARCH_DIR}/static/JSR-SDK.lib"
       INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}"
     )
 endif()
