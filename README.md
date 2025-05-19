@@ -1,6 +1,7 @@
-# JSR SDK
+﻿# JSR SDK
 This project provides a wrapper around the JSRdotNETSDK that allows you to use it in other programming languages than C# through a C++/CLI wrapper.
 
+### ⚠️⚠️ This project is **not** developed, endorsed, maintained, or otherwise associated with **JSR/BYK/Imaginant**⚠️⚠️
 
 
 ## Usage
@@ -46,3 +47,15 @@ In C++, include the header and create the JSR Manager object.
 }
 ```
 
+
+## Disclaimer
+
+This repository (“**JSR-SDK**”) is an **independent, community-driven wrapper** for the closed-source **JSRDotNETSDK**. It is **not** developed, endorsed, maintained, or otherwise associated with **JSR** or any of its subsidiaries or affiliates.
+
+* **No Affiliation or Endorsement** – “JSR”, “JSRDotNETSDK”, and all related trademarks, service marks, and logos are the exclusive property of JSR. Their use here is **solely for identification purposes** and does **not** imply endorsement by, or any formal relationship with, JSR.  
+* **No Distribution of Proprietary Code** – This repository does bundle (portion) of the proprietary JSRDotNETSDK. However, using this library means you must comply with JSR its license and EULA.  
+* **License Independence** – The Project’s source code is released under the license stated in `LICENSE`. **Nothing** in this repository alters, overrides, or substitutes the license terms that apply to the JSRDotNETSDK itself.  
+* **Reverse Engineering** – The Project neither encourages nor facilitates reverse engineering, de-obfuscation, or circumvention of the JSRDotNETSDK or any copy-protection mechanisms.  
+* **Liability** – The Project is provided **“AS IS”** without warranty of any kind. The authors and maintainers assume **no liability** for any damages, losses, or legal issues arising from its use. Use the Project **at your own risk** and ensure you have the legal right to interface with the JSRDotNETSDK.
+
+By using this Project you acknowledge that you have read, understood, and agree to all of the above terms.
