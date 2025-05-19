@@ -26,10 +26,17 @@ jobs:
       - name: Zip release
         shell: pwsh
         run: Compress-Archive -Path '${{github.workspace}}\include','${{github.workspace}}\lib', '${{github.workspace}}\CMakeLists.txt', '${{github.workspace}}\LICENSE' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
+      - name: Generate hash
+        shell: pwsh
+        run: |
+            $hash = (Get-FileHash -Path ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip -Algorithm SHA256).Hash
+            $hash | Out-File -Encoding ascii "${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip.sha256"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          files: ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip
+          files: |
+            ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip
+            ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip.sha256
              
