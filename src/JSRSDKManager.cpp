@@ -1,6 +1,6 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
 #include <msclr/marshal_cppstd.h>
-#include <vcclr.h>  // Needed for gcroot
+#include <vcclr.h>
 
 using namespace System;
 using namespace JSRDotNETSDK;
@@ -33,7 +33,7 @@ public:
     }
 
     int GetNumberOfPlugins() override {
-		return m_manager->GetPluginNames()->Length;
+        return m_manager->GetPluginNames()->Length;
     }
 
     std::vector<std::string> GetPluginNames() override {
@@ -45,8 +45,97 @@ public:
         return result;
     }
 
-private:
-    gcroot<JSRDotNETManager^> m_manager;  // This is the correct way inside a native class
+    void AddManagedPlugin(std::string pluginName) {
+      m_manager->AddManagedPlugin(marshal_as<String ^>(pluginName));
+    }
+
+    void SetDiscoveryEnable(bool bEnable) {
+      m_manager->SetDiscoveryEnable(bEnable);
+    }
+
+
+
+    // Variables
+    bool getPulseRepetitionFrequencyIndexSupported() {
+        return m_manager->PulseRepetitionFrequencyIndexSupported;
+    }
+    double getHVSupplyMax() { 
+        return m_manager->HVSupplyMax;
+    }
+    double getHVSupply() { 
+        return m_manager->HVSupply;
+    }
+    void setHVSupply(double hvSupply) { 
+        m_manager->HVSupply = hvSupply;
+    }
+    bool getHVSupplySupported() {
+        return m_manager->HVSupplySupported;
+    }
+    int getPulseRepetitionFrequencyNumerator() {
+      return m_manager->PulseRepetitionFrequencyNumerator;
+    }
+    std::vector<double> getPulseRepetitionFrequencyValues() {
+        std::vector<double> result;
+        auto values = m_manager->PulseRepetitionFrequencyValues;
+        for each (double value in values) {
+            result.push_back(value);
+        }
+        return result;
+    }
+    int getPulseRepetitionFrequencyIndexMax() {
+        return m_manager->PulseRepetitionFrequencyIndexMax;
+    }
+    int getPulseRepetitionFrequencyIndex() {
+        return m_manager->PulseRepetitionFrequencyIndex;
+    }
+    void setPulseRepetitionFrequencyIndex(int index) {
+      m_manager->PulseRepetitionFrequencyIndex = index;
+    }
+
+    double getPulseRepetitionFrequencyMin() {
+      return m_manager->PulseRepetitionFrequencyMin;
+    }
+    double getPulseRepetitionFrequencyMax() {
+      return m_manager->PulseRepetitionFrequencyMax;
+    }
+
+    double getPulseRepetitionFrequency() {
+      return m_manager->PulseRepetitionFrequency;
+    }
+    void setPulseRepetitionFrequency(double frequency) {
+      m_manager->PulseRepetitionFrequency = frequency;
+    }
+
+    bool getTriggerEdgePolaritySupported() {
+      return m_manager->TriggerEdgePolaritySupported;
+    }
+
+    std::vector<double> getHighPassFilterValues() {
+      std::vector<double> result;
+      auto values = m_manager->HighPassFilterValues;
+      for each (double value in values) {
+        result.push_back(value);
+      }
+      return result;
+    }
+
+    int getHighPassFilterIndexMax() {
+      return m_manager->HighPassFilterIndexMax;
+    }
+
+    int getHighPassFilterIndex() { 
+        return m_manager->HighPassFilterIndex;
+    }
+    void setHighPassFilterIndex(int index) {
+      m_manager->HighPassFilterIndex = index;
+    }
+
+    int getLowPassFilterIndexMax() { 
+        return m_manager->LowPassFilterIndexMax;
+    }
+
+  private:
+    gcroot<JSRDotNETManager^> m_manager;
 };
 
 
