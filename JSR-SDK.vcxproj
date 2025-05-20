@@ -20,9 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
+    <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
+    <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
+    <ClInclude Include="include\JSR-SDK\PulserReceiverID.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">
@@ -30,6 +34,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include=".clang-tidy" />
     <None Include=".github\workflows\release.yml" />
     <None Include=".gitignore" />
     <None Include="LICENSE" />
@@ -104,6 +110,9 @@
     <OutDir>$(SolutionDir)\lib\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|x64'">
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
@@ -118,6 +127,9 @@
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
     <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
     <ClCompile>
@@ -168,14 +180,7 @@
     <ItemGroup>
       <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*" />
     </ItemGroup>
-
     <Message Importance="high" Text="Checking for plugin changes in external\jsr\plugins..." />
-
-    <Copy
-      SourceFiles="@(PluginSourceFiles)"
-      DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true"
-    />
+    <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-
 </Project>
