@@ -4,7 +4,6 @@
 
 using namespace JSRDotNETSDK;
 
-
 // Converting InstrumentID <-> IInstrumentIdentity^
 static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
                                           instrumentIdentity) {
@@ -20,10 +19,9 @@ static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
   return unmanaged;
 }
 
-
 // Converting InstrumentID <-> IInstrumentIdentity^
 static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
-                                    instrumentIdentity) {
+                                                 instrumentIdentity) {
   PulserReceiverID unmanaged;
   unmanaged.InstrumentId =
       instrumentFromManaged(instrumentIdentity->InstrumentId);
