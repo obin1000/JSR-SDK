@@ -28,7 +28,7 @@ public:
     // Start or stop discovery of devices.
     virtual void SetDiscoveryEnable(bool bEnable) = 0;
     // Gives the devices detected by the plugin.
-    virtual std::vector<InstrumentID> GetInstruments(std::string pluginName);
+    virtual std::vector<InstrumentID> GetInstruments(std::string pluginName) = 0;
 
 
 
