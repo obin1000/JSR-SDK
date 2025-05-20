@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
+    <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
     <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
+    <ClInclude Include="include\JSR-SDK\PulserReceiverID.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">

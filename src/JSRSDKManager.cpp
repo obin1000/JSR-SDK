@@ -1,4 +1,5 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
+#include "MarshalTypes.cpp"
 #include <msclr/marshal_cppstd.h>
 #include <vcclr.h>
 
@@ -8,14 +9,6 @@ using namespace msclr::interop;
 using namespace System::Reflection;
 using namespace System::IO;
 
-static InstrumentID convertID(IInstrumentIdentity^ indentity) {
-    InstrumentID id;
-    id.ModelName = marshal_as<std::string>(indentity->ModelName);
-    id.SerialNum = marshal_as<std::string>(indentity->SerialNum);
-    id.Port = marshal_as<std::string>(indentity->Port);
-    id.PluginName = marshal_as<std::string>(indentity->PluginName);
-    return id;
-}
 
 class JSRSDKManagerWrapper : public JSRSDKManager {
 public:
@@ -66,10 +59,29 @@ public:
         std::vector<InstrumentID> result;
         auto instruments = m_manager->GetInstruments(marshal_as<String ^>(pluginName));
         for each (IInstrumentIdentity ^ instrument in instruments) {
-          result.push_back(convertID(instrument));
+          result.push_back(instrumentFromManaged(instrument));
         }
         return result;
     }
+    std::vector<PulserReceiverID> GetPulserReceivers() {
+        std::vector<PulserReceiverID> result;
+        auto pulsereceivers = m_manager->GetPulserReceivers(nullptr);
+
+        for each (IPulserReceiverIdentity ^ pulsereceiver in pulsereceivers) {
+          result.push_back(pulsereceiverFromManaged(pulsereceiver));
+        }
+        return result;
+    }
+
+    void SetCurrentPulserReceiver(PulserReceiverID prID) {
+      SetCurrentPulserReceiver(prID.InstrumentId.ModelName,
+                               prID.InstrumentId.SerialNum, 
+                               prID.PulserReceiverIndex);
+    }
+    void SetCurrentPulserReceiver(std::string model, std::string serialNum, int idxPR) {
+        m_manager->SetCurrentPulserReceiver(marshal_as<String ^>(model), marshal_as<String ^>(serialNum), idxPR);
+    }
+
 
 
 

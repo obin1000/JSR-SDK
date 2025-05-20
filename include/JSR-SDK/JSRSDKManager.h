@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JSR-SDK/InstrumentID.h"
+#include "JSR-SDK/PulserReceiverID.h"
 
 #include <string>
 #include <vector>
@@ -29,6 +30,12 @@ public:
     virtual void SetDiscoveryEnable(bool bEnable) = 0;
     // Gives the devices detected by the plugin.
     virtual std::vector<InstrumentID> GetInstruments(std::string pluginName) = 0;
+    // Get the list of the discovered pulser/receivers
+    virtual std::vector<PulserReceiverID> GetPulserReceivers() = 0;
+    // Set this pulser/receiver as the active device
+    virtual void SetCurrentPulserReceiver(PulserReceiverID prID) = 0;
+    virtual void SetCurrentPulserReceiver(std::string model, std::string serialNum, int idxPR) = 0;
+
 
 
 
