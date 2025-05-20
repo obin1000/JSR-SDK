@@ -8,6 +8,15 @@ using namespace msclr::interop;
 using namespace System::Reflection;
 using namespace System::IO;
 
+static InstrumentID convertID(IInstrumentIdentity^ indentity) {
+    InstrumentID id;
+    id.ModelName = marshal_as<std::string>(indentity->ModelName);
+    id.SerialNum = marshal_as<std::string>(indentity->SerialNum);
+    id.Port = marshal_as<std::string>(indentity->Port);
+    id.PluginName = marshal_as<std::string>(indentity->PluginName);
+    return id;
+}
+
 class JSRSDKManagerWrapper : public JSRSDKManager {
 public:
     JSRSDKManagerWrapper() {
@@ -52,6 +61,16 @@ public:
     void SetDiscoveryEnable(bool bEnable) {
       m_manager->SetDiscoveryEnable(bEnable);
     }
+
+    std::vector<InstrumentID> GetInstruments(std::string pluginName) {
+        std::vector<InstrumentID> result;
+        auto instruments = m_manager->GetInstruments(marshal_as<String ^>(pluginName));
+        for each (IInstrumentIdentity ^ instrument in instruments) {
+          result.push_back(convertID(instrument));
+        }
+        return result;
+    }
+
 
 
 
