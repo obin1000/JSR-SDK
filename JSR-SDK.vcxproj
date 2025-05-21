@@ -23,6 +23,7 @@
     <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h" />
     <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
     <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />
     <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />

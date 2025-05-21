@@ -33,10 +33,6 @@ public:
     }
   }
 
-  int GetNumberOfPlugins() override {
-    return m_manager->GetPluginNames()->Length;
-  }
-
   std::vector<std::string> GetPluginNames() override {
     std::vector<std::string> result;
     auto names = m_manager->GetPluginNames();

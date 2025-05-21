@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JSR-SDK/InstrumentID.h"
+#include "JSR-SDK/JSRLibMetadata.h"
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/enums/IsPulsing.h"
 #include "JSR-SDK/enums/ManagerState.h"
@@ -11,6 +12,7 @@
 #include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -33,44 +35,42 @@ public:
   // Closes the connection to the devices and releases all resources.
   virtual ~JSRSDKManager() = default;
 
-
-
-
   // === Static functions used to generate IDs ===
-  //static std::string MakeIdString(IPulserReceiverIdentity prId) = 0;
+  // static std::string MakeIdString(IPulserReceiverIdentity prId) = 0;
 
-  //static std::string MakeIdString(std::string model, std::string serialNum,
-  //                                   int idxPR) = 0;
+  // static std::string MakeIdString(std::string model, std::string serialNum,
+  //                                    int idxPR) = 0;
 
-  //static void ParseIdString(std::string sID, out std::string model,
-  //                          out std::string serialNum,
-  //                          out int idxPR) = 0;
+  // static void ParseIdString(std::string sID, out std::string model,
+  //                           out std::string serialNum,
+  //                           out int idxPR) = 0;
 
   // === Functions provided by SDK ===
- virtual void AddManagedPlugin(string pluginName) = 0;
+  virtual void AddManagedPlugin(std::string pluginName) = 0;
 
-  virtual void AddPluginOpenOption(string strPluginName, string optionName,
-                           string optionValue) = 0;
+  virtual void AddPluginOpenOption(std::string strPluginName,
+                                   std::string optionName,
+                                   std::string optionValue) = 0;
 
-  virtual void AddPluginType(string pluginType) = 0;
+  virtual void AddPluginType(std::string pluginType) = 0;
 
   virtual void ForceDetach() = 0;
 
   virtual std::vector<std::string> GetCustomSettings() = 0;
 
-  virtual IInstrumentIdentity[] GetInstruments(string pluginName = "") = 0;
+  virtual std::vector<InstrumentID> GetInstruments(std::string pluginName) = 0;
 
   virtual std::vector<std::string> GetManagedPluginNames() = 0;
 
-  virtual Dictionary<std::string, std::vector<std::string>>
+  virtual std::map<std::string, std::vector<std::string>>
   GetPluginLibOpenOptions(std::string strPluginName) = 0;
 
-  virtual IJSRDotNET GetPluginLibraryInstance(std::string strPluginName) = 0;
+  // virtual IJSRDotNET GetPluginLibraryInstance(std::string strPluginName) = 0;
 
-  virtual IJSRDotNETLibMetadata
+  virtual JSRLibMetadata
   GetPluginLibraryMetadata(std::string strPluginName) = 0;
 
-  virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
+  // virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
 
   virtual std::vector<std::string> GetPluginNames() = 0;
 
@@ -82,31 +82,30 @@ public:
   virtual PROPERTY_UNITS GetPulserPropertyUnits(std::string settingName) = 0;
 
   virtual std::string GetPulserPropertyUnitsAsString(std::string settingName,
-                                                 bool useShort = false) = 0;
+                                                     bool useShort = false) = 0;
+  // TODO: Overload for other data types
+  virtual std::string GetPulserPropertyValue(std::string strProp) = 0;
 
-  virtual object GetPulserPropertyValue(std::string strProp) = 0;
+  virtual std::string GetPulserPropertyValue(std::string settingName,
+                                             PulserPropertyRole role) = 0;
 
-  virtual object GetPulserPropertyValue(std::string settingName,
-                                         PulserPropertyRole role) = 0;
-
-  virtual IPulserReceiver GetPulserReceiver(IPulserReceiverIdentity prID) = 0;
+  // virtual IPulserReceiver GetPulserReceiver(PulserReceiverID prID) = 0;
 
   virtual std::vector<std::string>
   GetPulserReceiverInfo(std::vector<std::string> model,
-                        std::vector <std::string> serialNum,
-                                         int idxPR) = 0;
+                        std::vector<std::string> serialNum, int idxPR) = 0;
 
-  virtual std::vector <
-      std::string> GetPulserReceiverInfo(IPulserReceiverIdentity id) = 0;
+  virtual std::vector<std::string>
+  GetPulserReceiverInfo(PulserReceiverID id) = 0;
 
-  virtual IPulserReceiverIdentity[] GetPulserReceivers(
-      IInstrumentIdentity instrId = null) = 0;
+  virtual std::vector<PulserReceiverID>
+  GetPulserReceivers(InstrumentID instrId) = 0;
 
   virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) = 0;
 
   virtual bool IsPulserSettingSupported(std::string settingName) = 0;
 
- virtual void LoadPlugins(std::string pluginPath = null) = 0;
+  virtual void LoadPlugins(std::string pluginPath) = 0;
 
   virtual void NotifyThreadProc() = 0;
 
@@ -116,35 +115,26 @@ public:
 
   virtual void RequestThreadProc() = 0;
 
-  virtual void
-  SetCurrentPulserReceiver(IPulserReceiverIdentity prID = null) = 0;
+  virtual void SetCurrentPulserReceiver(PulserReceiverID prID) = 0;
 
   virtual void SetCurrentPulserReceiver(std::string model,
-                                        std::string serialNum,
-                                        int idxPR) = 0;
+                                        std::string serialNum, int idxPR) = 0;
 
- virtual void SetDiscoveryEnable(bool bEnable) = 0;
+  virtual void SetDiscoveryEnable(bool bEnable) = 0;
 
-  virtual void SetPulserPropertyValue(std::string strProp, object value) = 0;
+  // TODO: Overload for other data types
+  virtual void SetPulserPropertyValue(std::string strProp,
+                                      const std::string &value) = 0;
 
   virtual void SetPulserPropertyValue(std::string settingName,
-                                       PulserPropertyRole role,
-                                       object value) = 0;
+                                      PulserPropertyRole role,
+                                      const std::string &value) = 0;
 
   virtual void Shutdown() = 0;
   // Protected functions, so not accessible
-  //virtual void addManagedPulserReceivers(IJSRDotNET lib);
-  //virtual void removeManagedPulserReceivers(IJSRDotNET lib);
-  //virtual void setDiscoveryEnable(object sender, bool bEnable);
-
-
-
-
-
-
-
-
-
+  // virtual void addManagedPulserReceivers(IJSRDotNET lib);
+  // virtual void removeManagedPulserReceivers(IJSRDotNET lib);
+  // virtual void setDiscoveryEnable(object sender, bool bEnable);
 
   // === Getters and setters for variables in the manager ===
   virtual bool getPulseRepetitionFrequencyIndexSupported() = 0;
