@@ -2,6 +2,8 @@
 
 #include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/enums/TriggerSource.h"
+#include "JSR-SDK/enums/ReceiverMode.h"
 
 #include <string>
 #include <vector>
@@ -71,70 +73,69 @@ public:
   virtual void setHighPassFilterIndex(int index) = 0;
 
   virtual int getLowPassFilterIndexMax() = 0;
-  //
-  //    virtual int getLowPassFilterIndex() = 0;
-  //    virtual void setLowPassFilterIndex(int index) = 0;
-  //
-  //    virtual RECEIVER_MODE getReceiverMode() = 0;
-  //    virtual void setReceiverMode(RECEIVER_MODE mode) = 0;
-  //
-  //
-  //    virtual bool getReceiverModeBothSupported() = 0;
-  //
-  //    virtual bool getReceiverModeThruSupported() = 0;
-  //
-  //    virtual bool getReceiverModeEchoSupported() = 0;
-  //
-  //    virtual std::vector<double> getGainValues() = 0;
-  //
-  //    virtual int getGainIndexMax() = 0;
-  //
-  //    virtual int getGainIndex() = 0;
-  //    virtual void setGainIndex(int index) = 0;
-  //
-  //    virtual std::vector<double> getLowPassFilterValues() = 0;
-  //
-  //    virtual double getHVSupplyMin() = 0;
-  //
-  //    virtual bool getHVSupplyIndexSupported() = 0;
-  //
-  //    virtual int getHVSupplyIndex() = 0;
-  //    virtual void setHVSupplyIndex(int index) = 0;
-  //
-  //    virtual double getHVMeasurement() = 0;
-  //
-  //    virtual bool getHVMeasurementSupported() = 0;
-  //
-  //    virtual std::string getUnitModelName() = 0;
-  //    virtual void setUnitModelName(std::string name) = 0;
-  //
-  //    virtual std::string getUnitSerialNum() = 0;
-  //    virtual void setUnitSerialNum(std::string serialNum) = 0;
-  //
-  //    virtual bool getPulserOEMDataSupported() = 0;
-  //
-  //    virtual bool getReceiverOEMDataSupported() = 0;
-  //
-  //    virtual bool getUnitModelNameSupported() = 0;
-  //
-  //    virtual bool getUnitSerialNumSupported() = 0;
-  //
-  //    virtual TRIGGER_SOURCE getTriggerSource() = 0;
-  //    virtual void setTriggerSource(TRIGGER_SOURCE source) = 0;
-  //
-  //    virtual std::vector<std::string> getPulserTriggerSourceValueNames() = 0;
-  //
-  //    virtual int getPulserTriggerSourceIndexMax() = 0;
-  //
-  //    virtual int getPulserTriggerSourceIndex() = 0;
-  //    virtual void setPulserTriggerSourceIndex(int index) = 0;
-  //
-  //    virtual bool getGainIndexSupported() = 0;
-  //
-  //    virtual bool getTriggerSourceSlaveSupported() = 0;
-  //
-  //    virtual bool getTriggerSourceExternalSupported() = 0;
-  //
+
+  virtual int getLowPassFilterIndex() = 0;
+  virtual void setLowPassFilterIndex(int index) = 0;
+
+  virtual RecieverMode getReceiverMode() = 0;
+  virtual void setReceiverMode(RecieverMode mode) = 0;
+
+  virtual bool getReceiverModeBothSupported() = 0;
+
+  virtual bool getReceiverModeThruSupported() = 0;
+
+  virtual bool getReceiverModeEchoSupported() = 0;
+
+  virtual std::vector<double> getGainValues() = 0;
+
+  virtual int getGainIndexMax() = 0;
+
+  virtual int getGainIndex() = 0;
+  virtual void setGainIndex(int index) = 0;
+
+  virtual std::vector<double> getLowPassFilterValues() = 0;
+
+  virtual double getHVSupplyMin() = 0;
+
+  virtual bool getHVSupplyIndexSupported() = 0;
+
+  virtual int getHVSupplyIndex() = 0;
+  virtual void setHVSupplyIndex(int index) = 0;
+
+  virtual double getHVMeasurement() = 0;
+
+  virtual bool getHVMeasurementSupported() = 0;
+
+  virtual std::string getUnitModelName() = 0;
+  virtual void setUnitModelName(std::string name) = 0;
+
+  virtual std::string getUnitSerialNum() = 0;
+  virtual void setUnitSerialNum(std::string serialNum) = 0;
+
+  virtual bool getPulserOEMDataSupported() = 0;
+
+  virtual bool getReceiverOEMDataSupported() = 0;
+
+  virtual bool getUnitModelNameSupported() = 0;
+
+  virtual bool getUnitSerialNumSupported() = 0;
+
+  virtual TriggerSource getTriggerSource() = 0;
+  virtual void setTriggerSource(TriggerSource source) = 0;
+
+  virtual std::vector<std::string> getPulserTriggerSourceValueNames() = 0;
+
+  virtual int getPulserTriggerSourceIndexMax() = 0;
+
+  virtual int getPulserTriggerSourceIndex() = 0;
+  virtual void setPulserTriggerSourceIndex(int index) = 0;
+
+  virtual bool getGainIndexSupported() = 0;
+
+  virtual bool getTriggerSourceSlaveSupported() = 0;
+
+  virtual bool getTriggerSourceExternalSupported() = 0;
+
   virtual bool getTriggerEnable() = 0;
   virtual void setTriggerEnable(bool enable) = 0;
   //

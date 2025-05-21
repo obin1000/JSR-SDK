@@ -84,9 +84,6 @@ public:
                                         marshal_as<String ^>(serialNum), idxPR);
   }
 
-  bool getTriggerEnable() { return m_manager->TriggerEnable; }
-  void setTriggerEnable(bool enable) { m_manager->TriggerEnable = enable; }
-
   // Variables
   bool getPulseRepetitionFrequencyIndexSupported() {
     return m_manager->PulseRepetitionFrequencyIndexSupported;
@@ -151,6 +148,126 @@ public:
   }
 
   int getLowPassFilterIndexMax() { return m_manager->LowPassFilterIndexMax; }
+
+  int getLowPassFilterIndex() { return m_manager->LowPassFilterIndex; }
+  void setLowPassFilterIndex(int index) {
+    m_manager->LowPassFilterIndex = index;
+  }
+
+  RecieverMode getReceiverMode() {
+    return receiverModeFromManaged(m_manager->ReceiverMode);
+  }
+  void setReceiverMode(RecieverMode mode) {
+    m_manager->ReceiverMode = receiverModeToManaged(mode);
+  }
+
+  bool getReceiverModeBothSupported() {
+    return m_manager->ReceiverModeBothSupported;
+  }
+
+  bool getReceiverModeThruSupported() {
+    return m_manager->ReceiverModeThruSupported;
+  }
+
+  bool getReceiverModeEchoSupported() {
+    return m_manager->ReceiverModeEchoSupported;
+  }
+
+  std::vector<double> getGainValues() {
+    std::vector<double> result;
+    auto values = m_manager->GainValues;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  int getGainIndexMax() { return m_manager->GainIndexMax; }
+
+  int getGainIndex() { return m_manager->GainIndex; }
+  void setGainIndex(int index) { m_manager->GainIndex = index; }
+
+  std::vector<double> getLowPassFilterValues() {
+    std::vector<double> result;
+    auto values = m_manager->LowPassFilterValues;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  double getHVSupplyMin() { return m_manager->HVSupplyMin; }
+
+  bool getHVSupplyIndexSupported() { return m_manager->HVSupplyIndexSupported; }
+
+  int getHVSupplyIndex() { return m_manager->HVSupplyIndex; }
+  void setHVSupplyIndex(int index) { m_manager->HVSupplyIndex = index; }
+
+  double getHVMeasurement() { return m_manager->HVMeasurement; }
+
+  bool getHVMeasurementSupported() { return m_manager->HVMeasurementSupported; }
+
+  std::string getUnitModelName() {
+    return marshal_as<std::string>(m_manager->UnitModelName);
+  }
+  void setUnitModelName(std::string name) {
+    m_manager->UnitModelName = marshal_as<String ^>(name);
+  }
+
+  std::string getUnitSerialNum() {
+    return marshal_as<std::string>(m_manager->UnitSerialNum);
+  }
+  void setUnitSerialNum(std::string serialNum) {
+    m_manager->UnitSerialNum = marshal_as<String ^>(serialNum);
+  }
+
+  bool getPulserOEMDataSupported() { return m_manager->PulserOEMDataSupported; }
+
+  bool getReceiverOEMDataSupported() {
+    return m_manager->ReceiverOEMDataSupported;
+  }
+
+  bool getUnitModelNameSupported() { return m_manager->UnitModelNameSupported; }
+
+  bool getUnitSerialNumSupported() { return m_manager->UnitSerialNumSupported; }
+
+  TriggerSource getTriggerSource() { return triggerSourceFromManaged(m_manager->TriggerSource); }
+  void setTriggerSource(TriggerSource source) {
+    m_manager->TriggerSource = triggerSourceToManaged(source);
+  }
+
+  std::vector<std::string> getPulserTriggerSourceValueNames() {
+    std::vector<std::string> result;
+    auto names = m_manager->PulserTriggerSourceValueNames;
+    for each (String ^ name in names) {
+      result.push_back(marshal_as<std::string>(name));
+    }
+    return result;
+  }
+
+  int getPulserTriggerSourceIndexMax() {
+    return m_manager->PulserTriggerSourceIndexMax;
+  }
+
+  int getPulserTriggerSourceIndex() {
+    return m_manager->PulserTriggerSourceIndex;
+  }
+  void setPulserTriggerSourceIndex(int index) {
+    m_manager->PulserTriggerSourceIndex = index;
+  }
+
+  bool getGainIndexSupported() { return m_manager->GainIndexSupported; }
+
+  bool getTriggerSourceSlaveSupported() {
+    return m_manager->TriggerSourceSlaveSupported;
+  }
+
+  bool getTriggerSourceExternalSupported() {
+    return m_manager->TriggerSourceExternalSupported;
+  }
+
+  bool getTriggerEnable() { return m_manager->TriggerEnable; }
+  void setTriggerEnable(bool enable) { m_manager->TriggerEnable = enable; }
 
 private:
   gcroot<JSRDotNETManager ^> m_manager;
