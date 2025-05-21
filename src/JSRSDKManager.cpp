@@ -520,8 +520,9 @@ public:
 
   bool getPluginsLoaded() { return m_manager->PluginsLoaded; }
 
-  // MANAGER_STATE getManagerState() = 0;
-  // void setManagerState(MANAGER_STATE state) = 0;
+  ManagerState getManagerState() {
+    return managerStateFromManaged(m_manager->ManagerState);
+  }
 
   bool getPulserMaxPRFsSupported() { return m_manager->PulserMaxPRFsSupported; }
 

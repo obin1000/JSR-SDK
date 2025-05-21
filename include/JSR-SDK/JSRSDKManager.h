@@ -3,6 +3,7 @@
 #include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/enums/IsPulsing.h"
+#include "JSR-SDK/enums/ManagerState.h"
 #include "JSR-SDK/enums/PowerLimit.h"
 #include "JSR-SDK/enums/PulserImpedance.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
@@ -16,6 +17,8 @@
 // This abstract class is the interface to unmanaged C++.
 // The extension will contain C++/CLI code, which the unmanaged C++ code will
 // know nothing about.
+// TODO: std::vector can be replaced with std::array or std::span if the size is
+// known at compile time.
 class JSRSDKManager {
 public:
   // Prevent copying and moving
@@ -53,8 +56,7 @@ public:
 
   virtual bool getHVSupplySupported() = 0;
   virtual int getPulseRepetitionFrequencyNumerator() = 0;
-  virtual std::vector<double>
-  getPulseRepetitionFrequencyValues() = 0; // TODO: Make std::Array<double>
+  virtual std::vector<double> getPulseRepetitionFrequencyValues() = 0;
   virtual int getPulseRepetitionFrequencyIndexMax() = 0;
   virtual int getPulseRepetitionFrequencyIndex() = 0;
   virtual void setPulseRepetitionFrequencyIndex(int index) = 0;
@@ -274,8 +276,7 @@ public:
 
   virtual bool getPluginsLoaded() = 0;
 
-  // virtual MANAGER_STATE getManagerState() = 0;
-  // virtual void setManagerState(MANAGER_STATE state) = 0;
+  virtual ManagerState getManagerState() = 0;
 
   virtual bool getPulserMaxPRFsSupported() = 0;
 

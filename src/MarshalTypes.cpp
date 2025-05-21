@@ -1,6 +1,7 @@
 ﻿#include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/enums/IsPulsing.h"
+#include "JSR-SDK/enums/ManagerState.h"
 #include "JSR-SDK/enums/PowerLimit.h"
 #include "JSR-SDK/enums/PulserImpedance.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
@@ -14,7 +15,7 @@ using namespace JSRDotNETSDK;
  * @file MarshalTypes.cpp
  * @brief This file contains the conversion functions between JSR-SDK types and
  * JSRDotNETSDK types.
- * These can't be exposed through the headers as it contains refernces to
+ * These can't be exposed through the headers as it contains references to
  * managed objects.
  *
  **/
@@ -236,5 +237,40 @@ static POWER_LIMIT powerLimitToManaged(PowerLimit source) {
     return POWER_LIMIT::WITHIN_LIMIT;
   default:
     return POWER_LIMIT::UNKNOWN;
+  }
+}
+
+// converting JSR-SDK::ManagerState <->
+// JSRDotNETSDK::JSRDotNETManager::MANAGER_STATE
+static ManagerState
+managerStateFromManaged(JSRDotNETManager::MANAGER_STATE state) {
+  switch (state) {
+  case JSRDotNETManager::MANAGER_STATE::NOT_STARTED:
+    return ManagerState::NOT_STARTED;
+  case JSRDotNETManager::MANAGER_STATE::PLUGINS_LOADED:
+    return ManagerState::PLUGINS_LOADED;
+  case JSRDotNETManager::MANAGER_STATE::RUNNING:
+    return ManagerState::RUNNING;
+  case JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN:
+    return ManagerState::SHUTTING_DOWN;
+  default:
+    return ManagerState::UNKNOWN;
+  }
+}
+
+static JSRDotNETManager::MANAGER_STATE
+managerStateToManaged(ManagerState state) {
+  switch (state) {
+  case ManagerState::NOT_STARTED:
+    return JSRDotNETManager::MANAGER_STATE::NOT_STARTED;
+  case ManagerState::PLUGINS_LOADED:
+    return JSRDotNETManager::MANAGER_STATE::PLUGINS_LOADED;
+  case ManagerState::RUNNING:
+    return JSRDotNETManager::MANAGER_STATE::RUNNING;
+  case ManagerState::SHUTTING_DOWN:
+    return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
   }
 }
