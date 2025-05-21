@@ -23,10 +23,18 @@
     <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
+    <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h" />
+    <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h" />
+    <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />
+    <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
     <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
     <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
     <ClInclude Include="include\JSR-SDK\PulserReceiverID.h" />
+    <ClInclude Include="include\JSR-SDK\enums\ReceiverMode.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">
