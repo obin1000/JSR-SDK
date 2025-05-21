@@ -2,6 +2,7 @@
 
 #include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
 
@@ -60,8 +61,8 @@ public:
   virtual double getPulseRepetitionFrequency() = 0;
   virtual void setPulseRepetitionFrequency(double frequency) = 0;
 
-  // virtual TRIGGER_POLARITY getTriggerEdgePolarity() = 0;
-  // virtual void setTriggerEdgePolarity(TRIGGER_POLARITY polarity) = 0;
+   virtual TriggerPolarity getTriggerEdgePolarity() = 0;
+  virtual void setTriggerEdgePolarity(TriggerPolarity polarity) = 0;
 
   virtual bool getTriggerEdgePolaritySupported() = 0;
 

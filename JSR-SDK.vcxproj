@@ -23,6 +23,7 @@
     <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
     <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
     <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />

@@ -40,6 +40,9 @@
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">

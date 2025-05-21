@@ -1,6 +1,7 @@
 ﻿#include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
+#include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
 #include <msclr/marshal_cppstd.h>
 
@@ -68,7 +69,7 @@ static RECEIVER_MODE receiverModeToManaged(RecieverMode mode) {
     return RECEIVER_MODE::THRU;
   default:
     // TODO: throw exception for unknown enum value?
-    return RECEIVER_MODE::THRU;
+    return RECEIVER_MODE::LAST_VAL;
   }
 }
 
@@ -101,5 +102,33 @@ static TRIGGER_SOURCE triggerSourceToManaged(TriggerSource source) {
   default:
     // TODO: throw exception for unknown enum value?
     return TRIGGER_SOURCE::LAST_VAL;
+  }
+}
+
+// converting JSR-SDK::TriggerPolarity <-> JSRDotNETSDK::TRIGGER_POLARITY
+static TriggerPolarity triggerPolarityFromManaged(TRIGGER_POLARITY source) {
+  switch (source) {
+  case TRIGGER_POLARITY::FALLING:
+    return TriggerPolarity::FALLING;
+  case TRIGGER_POLARITY::RISING:
+    return TriggerPolarity::RISING;
+  case TRIGGER_POLARITY::LAST_VAL:
+    return TriggerPolarity::LAST_VAL;
+  default:
+    return TriggerPolarity::UNKNOWN;
+  }
+}
+
+static TRIGGER_POLARITY triggerPolarityToManaged(TriggerPolarity source) {
+  switch (source) {
+  case TriggerPolarity::FALLING:
+    return TRIGGER_POLARITY::FALLING;
+  case TriggerPolarity::RISING:
+    return TRIGGER_POLARITY::RISING;
+  case TriggerPolarity::LAST_VAL:
+    return TRIGGER_POLARITY::LAST_VAL;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return TRIGGER_POLARITY::LAST_VAL;
   }
 }

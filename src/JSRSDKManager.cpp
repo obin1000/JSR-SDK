@@ -127,6 +127,13 @@ public:
     m_manager->PulseRepetitionFrequency = frequency;
   }
 
+  TriggerPolarity getTriggerEdgePolarity() {
+    return triggerPolarityFromManaged(m_manager->TriggerEdgePolarity);
+  }
+  void setTriggerEdgePolarity(TriggerPolarity polarity) {
+    m_manager->TriggerEdgePolarity = triggerPolarityToManaged(polarity);
+  }
+
   bool getTriggerEdgePolaritySupported() {
     return m_manager->TriggerEdgePolaritySupported;
   }
@@ -231,7 +238,9 @@ public:
 
   bool getUnitSerialNumSupported() { return m_manager->UnitSerialNumSupported; }
 
-  TriggerSource getTriggerSource() { return triggerSourceFromManaged(m_manager->TriggerSource); }
+  TriggerSource getTriggerSource() {
+    return triggerSourceFromManaged(m_manager->TriggerSource);
+  }
   void setTriggerSource(TriggerSource source) {
     m_manager->TriggerSource = triggerSourceToManaged(source);
   }
