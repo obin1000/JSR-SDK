@@ -1,7 +1,7 @@
 #pragma once
 
 enum class IsPulsing {
-  ACTIVE,
-  INACTIVE,
-  UNKNOWN,
+  INACTIVE = 0,
+  ACTIVE = 1,
+  UNKNOWN = 2,
 };

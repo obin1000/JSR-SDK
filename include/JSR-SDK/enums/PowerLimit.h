@@ -1,7 +1,7 @@
 #pragma once
 
 enum class PowerLimit {
-  OVER_LIMIT,
-  UNKNOWN,
-  WITHIN_LIMIT,
+  WITHIN_LIMIT = 0,
+  OVER_LIMIT = 1,
+  UNKNOWN = 2,
 };
