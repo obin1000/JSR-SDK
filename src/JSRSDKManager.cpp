@@ -278,6 +278,335 @@ public:
   bool getTriggerEnable() { return m_manager->TriggerEnable; }
   void setTriggerEnable(bool enable) { m_manager->TriggerEnable = enable; }
 
+  std::vector<std::string> getPulseEnergyValueNames() {
+    std::vector<std::string> result;
+    auto names = m_manager->PulseEnergyValueNames;
+    for each (String ^ name in names) {
+      result.push_back(marshal_as<std::string>(name));
+    }
+    return result;
+  }
+
+  int getPulseEnergyIndexMax() { return m_manager->PulseEnergyIndexMax; }
+
+  int getPulseEnergyIndex() { return m_manager->PulseEnergyIndex; }
+  void setPulseEnergyIndex(int index) { m_manager->PulseEnergyIndex = index; }
+
+  bool getPulseEnergyIndexSupported() {
+    return m_manager->PulseEnergyIndexSupported;
+  }
+
+  std::vector<double> getDampingValues() {
+    std::vector<double> result;
+    auto values = m_manager->DampingValues;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  int getDampingIndexMax() { return m_manager->DampingIndexMax; }
+
+  int getDampingIndex() { return m_manager->DampingIndex; }
+  void setDampingIndex(int index) { m_manager->DampingIndex = index; }
+
+  bool getDampingIndexSupported() { return m_manager->DampingIndexSupported; }
+
+  std::vector<double> getHVSupplyValues() {
+    std::vector<double> result;
+    auto values = m_manager->HVSupplyValues;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  int getHVSupplyIndexMax() { return m_manager->HVSupplyIndexMax; }
+
+  bool getTriggerSourceInternalSupported() {
+    return m_manager->TriggerSourceInternalSupported;
+  }
+
+  bool getGainStepSizeSupported() { return m_manager->GainStepSizeSupported; }
+
+  double getGainStepSize() { return m_manager->GainStepSize; }
+
+  double getGainMax() { return m_manager->GainMax; }
+
+  std::string getPulserSerialNum() {
+    return marshal_as<std::string>(m_manager->PulserSerialNum);
+  }
+  void setPulserSerialNum(std::string serialNum) {
+    m_manager->PulserSerialNum = marshal_as<String ^>(serialNum);
+  }
+
+  bool getPulserSerialNumSupported() {
+    return m_manager->PulserSerialNumSupported;
+  }
+
+  bool getReceiverHWRevSupported() { return m_manager->ReceiverHWRevSupported; }
+
+  std::string getReceiverHWRev() {
+    return marshal_as<std::string>(m_manager->ReceiverHWRev);
+  }
+  void setReceiverHWRev(std::string hwRev) {
+    m_manager->ReceiverHWRev = marshal_as<String ^>(hwRev);
+  }
+
+  bool getPulserHWRevSupported() { return m_manager->PulserHWRevSupported; }
+
+  std::string getPulserHWRev() {
+    return marshal_as<std::string>(m_manager->PulserHWRev);
+  }
+  void setPulserHWRev(std::string hwRev) {
+    m_manager->PulserHWRev = marshal_as<String ^>(hwRev);
+  }
+
+  bool getReceiverFirmwareVerSupported() {
+    return m_manager->ReceiverFirmwareVerSupported;
+  }
+
+  std::string getReceiverFirmwareVer() {
+    return marshal_as<std::string>(m_manager->ReceiverFirmwareVer);
+  }
+
+  bool getPulserFirmwareVerSupported() {
+    return m_manager->PulserFirmwareVerSupported;
+  }
+
+  std::string getPulserFirmwareVer() {
+    return marshal_as<std::string>(m_manager->PulserFirmwareVer);
+  }
+
+  double getMaxFrequency() { return m_manager->MaxFrequency; }
+
+  TriggerImpedance getTriggerImpedance() {
+    return triggerImpedanceFromManaged(m_manager->TriggerImpedance);
+  }
+  void setTriggerImpedance(TriggerImpedance impedance) {
+    m_manager->TriggerImpedance = triggerImpedanceToManaged(impedance);
+  }
+
+  bool getTriggerImpedanceSupported() {
+    return m_manager->TriggerImpedanceSupported;
+  }
+
+  PulserImpedance getPulserImpedance() {
+    return pulserImpedanceFromManaged(m_manager->PulserImpedance);
+  }
+  void setPulserImpedance(PulserImpedance impedance) {
+    m_manager->PulserImpedance = pulserImpedanceToManaged(impedance);
+  }
+
+  bool getPulserImpedanceSupported() {
+    return m_manager->PulserImpedanceSupported;
+  }
+
+  double getEnergyPerPulse() { return m_manager->EnergyPerPulse; }
+
+  std::vector<std::string> getInfo() {
+    std::vector<std::string> result;
+    auto info = m_manager->Info;
+    for each (String ^ str in info) {
+      result.push_back(marshal_as<std::string>(str));
+    }
+    return result;
+  }
+
+  IsPulsing getPulserIsPulsing() {
+    return isPulsingFromManaged(m_manager->PulserIsPulsing);
+  }
+
+  PowerLimit getPulserPowerLimitStatus() {
+    return powerLimitFromManaged(m_manager->PulserPowerLimitStatus);
+  }
+
+  int getPulserTriggerCount() { return m_manager->PulserTriggerCount; }
+
+  bool getPulserTriggerCountSupported() {
+    return m_manager->PulserTriggerCountSupported;
+  }
+
+  bool getHVSupplyEnable() { return m_manager->HVSupplyEnable; }
+  void setHVSupplyEnable(bool enable) { m_manager->HVSupplyEnable = enable; }
+
+  bool getHVSupplyEnableSupported() {
+    return m_manager->HVSupplyEnableSupported;
+  }
+
+  // std::vector<PulserSettingInfo> getPulserSettings() = 0;
+
+  // PropertyChangeEventCriteria getStatusChangePropertyCriteria() = 0;
+  // void setStatusChangePropertyCriteria(PropertyChangeEventCriteria criteria)
+  // = 0;
+
+  bool getReceiverSerialNumSupported() {
+    return m_manager->ReceiverSerialNumSupported;
+  }
+
+  bool getIsPulserPresentSupported() {
+    return m_manager->IsPulserPresentSupported;
+  }
+
+  std::string getReceiverSerialNum() {
+    return marshal_as<std::string>(m_manager->ReceiverSerialNum);
+  }
+  void setReceiverSerialNum(std::string serialNum) {
+    m_manager->ReceiverSerialNum = marshal_as<String ^>(serialNum);
+  }
+
+  bool getPulserModelNameSupported() {
+    return m_manager->PulserModelNameSupported;
+  }
+
+  double getGainMin() { return m_manager->GainMin; }
+
+  double getGain() { return m_manager->Gain; }
+  void setGain(double gain) { m_manager->Gain = gain; }
+
+  bool getHasManualControls() { return m_manager->HasManualControls; }
+
+  std::vector<std::string> getLEDBlinkModeValues() {
+    std::vector<std::string> result;
+    auto values = m_manager->LEDBlinkModeValues;
+    for each (String ^ value in values) {
+      result.push_back(marshal_as<std::string>(value));
+    }
+    return result;
+  }
+
+  int getLEDBlinkModeIndexMax() { return m_manager->LEDBlinkModeIndexMax; }
+
+  int getLEDBlinkModeIndex() { return m_manager->LEDBlinkModeIndex; }
+  void setLEDBlinkModeIndex(int index) { m_manager->LEDBlinkModeIndex = index; }
+
+  bool getLEDBlinkModeIndexSupported() {
+    return m_manager->LEDBlinkModeIndexSupported;
+  }
+
+  PulserReceiverID getId() { return pulsereceiverFromManaged(m_manager->Id); }
+
+  bool getIsPulserReceiverSelected() {
+    return m_manager->IsPulserReceiverSelected;
+  }
+
+  std::string getLastExceptionContextMessage() {
+    return marshal_as<std::string>(m_manager->LastExceptionContextMessage);
+  }
+
+  std::string getLastExceptionOrNull() {
+    Exception ^ exception = m_manager->LastExceptionOrNull;
+    if (exception != nullptr) {
+      return marshal_as<std::string>(exception->Message);
+    } else {
+      return nullptr;
+    }
+  }
+  // void setLastExceptionOrNull(Exception exception) = 0;
+
+  std::string getPluginPath() {
+    return marshal_as<std::string>(m_manager->PluginPath);
+  }
+  void setPluginPath(std::string path) {
+    m_manager->PluginPath = marshal_as<String ^>(path);
+  }
+
+  std::string getPulserModelName() {
+    return marshal_as<std::string>(m_manager->PulserModelName);
+  }
+  void setPulserModelName(std::string name) {
+    m_manager->PulserModelName = marshal_as<String ^>(name);
+  }
+
+  bool getPluginsLoaded() { return m_manager->PluginsLoaded; }
+
+  // MANAGER_STATE getManagerState() = 0;
+  // void setManagerState(MANAGER_STATE state) = 0;
+
+  bool getPulserMaxPRFsSupported() { return m_manager->PulserMaxPRFsSupported; }
+
+  std::vector<double> getPulserMaxPRFs() {
+    std::vector<double> result;
+    auto values = m_manager->PulserMaxPRFs;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  bool getPulserEnergyCapacitorValuesSupported() {
+    return m_manager->PulserEnergyCapacitorValuesSupported;
+  }
+
+  std::vector<double> getPulserEnergyCapacitorValues() {
+    std::vector<double> result;
+    auto values = m_manager->PulserEnergyCapacitorValues;
+    for each (double value in values) {
+      result.push_back(value);
+    }
+    return result;
+  }
+
+  std::vector<std::string> getReceiverSupplyVoltages() {
+    std::vector<std::string> result;
+    auto values = m_manager->ReceiverSupplyVoltages;
+    for each (String ^ value in values) {
+      result.push_back(marshal_as<std::string>(value));
+    }
+    return result;
+  }
+
+  bool getReceiverSupplyVoltagesSupported() {
+    return m_manager->ReceiverSupplyVoltagesSupported;
+  }
+
+  // std::vector<byte> getReceiverOEMData() {
+  //   std::vector<byte> result;
+  //   auto data = m_manager->ReceiverOEMData;
+  //   for each (byte b in data) {
+  //     result.push_back(b);
+  //   }
+  //   return result;
+  // }
+  // void setReceiverOEMData(std::vector<byte> date) {
+  //   array<byte> ^ data = gcnew array<byte>(date.size());
+  //   for (size_t i = 0; i < date.size(); i++) {
+  //     data[i] = date[i];
+  //   }
+  //   m_manager->ReceiverOEMData = data;
+  // }
+
+  // std::vector<byte> getPulserOEMData() {
+  //   std::vector<byte> result;
+  //   auto data = m_manager->PulserOEMData;
+  //   for each (byte b in data) {
+  //     result.push_back(b);
+  //   }
+  //   return result;
+  // }
+  // void setPulserOEMData(std::vector<byte> data) {
+  //   array<byte> ^ oemData = gcnew array<byte>(data.size());
+  //   for (size_t i = 0; i < data.size(); i++) {
+  //     oemData[i] = data[i];
+  //   }
+  //   m_manager->PulserOEMData = oemData;
+  // }
+
+  bool getReceiverModelNameSupported() {
+    return m_manager->ReceiverModelNameSupported;
+  }
+
+  std::string getReceiverModelName() {
+    return marshal_as<std::string>(m_manager->ReceiverModelName);
+  }
+  void setReceiverModelName(std::string name) {
+    m_manager->ReceiverModelName = marshal_as<String ^>(name);
+  }
+
+  bool getArePluginsAvailable() { return m_manager->ArePluginsAvailable; }
+
+  bool getIsPulserPresent() { return m_manager->IsPulserPresent; }
+
 private:
   gcroot<JSRDotNETManager ^> m_manager;
 };

@@ -43,6 +43,18 @@
     <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">

@@ -1,3 +1,8 @@
 #pragma once
 
-enum class TriggerPolarity { FALLING, LAST_VAL, RISING, UNKNOWN };
+enum class TriggerPolarity {
+  FALLING,
+  LAST_VAL,
+  RISING,
+  UNKNOWN,
+};

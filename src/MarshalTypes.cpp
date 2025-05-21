@@ -1,6 +1,10 @@
 ﻿#include "JSR-SDK/InstrumentID.h"
 #include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/enums/IsPulsing.h"
+#include "JSR-SDK/enums/PowerLimit.h"
+#include "JSR-SDK/enums/PulserImpedance.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
+#include "JSR-SDK/enums/TriggerImpedance.h"
 #include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
 #include <msclr/marshal_cppstd.h>
@@ -130,5 +134,107 @@ static TRIGGER_POLARITY triggerPolarityToManaged(TriggerPolarity source) {
   default:
     // TODO: throw exception for unknown enum value?
     return TRIGGER_POLARITY::LAST_VAL;
+  }
+}
+
+// converting JSR-SDK::TriggerImpedance <-> JSRDotNETSDK::TRIGGER_IMPEDANCE
+static TriggerImpedance triggerImpedanceFromManaged(TRIGGER_IMPEDANCE source) {
+  switch (source) {
+  case TRIGGER_IMPEDANCE::HIGH_Z:
+    return TriggerImpedance::HIGH_Z;
+  case TRIGGER_IMPEDANCE::LOW_Z:
+    return TriggerImpedance::LOW_Z;
+  case TRIGGER_IMPEDANCE::LAST_VAL:
+    return TriggerImpedance::LAST_VAL;
+  default:
+    return TriggerImpedance::UNKNOWN;
+  }
+}
+
+static TRIGGER_IMPEDANCE triggerImpedanceToManaged(TriggerImpedance source) {
+  switch (source) {
+  case TriggerImpedance::HIGH_Z:
+    return TRIGGER_IMPEDANCE::HIGH_Z;
+  case TriggerImpedance::LOW_Z:
+    return TRIGGER_IMPEDANCE::LOW_Z;
+  case TriggerImpedance::LAST_VAL:
+    return TRIGGER_IMPEDANCE::LAST_VAL;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return TRIGGER_IMPEDANCE::LAST_VAL;
+  }
+}
+
+// converting JSR-SDK::PulserImpedance <-> JSRDotNETSDK::PULSER_IMPEDANCE
+static PulserImpedance pulserImpedanceFromManaged(PULSER_IMPEDANCE source) {
+  switch (source) {
+  case PULSER_IMPEDANCE::HIGH_Z:
+    return PulserImpedance::HIGH_Z;
+  case PULSER_IMPEDANCE::LOW_Z:
+    return PulserImpedance::LOW_Z;
+  case PULSER_IMPEDANCE::LAST_VAL:
+    return PulserImpedance::LAST_VAL;
+  default:
+    return PulserImpedance::UNKNOWN;
+  }
+}
+
+static PULSER_IMPEDANCE pulserImpedanceToManaged(PulserImpedance source) {
+  switch (source) {
+  case PulserImpedance::HIGH_Z:
+    return PULSER_IMPEDANCE::HIGH_Z;
+  case PulserImpedance::LOW_Z:
+    return PULSER_IMPEDANCE::LOW_Z;
+  case PulserImpedance::LAST_VAL:
+    return PULSER_IMPEDANCE::LAST_VAL;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return PULSER_IMPEDANCE::LAST_VAL;
+  }
+}
+
+// converting JSR-SDK::IsPulsing <-> JSRDotNETSDK::IS_PULSING
+static IsPulsing isPulsingFromManaged(IS_PULSING source) {
+  switch (source) {
+  case IS_PULSING::ACTIVE:
+    return IsPulsing::ACTIVE;
+  case IS_PULSING::INACTIVE:
+    return IsPulsing::INACTIVE;
+  default:
+    return IsPulsing::UNKNOWN;
+  }
+}
+
+static IS_PULSING isPulsingToManaged(IsPulsing source) {
+  switch (source) {
+  case IsPulsing::ACTIVE:
+    return IS_PULSING::ACTIVE;
+  case IsPulsing::INACTIVE:
+    return IS_PULSING::INACTIVE;
+  default:
+    return IS_PULSING::UNKNOWN;
+  }
+}
+
+// converting JSR-SDK::PowerLimit <-> JSRDotNETSDK::POWER_LIMIT
+static PowerLimit powerLimitFromManaged(POWER_LIMIT source) {
+  switch (source) {
+  case POWER_LIMIT::OVER_LIMIT:
+    return PowerLimit::OVER_LIMIT;
+  case POWER_LIMIT::WITHIN_LIMIT:
+    return PowerLimit::WITHIN_LIMIT;
+  default:
+    return PowerLimit::UNKNOWN;
+  }
+}
+
+static POWER_LIMIT powerLimitToManaged(PowerLimit source) {
+  switch (source) {
+  case PowerLimit::OVER_LIMIT:
+    return POWER_LIMIT::OVER_LIMIT;
+  case PowerLimit::WITHIN_LIMIT:
+    return POWER_LIMIT::WITHIN_LIMIT;
+  default:
+    return POWER_LIMIT::UNKNOWN;
   }
 }
