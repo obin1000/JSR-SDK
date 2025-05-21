@@ -499,7 +499,7 @@ public:
     if (exception != nullptr) {
       return marshal_as<std::string>(exception->Message);
     } else {
-      return nullptr;
+      return "";
     }
   }
   // void setLastExceptionOrNull(Exception exception) = 0;
@@ -561,37 +561,49 @@ public:
     return m_manager->ReceiverSupplyVoltagesSupported;
   }
 
-  // std::vector<byte> getReceiverOEMData() {
-  //   std::vector<byte> result;
-  //   auto data = m_manager->ReceiverOEMData;
-  //   for each (byte b in data) {
-  //     result.push_back(b);
-  //   }
-  //   return result;
-  // }
-  // void setReceiverOEMData(std::vector<byte> date) {
-  //   array<byte> ^ data = gcnew array<byte>(date.size());
-  //   for (size_t i = 0; i < date.size(); i++) {
-  //     data[i] = date[i];
-  //   }
-  //   m_manager->ReceiverOEMData = data;
-  // }
+  std::vector<unsigned char> getReceiverOEMData() {
+    array<System::Byte> ^ data = m_manager->ReceiverOEMData;
+    if (data == nullptr)
+      return {};
 
-  // std::vector<byte> getPulserOEMData() {
-  //   std::vector<byte> result;
-  //   auto data = m_manager->PulserOEMData;
-  //   for each (byte b in data) {
-  //     result.push_back(b);
-  //   }
-  //   return result;
-  // }
-  // void setPulserOEMData(std::vector<byte> data) {
-  //   array<byte> ^ oemData = gcnew array<byte>(data.size());
-  //   for (size_t i = 0; i < data.size(); i++) {
-  //     oemData[i] = data[i];
-  //   }
-  //   m_manager->PulserOEMData = oemData;
-  // }
+    std::vector<unsigned char> nativeData(data->Length);
+    for (int i = 0; i < data->Length; ++i)
+      nativeData[i] = data[i];
+
+    return nativeData;
+  }
+  void setReceiverOEMData(std::vector<unsigned char> data) {
+    array<System::Byte> ^ managedArray =
+        gcnew array<System::Byte>(static_cast<int>(data.size()));
+
+    int index = 0;
+    for (auto byte : data)
+      managedArray[index++] = byte;
+
+    m_manager->ReceiverOEMData = managedArray;
+  }
+
+  std::vector<unsigned char> getPulserOEMData() {
+    array<System::Byte> ^ data = m_manager->PulserOEMData;
+    if (data == nullptr)
+      return {};
+
+    std::vector<unsigned char> nativeData(data->Length);
+    for (int i = 0; i < data->Length; ++i)
+      nativeData[i] = data[i];
+
+    return nativeData;
+  }
+  void setPulserOEMData(std::vector<unsigned char> data) {
+    array<System::Byte> ^ managedArray =
+        gcnew array<System::Byte>(static_cast<int>(data.size()));
+
+    int index = 0;
+    for (auto byte : data)
+      managedArray[index++] = byte;
+
+    m_manager->PulserOEMData = managedArray;
+  }
 
   bool getReceiverModelNameSupported() {
     return m_manager->ReceiverModelNameSupported;

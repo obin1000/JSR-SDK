@@ -290,11 +290,11 @@ public:
 
   virtual bool getReceiverSupplyVoltagesSupported() = 0;
 
-  // virtual std::vector<byte> getReceiverOEMData() = 0;
-  // virtual void setReceiverOEMData(std::vector<byte> date) = 0;
+  virtual std::vector<unsigned char> getReceiverOEMData() = 0;
+  virtual void setReceiverOEMData(std::vector<unsigned char> date) = 0;
 
-  // virtual std::vector<byte> getPulserOEMData() = 0;
-  // virtual void setPulserOEMData(std::vector<byte> data) = 0;
+  virtual std::vector<unsigned char> getPulserOEMData() = 0;
+  virtual void setPulserOEMData(std::vector<unsigned char> data) = 0;
 
   virtual bool getReceiverModelNameSupported() = 0;
 
