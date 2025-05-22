@@ -897,83 +897,250 @@ public:
    * otherwise.
    */
   virtual bool getHVSupplyEnableSupported() = 0;
-  */ virtual int getHVSupplyIndex() = 0;
 
   // virtual std::vector<PulserSettingInfo> getPulserSettings() = 0;
 
   // virtual PropertyChangeEventCriteria getStatusChangePropertyCriteria() = 0;
   // virtual void
   // setStatusChangePropertyCriteria(PropertyChangeEventCriteria criteria) = 0;
-
+  /**
+   * @brief Checks if the receiver serial number is supported.
+   * @return True if the receiver serial number is supported, false otherwise.
+   */
   virtual bool getReceiverSerialNumSupported() = 0;
 
+  /**
+   * @brief Checks if the pulser presence is supported.
+   * @return True if the pulser presence is supported, false otherwise.
+   */
   virtual bool getIsPulserPresentSupported() = 0;
 
+  /**
+   * @brief Retrieves the receiver serial number.
+   * @return A string representing the receiver serial number.
+   */
   virtual std::string getReceiverSerialNum() = 0;
+
+  /**
+   * @brief Sets the receiver serial number.
+   * @param serialNum The receiver serial number to set.
+   */
   virtual void setReceiverSerialNum(std::string serialNum) = 0;
 
+  /**
+   * @brief Checks if the pulser model name is supported.
+   * @return True if the pulser model name is supported, false otherwise.
+   */
   virtual bool getPulserModelNameSupported() = 0;
 
+  /**
+   * @brief Retrieves the minimum gain value.
+   * @return The minimum gain value as a double.
+   */
   virtual double getGainMin() = 0;
 
+  /**
+   * @brief Retrieves the current gain value.
+   * @return The current gain value as a double.
+   */
   virtual double getGain() = 0;
+
+  /**
+   * @brief Sets the gain value.
+   * @param gain The gain value to set.
+   */
   virtual void setGain(double gain) = 0;
 
+  /**
+   * @brief Checks if manual controls are available.
+   * @return True if manual controls are available, false otherwise.
+   */
   virtual bool getHasManualControls() = 0;
 
+  /**
+   * @brief Retrieves the available LED blink mode values.
+   * @return A vector of strings representing the LED blink mode values.
+   */
   virtual std::vector<std::string> getLEDBlinkModeValues() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of LED blink modes.
+   * @return The maximum index of LED blink modes.
+   */
   virtual int getLEDBlinkModeIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the LED blink mode.
+   * @return The current index of the LED blink mode.
+   */
   virtual int getLEDBlinkModeIndex() = 0;
+
+  /**
+   * @brief Sets the index of the LED blink mode.
+   * @param index The index to set for the LED blink mode.
+   */
   virtual void setLEDBlinkModeIndex(int index) = 0;
 
+  /**
+   * @brief Checks if the LED blink mode index is supported.
+   * @return True if the LED blink mode index is supported, false otherwise.
+   */
   virtual bool getLEDBlinkModeIndexSupported() = 0;
 
+  /**
+   * @brief Retrieves the PulserReceiverID of the current device.
+   * @return The PulserReceiverID of the current device.
+   */
   virtual PulserReceiverID getId() = 0;
 
+  /**
+   * @brief Checks if a pulser receiver is currently selected.
+   * @return True if a pulser receiver is selected, false otherwise.
+   */
   virtual bool getIsPulserReceiverSelected() = 0;
 
+  /**
+   * @brief Retrieves the context message of the last exception.
+   * @return A string containing the context message of the last exception.
+   */
   virtual std::string getLastExceptionContextMessage() = 0;
 
+  /**
+   * @brief Retrieves the last exception message or null if no exception
+   * occurred.
+   * @return A string containing the last exception message or null.
+   */
   virtual std::string getLastExceptionOrNull() = 0;
   // virtual void setLastExceptionOrNull(Exception exception) = 0;
 
+  /**
+   * @brief Retrieves the plugin path.
+   * @return A string representing the plugin path.
+   */
   virtual std::string getPluginPath() = 0;
+
+  /**
+   * @brief Sets the plugin path.
+   * @param path The plugin path to set.
+   */
   virtual void setPluginPath(std::string path) = 0;
 
+  /**
+   * @brief Retrieves the pulser model name.
+   * @return A string representing the pulser model name.
+   */
   virtual std::string getPulserModelName() = 0;
+
+  /**
+   * @brief Sets the pulser model name.
+   * @param name The pulser model name to set.
+   */
   virtual void setPulserModelName(std::string name) = 0;
 
+  /**
+   * @brief Checks if plugins are loaded.
+   * @return True if plugins are loaded, false otherwise.
+   */
   virtual bool getPluginsLoaded() = 0;
 
+  /**
+   * @brief Retrieves the current state of the manager.
+   * @return The current state of the manager as a ManagerState enum value.
+   */
   virtual ManagerState getManagerState() = 0;
 
+  /**
+   * @brief Checks if the maximum PRFs for the pulser are supported.
+   * @return True if the maximum PRFs are supported, false otherwise.
+   */
   virtual bool getPulserMaxPRFsSupported() = 0;
 
+  /**
+   * @brief Retrieves the maximum PRFs for the pulser.
+   * @return A vector of doubles representing the maximum PRFs.
+   */
   virtual std::vector<double> getPulserMaxPRFs() = 0;
 
+  /**
+   * @brief Checks if pulser energy capacitor values are supported.
+   * @return True if pulser energy capacitor values are supported, false
+   * otherwise.
+   */
   virtual bool getPulserEnergyCapacitorValuesSupported() = 0;
 
+  /**
+   * @brief Retrieves the pulser energy capacitor values.
+   * @return A vector of doubles representing the pulser energy capacitor
+   * values.
+   */
   virtual std::vector<double> getPulserEnergyCapacitorValues() = 0;
 
+  /**
+   * @brief Retrieves the receiver supply voltages.
+   * @return A vector of strings representing the receiver supply voltages.
+   */
   virtual std::vector<std::string> getReceiverSupplyVoltages() = 0;
 
+  /**
+   * @brief Checks if receiver supply voltages are supported.
+   * @return True if receiver supply voltages are supported, false otherwise.
+   */
   virtual bool getReceiverSupplyVoltagesSupported() = 0;
 
+  /**
+   * @brief Retrieves the receiver OEM data.
+   * @return A vector of unsigned char representing the receiver OEM data.
+   */
   virtual std::vector<unsigned char> getReceiverOEMData() = 0;
+
+  /**
+   * @brief Sets the receiver OEM data.
+   * @param date A vector of unsigned char representing the receiver OEM data to
+   * set.
+   */
   virtual void setReceiverOEMData(std::vector<unsigned char> date) = 0;
 
+  /**
+   * @brief Retrieves the pulser OEM data.
+   * @return A vector of unsigned char representing the pulser OEM data.
+   */
   virtual std::vector<unsigned char> getPulserOEMData() = 0;
+
+  /**
+   * @brief Sets the pulser OEM data.
+   * @param data A vector of unsigned char representing the pulser OEM data to
+   * set.
+   */
   virtual void setPulserOEMData(std::vector<unsigned char> data) = 0;
 
+  /**
+   * @brief Checks if the receiver model name is supported.
+   * @return True if the receiver model name is supported, false otherwise.
+   */
   virtual bool getReceiverModelNameSupported() = 0;
 
+  /**
+   * @brief Retrieves the receiver model name.
+   * @return A string representing the receiver model name.
+   */
   virtual std::string getReceiverModelName() = 0;
+
+  /**
+   * @brief Sets the receiver model name.
+   * @param name The receiver model name to set.
+   */
   virtual void setReceiverModelName(std::string name) = 0;
 
+  /**
+   * @brief Checks if plugins are available.
+   * @return True if plugins are available, false otherwise.
+   */
   virtual bool getArePluginsAvailable() = 0;
 
+  /**
+   * @brief Checks if a pulser is present.
+   * @return True if a pulser is present, false otherwise.
+   */
   virtual bool getIsPulserPresent() = 0;
 };
 
