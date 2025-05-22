@@ -18,23 +18,31 @@
 #include <string>
 #include <vector>
 
-// This abstract class is the interface to unmanaged C++.
-// The extension will contain C++/CLI code, which the unmanaged C++ code will
-// know nothing about.
-// TODO: std::vector can be replaced with std::array or std::span if the size is
-// known at compile time.
+/**
+ * @brief Abstract class representing the interface to unmanaged C++.
+ * This class provides a set of virtual functions to interact with the JSR SDK.
+ * The C++/CLI implementation is hidden in the implementation, allowing
+ * unmanaged C++ to use this header.
+ */
 class JSRSDKManager {
 public:
   // === C++ constructor and destructor ===
-  // Prevent copying and moving
+  /**
+   * This object should not be copied or moved.
+   **/
   JSRSDKManager(const JSRSDKManager &) = delete;
   JSRSDKManager &operator=(const JSRSDKManager &) = delete;
   JSRSDKManager(JSRSDKManager &&) = delete;
   JSRSDKManager &operator=(JSRSDKManager &&) = delete;
 
-  // Constucts a manager and loads plugins from the binary directory
+  /**
+   * @brief Constructs a manager and loads plugins from the binary directory.
+   */
   JSRSDKManager() = default;
-  // Closes the connection to the devices and releases all resources.
+
+  /**
+   * @brief Closes the connection to the devices and releases all resources.
+   */
   virtual ~JSRSDKManager() = default;
 
   // === Static functions used to generate IDs ===
@@ -48,43 +56,105 @@ public:
   //                           out int idxPR) = 0;
 
   // === Functions provided by SDK ===
+
+  /**
+   * @brief Adds a managed plugin by its name.
+   * @param pluginName The name of the plugin to add.
+   */
   virtual void AddManagedPlugin(std::string pluginName) = 0;
 
+  /**
+   * @brief Adds an open option for a specific plugin.
+   * @param strPluginName The name of the plugin.
+   * @param optionName The name of the option.
+   * @param optionValue The value of the option.
+   */
   virtual void AddPluginOpenOption(std::string strPluginName,
                                    std::string optionName,
                                    std::string optionValue) = 0;
 
+  /**
+   * @brief Adds a plugin type to the manager.
+   * @param pluginType The type of the plugin to add.
+   */
   virtual void AddPluginType(std::string pluginType) = 0;
 
+  /**
+   * @brief Forces the detachment of all plugins and resources.
+   */
   virtual void ForceDetach() = 0;
 
+  /**
+   * @brief Retrieves custom settings available in the manager.
+   * @return A vector of strings representing custom settings.
+   */
   virtual std::vector<std::string> GetCustomSettings() = 0;
 
+  /**
+   * @brief Retrieves a list of instruments for a specific plugin.
+   * @param pluginName The name of the plugin.
+   * @return A vector of InstrumentID objects representing the instruments.
+   */
   virtual std::vector<InstrumentID> GetInstruments(std::string pluginName) = 0;
 
+  /**
+   * @brief Retrieves the names of all managed plugins.
+   * @return A vector of strings representing the names of managed plugins.
+   */
   virtual std::vector<std::string> GetManagedPluginNames() = 0;
 
+  /**
+   * @brief Retrieves the open options for a specific plugin.
+   * @param strPluginName The name of the plugin.
+   * @return A map where the key is the option name and the value is a vector of
+   * option values.
+   */
   virtual std::map<std::string, std::vector<std::string>>
   GetPluginLibOpenOptions(std::string strPluginName) = 0;
 
   // virtual IJSRDotNET GetPluginLibraryInstance(std::string strPluginName) = 0;
 
+  /**
+   * @brief Retrieves metadata for a specific plugin library.
+   * @param strPluginName The name of the plugin.
+   * @return A JSRLibMetadata object containing metadata about the plugin.
+   */
   virtual JSRLibMetadata
   GetPluginLibraryMetadata(std::string strPluginName) = 0;
 
   // virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
-
+  /**
+   * @brief Retrieves names of the loaded plugins.
+   * @return A vector of strings representing the names of the loaded plugins.
+   */
   virtual std::vector<std::string> GetPluginNames() = 0;
 
   // virtual InstrumentOpenCriteria
   // GetPluginOpenOptions(std::string strPluginName) = 0;
 
+  /**
+   * @brief Retrieves the attributes of a specific pulser property.
+   * @param settingName The name of the pulser property.
+   * @return An integer representing the attributes of the property.
+   */
   virtual int GetPulserPropertyAttributes(std::string settingName) = 0;
 
+  /**
+   * @brief Retrieves the units of a specific pulser property.
+   * @param settingName The name of the pulser property.
+   * @return A PropertyUnits enum value representing the units of the property.
+   */
   virtual PropertyUnits GetPulserPropertyUnits(std::string settingName) = 0;
 
+  /**
+   * @brief Retrieves the units of a specific pulser property as a string.
+   * @param settingName The name of the pulser property.
+   * @param useShort Whether to use the short form of the units.
+   * @return A string representing the units of the property.
+   */
   virtual std::string GetPulserPropertyUnitsAsString(std::string settingName,
                                                      bool useShort = false) = 0;
+
   // TODO: Overload for other data types
   // virtual std::string GetPulserPropertyValue(std::string strProp) = 0;
 
@@ -93,10 +163,25 @@ public:
 
   // virtual IPulserReceiver GetPulserReceiver(PulserReceiverID prID) = 0;
 
+  /**
+   * @brief Retrieves information about a pulser receiver based on its model,
+   * serial number, and index.
+   * @param model The model of the pulser receiver.
+   * @param serialNum The serial number of the pulser receiver.
+   * @param idxPR The index of the pulser receiver.
+   * @return A vector of strings containing information about the pulser
+   * receiver.
+   */
   virtual std::vector<std::string> GetPulserReceiverInfo(std::string model,
                                                          std::string serialNum,
                                                          int idxPR) = 0;
 
+  /**
+   * @brief Retrieves information about a pulser receiver based on its ID.
+   * @param id The PulserReceiverID of the pulser receiver.
+   * @return A vector of strings containing information about the pulser
+   * receiver.
+   */
   virtual std::vector<std::string>
   GetPulserReceiverInfo(PulserReceiverID id) = 0;
 
@@ -106,34 +191,87 @@ public:
   // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
   // 0;
 
+  /**
+   * @brief Checks if a specific pulser setting is supported.
+   * @param settingName The name of the pulser setting.
+   * @return True if the setting is supported, false otherwise.
+   */
   virtual bool IsPulserSettingSupported(std::string settingName) = 0;
 
+  /**
+   * @brief Loads plugins from a specified path.
+   * @param pluginPath The path to the plugins.
+   */
   virtual void LoadPlugins(std::string pluginPath) = 0;
 
+  /**
+   * @brief Notifies the manager's thread procedure.
+   */
   virtual void NotifyThreadProc() = 0;
 
+  /**
+   * @brief Removes all open options for a specific plugin.
+   * @param strPluginName The name of the plugin.
+   */
   virtual void RemoveAllOpenOptions(std::string strPluginName) = 0;
 
+  /**
+   * @brief Removes a managed plugin by its name.
+   * @param pluginName The name of the plugin to remove. Defaults to an empty
+   * string.
+   */
   virtual void RemoveManagedPlugin(std::string pluginName = "") = 0;
 
+  /**
+   * @brief Requests the manager's thread procedure.
+   */
   virtual void RequestThreadProc() = 0;
 
+  /**
+   * @brief Sets the current pulser receiver based on its ID.
+   * @param prID The PulserReceiverID of the pulser receiver.
+   */
   virtual void SetCurrentPulserReceiver(PulserReceiverID prID) = 0;
 
+  /**
+   * @brief Sets the current pulser receiver based on its model, serial number,
+   * and index.
+   * @param model The model of the pulser receiver.
+   * @param serialNum The serial number of the pulser receiver.
+   * @param idxPR The index of the pulser receiver.
+   */
   virtual void SetCurrentPulserReceiver(std::string model,
                                         std::string serialNum, int idxPR) = 0;
 
+  /**
+   * @brief Enables or disables discovery mode.
+   * @param bEnable True to enable discovery mode, false to disable it.
+   */
   virtual void SetDiscoveryEnable(bool bEnable) = 0;
 
-  // TODO: Overload for other data types
+  /**
+   * @brief Sets the value of a specific pulser property.
+   * @param strProp The name of the property.
+   * @param value The value to set for the property.
+   */
   virtual void SetPulserPropertyValue(std::string strProp,
                                       const std::string &value) = 0;
 
+  /**
+   * @brief Sets the value of a specific pulser property with a role.
+   * @param settingName The name of the property.
+   * @param role The role of the property.
+   * @param value The value to set for the property.
+   */
   virtual void SetPulserPropertyValue(std::string settingName,
                                       PulserPropertyRoles role,
                                       const std::string &value) = 0;
 
+  /**
+   * @brief Shuts down the manager and releases all resources.
+   */
   virtual void Shutdown() = 0;
+
   // Protected functions, so not accessible
   // virtual void addManagedPulserReceivers(IJSRDotNET lib);
   // virtual void removeManagedPulserReceivers(IJSRDotNET lib);
