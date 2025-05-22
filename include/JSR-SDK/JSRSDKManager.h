@@ -519,117 +519,385 @@ public:
   virtual std::string getUnitModelName() = 0;
   virtual void setUnitModelName(std::string name) = 0;
 
+  /**
+   * @brief Retrieves the unit serial number.
+   * @return A string representing the unit serial number.
+   */
   virtual std::string getUnitSerialNum() = 0;
+
+  /**
+   * @brief Sets the unit serial number.
+   * @param serialNum The unit serial number to set.
+   */
   virtual void setUnitSerialNum(std::string serialNum) = 0;
 
+  /**
+   * @brief Checks if pulser OEM data is supported.
+   * @return True if pulser OEM data is supported, false otherwise.
+   */
   virtual bool getPulserOEMDataSupported() = 0;
 
+  /**
+   * @brief Checks if receiver OEM data is supported.
+   * @return True if receiver OEM data is supported, false otherwise.
+   */
   virtual bool getReceiverOEMDataSupported() = 0;
 
+  /**
+   * @brief Checks if the unit model name is supported.
+   * @return True if the unit model name is supported, false otherwise.
+   */
   virtual bool getUnitModelNameSupported() = 0;
 
+  /**
+   * @brief Checks if the unit serial number is supported.
+   * @return True if the unit serial number is supported, false otherwise.
+   */
   virtual bool getUnitSerialNumSupported() = 0;
 
+  /**
+   * @brief Retrieves the current trigger source.
+   * @return The current trigger source as a TriggerSource enum value.
+   */
   virtual TriggerSource getTriggerSource() = 0;
+
+  /**
+   * @brief Sets the trigger source.
+   * @param source The trigger source to set as a TriggerSource enum value.
+   */
   virtual void setTriggerSource(TriggerSource source) = 0;
 
+  /**
+   * @brief Retrieves the names of available pulser trigger source values.
+   * @return A vector of strings representing the names of pulser trigger source
+   * values.
+   */
   virtual std::vector<std::string> getPulserTriggerSourceValueNames() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of pulser trigger sources.
+   * @return The maximum index of pulser trigger sources.
+   */
   virtual int getPulserTriggerSourceIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the pulser trigger source.
+   * @return The current index of the pulser trigger source.
+   */
   virtual int getPulserTriggerSourceIndex() = 0;
+
+  /**
+   * @brief Sets the index of the pulser trigger source.
+   * @param index The index to set for the pulser trigger source.
+   */
   virtual void setPulserTriggerSourceIndex(int index) = 0;
 
+  /**
+   * @brief Checks if the gain index is supported.
+   * @return True if the gain index is supported, false otherwise.
+   */
   virtual bool getGainIndexSupported() = 0;
 
+  /**
+   * @brief Checks if the slave trigger source is supported.
+   * @return True if the slave trigger source is supported, false otherwise.
+   */
   virtual bool getTriggerSourceSlaveSupported() = 0;
 
+  /**
+   * @brief Checks if the external trigger source is supported.
+   * @return True if the external trigger source is supported, false otherwise.
+   */
   virtual bool getTriggerSourceExternalSupported() = 0;
 
+  /**
+   * @brief Checks if the trigger is enabled.
+   * @return True if the trigger is enabled, false otherwise.
+   */
   virtual bool getTriggerEnable() = 0;
+
+  /**
+   * @brief Enables or disables the trigger.
+   * @param enable True to enable the trigger, false to disable it.
+   */
   virtual void setTriggerEnable(bool enable) = 0;
 
+  /**
+   * @brief Retrieves the names of available pulse energy values.
+   * @return A vector of strings representing the names of pulse energy values.
+   */
   virtual std::vector<std::string> getPulseEnergyValueNames() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of pulse energy values.
+   * @return The maximum index of pulse energy values.
+   */
   virtual int getPulseEnergyIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the pulse energy.
+   * @return The current index of the pulse energy.
+   */
   virtual int getPulseEnergyIndex() = 0;
+
+  /**
+   * @brief Sets the index of the pulse energy.
+   * @param index The index to set for the pulse energy.
+   */
   virtual void setPulseEnergyIndex(int index) = 0;
 
+  /**
+   * @brief Checks if the pulse energy index is supported.
+   * @return True if the pulse energy index is supported, false otherwise.
+   */
   virtual bool getPulseEnergyIndexSupported() = 0;
 
+  /**
+   * @brief Retrieves the available damping values.
+   * @return A vector of doubles representing the available damping values.
+   */
   virtual std::vector<double> getDampingValues() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of damping values.
+   * @return The maximum index of damping values.
+   */
   virtual int getDampingIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the damping.
+   * @return The current index of the damping.
+   */
   virtual int getDampingIndex() = 0;
+
+  /**
+   * @brief Sets the index of the damping.
+   * @param index The index to set for the damping.
+   */
   virtual void setDampingIndex(int index) = 0;
 
+  /**
+   * @brief Checks if the damping index is supported.
+   * @return True if the damping index is supported, false otherwise.
+   */
   virtual bool getDampingIndexSupported() = 0;
 
+  /**
+   * @brief Retrieves the available high voltage supply values.
+   * @return A vector of doubles representing the available high voltage supply
+   * values.
+   */
   virtual std::vector<double> getHVSupplyValues() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of high voltage supply values.
+   * @return The maximum index of high voltage supply values.
+   */
   virtual int getHVSupplyIndexMax() = 0;
 
+  /**
+   * @brief Checks if the internal trigger source is supported.
+   * @return True if the internal trigger source is supported, false otherwise.
+   */
   virtual bool getTriggerSourceInternalSupported() = 0;
 
+  /**
+   * @brief Checks if the gain step size is supported.
+   * @return True if the gain step size is supported, false otherwise.
+   */
   virtual bool getGainStepSizeSupported() = 0;
 
+  /**
+   * @brief Retrieves the gain step size.
+   * @return The gain step size as a double.
+   */
   virtual double getGainStepSize() = 0;
 
+  /**
+   * @brief Retrieves the maximum gain value.
+   * @return The maximum gain value as a double.
+   */
   virtual double getGainMax() = 0;
 
+  /**
+   * @brief Retrieves the pulser serial number.
+   * @return A string representing the pulser serial number.
+   */
   virtual std::string getPulserSerialNum() = 0;
+
+  /**
+   * @brief Sets the pulser serial number.
+   * @param serialNum The pulser serial number to set.
+   */
   virtual void setPulserSerialNum(std::string serialNum) = 0;
 
+  /**
+   * @brief Checks if the pulser serial number is supported.
+   * @return True if the pulser serial number is supported, false otherwise.
+   */
   virtual bool getPulserSerialNumSupported() = 0;
 
+  /**
+   * @brief Checks if the receiver hardware revision is supported.
+   * @return True if the receiver hardware revision is supported, false
+   * otherwise.
+   */
   virtual bool getReceiverHWRevSupported() = 0;
 
+  /**
+   * @brief Retrieves the receiver hardware revision.
+   * @return A string representing the receiver hardware revision.
+   */
   virtual std::string getReceiverHWRev() = 0;
+
+  /**
+   * @brief Sets the receiver hardware revision.
+   * @param hwRev The receiver hardware revision to set.
+   */
   virtual void setReceiverHWRev(std::string hwRev) = 0;
 
+  /**
+   * @brief Checks if the pulser hardware revision is supported.
+   * @return True if the pulser hardware revision is supported, false otherwise.
+   */
   virtual bool getPulserHWRevSupported() = 0;
 
+  /**
+   * @brief Retrieves the pulser hardware revision.
+   * @return A string representing the pulser hardware revision.
+   */
   virtual std::string getPulserHWRev() = 0;
+
+  /**
+   * @brief Sets the pulser hardware revision.
+   * @param hwRev The pulser hardware revision to set.
+   */
   virtual void setPulserHWRev(std::string hwRev) = 0;
 
+  /**
+   * @brief Checks if the receiver firmware version is supported.
+   * @return True if the receiver firmware version is supported, false
+   * otherwise.
+   */
   virtual bool getReceiverFirmwareVerSupported() = 0;
 
+  /**
+   * @brief Retrieves the receiver firmware version.
+   * @return A string representing the receiver firmware version.
+   */
   virtual std::string getReceiverFirmwareVer() = 0;
 
+  /**
+   * @brief Checks if the pulser firmware version is supported.
+   * @return True if the pulser firmware version is supported, false otherwise.
+   */
   virtual bool getPulserFirmwareVerSupported() = 0;
 
+  /**
+   * @brief Retrieves the pulser firmware version.
+   * @return A string representing the pulser firmware version.
+   */
   virtual std::string getPulserFirmwareVer() = 0;
 
+  /**
+   * @brief Retrieves the maximum frequency.
+   * @return The maximum frequency as a double.
+   */
   virtual double getMaxFrequency() = 0;
 
+  /**
+   * @brief Retrieves the trigger impedance.
+   * @return The trigger impedance as a TriggerImpedance enum value.
+   */
   virtual TriggerImpedance getTriggerImpedance() = 0;
+
+  /**
+   * @brief Sets the trigger impedance.
+   * @param impedance The trigger impedance to set as a TriggerImpedance enum
+   * value.
+   */
   virtual void setTriggerImpedance(TriggerImpedance impedance) = 0;
 
+  /**
+   * @brief Checks if the trigger impedance is supported.
+   * @return True if the trigger impedance is supported, false otherwise.
+   */
   virtual bool getTriggerImpedanceSupported() = 0;
 
+  /**
+   * @brief Retrieves the pulser impedance.
+   * @return The pulser impedance as a PulserImpedance enum value.
+   */
   virtual PulserImpedance getPulserImpedance() = 0;
+
+  /**
+   * @brief Sets the pulser impedance.
+   * @param impedance The pulser impedance to set as a PulserImpedance enum
+   * value.
+   */
   virtual void setPulserImpedance(PulserImpedance impedance) = 0;
 
+  /**
+   * @brief Checks if the pulser impedance is supported.
+   * @return True if the pulser impedance is supported, false otherwise.
+   */
   virtual bool getPulserImpedanceSupported() = 0;
 
+  /**
+   * @brief Retrieves the energy per pulse.
+   * @return The energy per pulse as a double.
+   */
   virtual double getEnergyPerPulse() = 0;
 
+  /**
+   * @brief Retrieves general information about the system.
+   * @return A vector of strings containing general information.
+   */
   virtual std::vector<std::string> getInfo() = 0;
 
+  /**
+   * @brief Retrieves the pulser's current pulsing state.
+   * @return The pulsing state as an IsPulsing enum value.
+   */
   virtual IsPulsing getPulserIsPulsing() = 0;
 
+  /**
+   * @brief Retrieves the pulser's power limit status.
+   * @return The power limit status as a PowerLimit enum value.
+   */
   virtual PowerLimit getPulserPowerLimitStatus() = 0;
 
+  /**
+   * @brief Retrieves the pulser trigger count.
+   * @return The pulser trigger count as an integer.
+   */
   virtual int getPulserTriggerCount() = 0;
 
+  /**
+   * @brief Checks if the pulser trigger count is supported.
+   * @return True if the pulser trigger count is supported, false otherwise.
+   */
   virtual bool getPulserTriggerCountSupported() = 0;
 
+  /**
+   * @brief Checks if the high voltage supply is enabled.
+   * @return True if the high voltage supply is enabled, false otherwise.
+   */
   virtual bool getHVSupplyEnable() = 0;
+
+  /**
+   * @brief Enables or disables the high voltage supply.
+   * @param enable True to enable the high voltage supply, false to disable it.
+   */
   virtual void setHVSupplyEnable(bool enable) = 0;
 
+  /**
+   * @brief Checks if enabling the high voltage supply is supported.
+   * @return True if enabling the high voltage supply is supported, false
+   * otherwise.
+   */
   virtual bool getHVSupplyEnableSupported() = 0;
+  */ virtual int getHVSupplyIndex() = 0;
 
   // virtual std::vector<PulserSettingInfo> getPulserSettings() = 0;
 
