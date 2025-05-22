@@ -12,7 +12,10 @@
 #include "JSR-SDK/enums/TriggerImpedance.h"
 #include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
+#include <msclr/marshal.h>
+#include <msclr/marshal_atl.h>
 #include <msclr/marshal_cppstd.h>
+#include <msclr/marshal_windows.h>
 
 using namespace JSRDotNETSDK;
 using namespace System::Collections::Generic;
@@ -28,7 +31,8 @@ using namespace msclr::interop;
  **/
 
 /**
- * @brief Converts a managed List (C#) to a std::vector (C++).
+ * @brief Converts a managed List (C#) to a std::vector (C++) without any
+ *conversions.
  **/
 template <typename managedType, typename unmanagedType>
 static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
@@ -39,10 +43,36 @@ static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
 
   // vec.reserve(list->Count);
   for each (managedType s in list)
+    vec.push_back(s);
+
+  return vec;
+}
+
+/**
+ * @brief Converts a managed List (C#) to a std::vector (C++) converting using
+ * marshal_as.
+ **/
+template <typename managedType, typename unmanagedType>
+static std::vector<unmanagedType>
+listToVectorMarshall(IEnumerable<managedType> ^ list) {
+  std::vector<unmanagedType> vec;
+  if (list == nullptr)
+    return vec;
+
+  // vec.reserve(list->Count);
+  for each (managedType s in list)
     vec.push_back(marshal_as<unmanagedType>(s));
 
   return vec;
 }
+
+// namespace msclr::interop {
+// template <>
+// inline double marshal_as<double, System::Double>(const System::Double &from)
+// {
+//   return from;
+// }
+// } // namespace msclr::interop
 
 // Converting JSR-SDK::InstrumentID <-> JSRDotNETSDK::IInstrumentIdentity^
 static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
@@ -78,12 +108,13 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
   unmanaged.FriendlyName = marshal_as<std::string>(metadata->FriendlyName);
   unmanaged.Version = marshal_as<std::string>(metadata->Version);
   unmanaged.InterfaceVersion = metadata->InterfaceVersion;
-  unmanaged.SupportedModels = listToVector < System::String ^,
+  unmanaged.SupportedModels = listToVectorMarshall < System::String ^,
   std::string > (metadata->SupportedModels);
-  unmanaged.OpenOptions = listToVector < System::String ^,
+  unmanaged.OpenOptions = listToVectorMarshall < System::String ^,
   std::string > (metadata->OpenOptions);
   unmanaged.ConnectionType =
-      listToVector<CONNECTION_TYPE, ConnectionType>(metadata->ConnectionType);
+      listToVectorMarshall<CONNECTION_TYPE, ConnectionType>(
+          metadata->ConnectionType);
 
   return unmanaged;
 }

@@ -1,5 +1,6 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
 #include "MarshalTypes.cpp"
+#include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
 #include <vcclr.h>
 
@@ -61,7 +62,7 @@ public:
   void ForceDetach() { m_manager->ForceDetach(); }
 
   std::vector<std::string> GetCustomSettings() {
-    return listToVector < System::String ^,
+    return listToVectorMarshall < System::String ^,
            std::string > (m_manager->GetCustomSettings());
   }
 
@@ -77,7 +78,7 @@ public:
   }
 
   std::vector<std::string> GetManagedPluginNames() {
-    return listToVector < System::String ^,
+    return listToVectorMarshall < System::String ^,
            std::string > (m_manager->GetManagedPluginNames());
   }
 
@@ -89,7 +90,7 @@ public:
     for each (KeyValuePair<String ^, List<String ^> ^> kvp in options) {
       const std::string key = marshal_as<std::string>(kvp.Key);
 
-      results.emplace(key, listToVector < System::String ^,
+      results.emplace(key, listToVectorMarshall < System::String ^,
                       std::string > (kvp.Value));
     }
     return results;
@@ -106,7 +107,7 @@ public:
   // virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
 
   std::vector<std::string> GetPluginNames() {
-    return listToVector < System::String ^,
+    return listToVectorMarshall < System::String ^,
            std::string > (m_manager->GetPluginNames());
   }
 
@@ -145,7 +146,7 @@ public:
 
   std::vector<std::string>
   GetPulserReceiverInfo(std::string model, std::string serialNum, int idxPR) {
-    return listToVector < System::String ^,
+    return listToVectorMarshall < System::String ^,
            std::string > (m_manager->GetPulserReceiverInfo(
                              marshal_as<String ^>(model),
                              marshal_as<String ^>(serialNum), idxPR));
@@ -230,13 +231,8 @@ public:
     return m_manager->PulseRepetitionFrequencyNumerator;
   }
   std::vector<double> getPulseRepetitionFrequencyValues() {
-    auto values = m_manager->PulseRepetitionFrequencyValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(
+        m_manager->PulseRepetitionFrequencyValues);
   }
   int getPulseRepetitionFrequencyIndexMax() {
     return m_manager->PulseRepetitionFrequencyIndexMax;
@@ -274,12 +270,7 @@ public:
   }
 
   std::vector<double> getHighPassFilterValues() {
-    auto values = m_manager->HighPassFilterValues;
-    std::vector<double> result(values->Length);
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->HighPassFilterValues);
   }
 
   int getHighPassFilterIndexMax() { return m_manager->HighPassFilterIndexMax; }
@@ -316,13 +307,7 @@ public:
   }
 
   std::vector<double> getGainValues() {
-    auto values = m_manager->GainValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->GainValues);
   }
 
   int getGainIndexMax() { return m_manager->GainIndexMax; }
@@ -331,13 +316,7 @@ public:
   void setGainIndex(int index) { m_manager->GainIndex = index; }
 
   std::vector<double> getLowPassFilterValues() {
-    auto values = m_manager->LowPassFilterValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->LowPassFilterValues);
   }
 
   double getHVSupplyMin() { return m_manager->HVSupplyMin; }
@@ -383,13 +362,8 @@ public:
   }
 
   std::vector<std::string> getPulserTriggerSourceValueNames() {
-    auto names = m_manager->PulserTriggerSourceValueNames;
-    std::vector<std::string> result(names->Length);
-
-    for each (String ^ name in names) {
-      result.push_back(marshal_as<std::string>(name));
-    }
-    return result;
+    return listToVectorMarshall < System::String ^,
+           std::string > (m_manager->PulserTriggerSourceValueNames);
   }
 
   int getPulserTriggerSourceIndexMax() {
@@ -417,13 +391,8 @@ public:
   void setTriggerEnable(bool enable) { m_manager->TriggerEnable = enable; }
 
   std::vector<std::string> getPulseEnergyValueNames() {
-    auto names = m_manager->PulseEnergyValueNames;
-    std::vector<std::string> result(names->Length);
-
-    for each (String ^ name in names) {
-      result.push_back(marshal_as<std::string>(name));
-    }
-    return result;
+    return listToVectorMarshall < System::String ^,
+           std::string > (m_manager->PulseEnergyValueNames);
   }
 
   int getPulseEnergyIndexMax() { return m_manager->PulseEnergyIndexMax; }
@@ -436,13 +405,7 @@ public:
   }
 
   std::vector<double> getDampingValues() {
-    auto values = m_manager->DampingValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->DampingValues);
   }
 
   int getDampingIndexMax() { return m_manager->DampingIndexMax; }
@@ -453,13 +416,7 @@ public:
   bool getDampingIndexSupported() { return m_manager->DampingIndexSupported; }
 
   std::vector<double> getHVSupplyValues() {
-    auto values = m_manager->HVSupplyValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->HVSupplyValues);
   }
 
   int getHVSupplyIndexMax() { return m_manager->HVSupplyIndexMax; }
@@ -546,13 +503,8 @@ public:
   double getEnergyPerPulse() { return m_manager->EnergyPerPulse; }
 
   std::vector<std::string> getInfo() {
-    auto info = m_manager->Info;
-    std::vector<std::string> result(info->Length);
-
-    for each (String ^ str in info) {
-      result.push_back(marshal_as<std::string>(str));
-    }
-    return result;
+    return listToVectorMarshall < System::String ^,
+           std::string > (m_manager->Info);
   }
 
   IsPulsing getPulserIsPulsing() {
@@ -609,13 +561,8 @@ public:
   bool getHasManualControls() { return m_manager->HasManualControls; }
 
   std::vector<std::string> getLEDBlinkModeValues() {
-    auto values = m_manager->LEDBlinkModeValues;
-    std::vector<std::string> result(values->Length);
-
-    for each (String ^ value in values) {
-      result.push_back(marshal_as<std::string>(value));
-    }
-    return result;
+    return listToVectorMarshall < System::String ^,
+           std::string > (m_manager->LEDBlinkModeValues);
   }
 
   int getLEDBlinkModeIndexMax() { return m_manager->LEDBlinkModeIndexMax; }
@@ -684,23 +631,12 @@ public:
   }
 
   std::vector<double> getPulserEnergyCapacitorValues() {
-    auto values = m_manager->PulserEnergyCapacitorValues;
-    std::vector<double> result(values->Length);
-
-    for each (double value in values) {
-      result.push_back(value);
-    }
-    return result;
+    return listToVector<System::Double, double>(m_manager->PulserEnergyCapacitorValues);
   }
 
   std::vector<std::string> getReceiverSupplyVoltages() {
-    auto values = m_manager->ReceiverSupplyVoltages;
-    std::vector<std::string> result(values->Length);
-
-    for each (String ^ value in values) {
-      result.push_back(marshal_as<std::string>(value));
-    }
-    return result;
+    return listToVectorMarshall < System::String ^,
+           std::string > (m_manager->ReceiverSupplyVoltages);
   }
 
   bool getReceiverSupplyVoltagesSupported() {
