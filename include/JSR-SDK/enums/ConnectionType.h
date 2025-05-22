@@ -7,5 +7,6 @@ enum class ConnectionType {
   USB = 3,
   ETHERNET = 4,
   FIREWIRE = 5,
-  BLUETOOTH = 6
+  BLUETOOTH = 6,
+  UNKNOWN = 7,
 };

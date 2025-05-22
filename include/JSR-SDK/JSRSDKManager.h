@@ -6,7 +6,9 @@
 #include "JSR-SDK/enums/IsPulsing.h"
 #include "JSR-SDK/enums/ManagerState.h"
 #include "JSR-SDK/enums/PowerLimit.h"
+#include "JSR-SDK/enums/PropertyUnits.h"
 #include "JSR-SDK/enums/PulserImpedance.h"
+#include "JSR-SDK/enums/PulserPropertyRoles.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
 #include "JSR-SDK/enums/TriggerImpedance.h"
 #include "JSR-SDK/enums/TriggerPolarity.h"
@@ -74,34 +76,35 @@ public:
 
   virtual std::vector<std::string> GetPluginNames() = 0;
 
-  virtual InstrumentOpenCriteria
-  GetPluginOpenOptions(std::string strPluginName) = 0;
+  // virtual InstrumentOpenCriteria
+  // GetPluginOpenOptions(std::string strPluginName) = 0;
 
   virtual int GetPulserPropertyAttributes(std::string settingName) = 0;
 
-  virtual PROPERTY_UNITS GetPulserPropertyUnits(std::string settingName) = 0;
+  virtual PropertyUnits GetPulserPropertyUnits(std::string settingName) = 0;
 
   virtual std::string GetPulserPropertyUnitsAsString(std::string settingName,
                                                      bool useShort = false) = 0;
   // TODO: Overload for other data types
-  virtual std::string GetPulserPropertyValue(std::string strProp) = 0;
+  // virtual std::string GetPulserPropertyValue(std::string strProp) = 0;
 
-  virtual std::string GetPulserPropertyValue(std::string settingName,
-                                             PulserPropertyRole role) = 0;
+  // virtual std::string GetPulserPropertyValue(std::string settingName,
+  //                                            PulserPropertyRoles role) = 0;
 
   // virtual IPulserReceiver GetPulserReceiver(PulserReceiverID prID) = 0;
 
-  virtual std::vector<std::string>
-  GetPulserReceiverInfo(std::vector<std::string> model,
-                        std::vector<std::string> serialNum, int idxPR) = 0;
+  virtual std::vector<std::string> GetPulserReceiverInfo(std::string model,
+                                                         std::string serialNum,
+                                                         int idxPR) = 0;
 
   virtual std::vector<std::string>
   GetPulserReceiverInfo(PulserReceiverID id) = 0;
 
-  virtual std::vector<PulserReceiverID>
-  GetPulserReceivers(InstrumentID instrId) = 0;
+  // virtual std::vector<PulserReceiverID>
+  // GetPulserReceivers(InstrumentID instrId) = 0;
 
-  virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) = 0;
+  // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
+  // 0;
 
   virtual bool IsPulserSettingSupported(std::string settingName) = 0;
 
@@ -127,7 +130,7 @@ public:
                                       const std::string &value) = 0;
 
   virtual void SetPulserPropertyValue(std::string settingName,
-                                      PulserPropertyRole role,
+                                      PulserPropertyRoles role,
                                       const std::string &value) = 0;
 
   virtual void Shutdown() = 0;

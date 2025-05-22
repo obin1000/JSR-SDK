@@ -27,7 +27,9 @@
     <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
     <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />
     <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PropertyUnits.h" />
     <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
