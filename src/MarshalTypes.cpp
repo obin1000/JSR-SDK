@@ -1,16 +1,26 @@
 ﻿#include "JSR-SDK/InstrumentID.h"
+#include "JSR-SDK/JSRLibMetadata.h"
 #include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/enums/ConnectionType.h"
 #include "JSR-SDK/enums/IsPulsing.h"
 #include "JSR-SDK/enums/ManagerState.h"
 #include "JSR-SDK/enums/PowerLimit.h"
+#include "JSR-SDK/enums/PropertyUnits.h"
 #include "JSR-SDK/enums/PulserImpedance.h"
+#include "JSR-SDK/enums/PulserPropertyRoles.h"
 #include "JSR-SDK/enums/ReceiverMode.h"
 #include "JSR-SDK/enums/TriggerImpedance.h"
 #include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
+#include <msclr/marshal.h>
+#include <msclr/marshal_atl.h>
 #include <msclr/marshal_cppstd.h>
+#include <msclr/marshal_windows.h>
 
 using namespace JSRDotNETSDK;
+using namespace System::Collections::Generic;
+using namespace msclr::interop;
+
 /**
  * @file MarshalTypes.cpp
  * @brief This file contains the conversion functions between JSR-SDK types and
@@ -19,6 +29,50 @@ using namespace JSRDotNETSDK;
  * managed objects.
  *
  **/
+
+/**
+ * @brief Converts a managed List (C#) to a std::vector (C++) without any
+ *conversions.
+ **/
+template <typename managedType, typename unmanagedType>
+static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
+                                               list) {
+  std::vector<unmanagedType> vec;
+  if (list == nullptr)
+    return vec;
+
+  // vec.reserve(list->Count);
+  for each (managedType s in list)
+    vec.push_back(s);
+
+  return vec;
+}
+
+/**
+ * @brief Converts a managed List (C#) to a std::vector (C++) converting using
+ * marshal_as.
+ **/
+template <typename managedType, typename unmanagedType>
+static std::vector<unmanagedType>
+listToVectorMarshall(IEnumerable<managedType> ^ list) {
+  std::vector<unmanagedType> vec;
+  if (list == nullptr)
+    return vec;
+
+  // vec.reserve(list->Count);
+  for each (managedType s in list)
+    vec.push_back(marshal_as<unmanagedType>(s));
+
+  return vec;
+}
+
+// namespace msclr::interop {
+// template <>
+// inline double marshal_as<double, System::Double>(const System::Double &from)
+// {
+//   return from;
+// }
+// } // namespace msclr::interop
 
 // Converting JSR-SDK::InstrumentID <-> JSRDotNETSDK::IInstrumentIdentity^
 static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
@@ -43,6 +97,25 @@ static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
   unmanaged.InstrumentId =
       instrumentFromManaged(instrumentIdentity->InstrumentId);
   unmanaged.PulserReceiverIndex = instrumentIdentity->PulserReceiverIndex;
+  return unmanaged;
+}
+
+// Converting JSR-SDK::JSRLibMetadata <-> JSRDotNETSDK::IJSRDotNETLibMetadata^
+static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
+  JSRLibMetadata unmanaged;
+  unmanaged.Name = marshal_as<std::string>(metadata->Name);
+  unmanaged.GUID = marshal_as<std::string>(metadata->GUID);
+  unmanaged.FriendlyName = marshal_as<std::string>(metadata->FriendlyName);
+  unmanaged.Version = marshal_as<std::string>(metadata->Version);
+  unmanaged.InterfaceVersion = metadata->InterfaceVersion;
+  unmanaged.SupportedModels = listToVectorMarshall < System::String ^,
+  std::string > (metadata->SupportedModels);
+  unmanaged.OpenOptions = listToVectorMarshall < System::String ^,
+  std::string > (metadata->OpenOptions);
+  unmanaged.ConnectionType =
+      listToVectorMarshall<CONNECTION_TYPE, ConnectionType>(
+          metadata->ConnectionType);
+
   return unmanaged;
 }
 
@@ -272,5 +345,195 @@ managerStateToManaged(ManagerState state) {
   default:
     // TODO: throw exception for unknown enum value?
     return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
+  }
+}
+
+// converting JSR-SDK::ConnectionType <-> JSRDotNETSDK::CONNECTION_TYPE
+static ConnectionType connectionTypeFromManaged(CONNECTION_TYPE connection) {
+  switch (connection) {
+  case CONNECTION_TYPE::SOFTWARE:
+    return ConnectionType::SOFTWARE;
+  case CONNECTION_TYPE::SERIALPORT:
+    return ConnectionType::SERIALPORT;
+  case CONNECTION_TYPE::PCI:
+    return ConnectionType::PCI;
+  case CONNECTION_TYPE::USB:
+    return ConnectionType::USB;
+  case CONNECTION_TYPE::ETHERNET:
+    return ConnectionType::ETHERNET;
+  case CONNECTION_TYPE::FIREWIRE:
+    return ConnectionType::FIREWIRE;
+  case CONNECTION_TYPE::BLUETOOTH:
+    return ConnectionType::BLUETOOTH;
+  default:
+    return ConnectionType::UNKNOWN;
+  }
+}
+
+inline static CONNECTION_TYPE
+connectionTypeToManaged(const ConnectionType &connection) {
+  switch (connection) {
+  case ConnectionType::SOFTWARE:
+    return CONNECTION_TYPE::SOFTWARE;
+  case ConnectionType::SERIALPORT:
+    return CONNECTION_TYPE::SERIALPORT;
+  case ConnectionType::PCI:
+    return CONNECTION_TYPE::PCI;
+  case ConnectionType::USB:
+    return CONNECTION_TYPE::USB;
+  case ConnectionType::ETHERNET:
+    return CONNECTION_TYPE::ETHERNET;
+  case ConnectionType::FIREWIRE:
+    return CONNECTION_TYPE::FIREWIRE;
+  case ConnectionType::BLUETOOTH:
+    return CONNECTION_TYPE::BLUETOOTH;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return CONNECTION_TYPE::SOFTWARE;
+  }
+}
+
+namespace msclr::interop {
+template <>
+inline ConnectionType
+marshal_as<ConnectionType, CONNECTION_TYPE>(const CONNECTION_TYPE &from) {
+  return connectionTypeFromManaged(from);
+}
+template <>
+inline CONNECTION_TYPE
+marshal_as<CONNECTION_TYPE, ConnectionType>(const ConnectionType &from) {
+  return connectionTypeToManaged(from);
+}
+} // namespace msclr::interop
+
+// converting JSR-SDK::PropertyUnits <-> JSRDotNETSDK::PROPERTY_UNITS
+static PropertyUnits propertyUnitsFromManaged(PROPERTY_UNITS units) {
+  switch (units) {
+  case PROPERTY_UNITS::UNIT_NONE:
+    return PropertyUnits::UNIT_NONE;
+  case PROPERTY_UNITS::UNIT_HERTZ:
+    return PropertyUnits::UNIT_HERTZ;
+  case PROPERTY_UNITS::UNIT_KILOHERTZ:
+    return PropertyUnits::UNIT_KILOHERTZ;
+  case PROPERTY_UNITS::UNIT_MEGAHERTZ:
+    return PropertyUnits::UNIT_MEGAHERTZ;
+  case PROPERTY_UNITS::UNIT_MICROJOULES:
+    return PropertyUnits::UNIT_MICROJOULES;
+  case PROPERTY_UNITS::UNIT_JOULES:
+    return PropertyUnits::UNIT_JOULES;
+  case PROPERTY_UNITS::UNIT_WATTS:
+    return PropertyUnits::UNIT_WATTS;
+  case PROPERTY_UNITS::UNIT_DB:
+    return PropertyUnits::UNIT_DB;
+  case PROPERTY_UNITS::UNIT_VOLTS:
+    return PropertyUnits::UNIT_VOLTS;
+  case PROPERTY_UNITS::UNIT_OHMS:
+    return PropertyUnits::UNIT_OHMS;
+  case PROPERTY_UNITS::UNIT_PICOFARADS:
+    return PropertyUnits::UNIT_PICOFARADS;
+  default:
+    return PropertyUnits::UNKNOWN;
+  }
+}
+static PROPERTY_UNITS propertyUnitsToManaged(PropertyUnits units) {
+  switch (units) {
+  case PropertyUnits::UNIT_NONE:
+    return PROPERTY_UNITS::UNIT_NONE;
+  case PropertyUnits::UNIT_HERTZ:
+    return PROPERTY_UNITS::UNIT_HERTZ;
+  case PropertyUnits::UNIT_KILOHERTZ:
+    return PROPERTY_UNITS::UNIT_KILOHERTZ;
+  case PropertyUnits::UNIT_MEGAHERTZ:
+    return PROPERTY_UNITS::UNIT_MEGAHERTZ;
+  case PropertyUnits::UNIT_MICROJOULES:
+    return PROPERTY_UNITS::UNIT_MICROJOULES;
+  case PropertyUnits::UNIT_JOULES:
+    return PROPERTY_UNITS::UNIT_JOULES;
+  case PropertyUnits::UNIT_WATTS:
+    return PROPERTY_UNITS::UNIT_WATTS;
+  case PropertyUnits::UNIT_DB:
+    return PROPERTY_UNITS::UNIT_DB;
+  case PropertyUnits::UNIT_VOLTS:
+    return PROPERTY_UNITS::UNIT_VOLTS;
+  case PropertyUnits::UNIT_OHMS:
+    return PROPERTY_UNITS::UNIT_OHMS;
+  case PropertyUnits::UNIT_PICOFARADS:
+    return PROPERTY_UNITS::UNIT_PICOFARADS;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return PROPERTY_UNITS::UNIT_NONE;
+  }
+}
+
+// converting JSR-SDK::PulserPropertyRoles <-> JSRDotNETSDK::PulserPropertyRole
+static PulserPropertyRoles
+pulserPropertyRoleFromManaged(PulserPropertyRole role) {
+  switch (role) {
+  case PulserPropertyRole::DIRECT:
+    return PulserPropertyRoles::DIRECT;
+  case PulserPropertyRole::DIRECTSUPPORTED:
+    return PulserPropertyRoles::DIRECTSUPPORTED;
+  case PulserPropertyRole::SPECIFICVALUESUPPORTED:
+    return PulserPropertyRoles::SPECIFICVALUESUPPORTED;
+  case PulserPropertyRole::DIRECTVALUES:
+    return PulserPropertyRoles::DIRECTVALUES;
+  case PulserPropertyRole::STEPSIZE:
+    return PulserPropertyRoles::STEPSIZE;
+  case PulserPropertyRole::STEPSIZESUPPORTED:
+    return PulserPropertyRoles::STEPSIZESUPPORTED;
+  case PulserPropertyRole::INDEX:
+    return PulserPropertyRoles::INDEX;
+  case PulserPropertyRole::INDEXMAX:
+    return PulserPropertyRoles::INDEXMAX;
+  case PulserPropertyRole::INDEXSUPPORTED:
+    return PulserPropertyRoles::INDEXSUPPORTED;
+  case PulserPropertyRole::MAX:
+    return PulserPropertyRoles::MAX;
+  case PulserPropertyRole::MIN:
+    return PulserPropertyRoles::MIN;
+  case PulserPropertyRole::INDEXVALUES:
+    return PulserPropertyRoles::INDEXVALUES;
+  case PulserPropertyRole::NUMERATOR:
+    return PulserPropertyRoles::NUMERATOR;
+  case PulserPropertyRole::OTHER:
+    return PulserPropertyRoles::OTHER;
+  default:
+    return PulserPropertyRoles::UKNOWN;
+  }
+}
+static PulserPropertyRole
+pulserPropertyRoleToManaged(PulserPropertyRoles role) {
+  switch (role) {
+  case PulserPropertyRoles::DIRECT:
+    return PulserPropertyRole::DIRECT;
+  case PulserPropertyRoles::DIRECTSUPPORTED:
+    return PulserPropertyRole::DIRECTSUPPORTED;
+  case PulserPropertyRoles::SPECIFICVALUESUPPORTED:
+    return PulserPropertyRole::SPECIFICVALUESUPPORTED;
+  case PulserPropertyRoles::DIRECTVALUES:
+    return PulserPropertyRole::DIRECTVALUES;
+  case PulserPropertyRoles::STEPSIZE:
+    return PulserPropertyRole::STEPSIZE;
+  case PulserPropertyRoles::STEPSIZESUPPORTED:
+    return PulserPropertyRole::STEPSIZESUPPORTED;
+  case PulserPropertyRoles::INDEX:
+    return PulserPropertyRole::INDEX;
+  case PulserPropertyRoles::INDEXMAX:
+    return PulserPropertyRole::INDEXMAX;
+  case PulserPropertyRoles::INDEXSUPPORTED:
+    return PulserPropertyRole::INDEXSUPPORTED;
+  case PulserPropertyRoles::MAX:
+    return PulserPropertyRole::MAX;
+  case PulserPropertyRoles::MIN:
+    return PulserPropertyRole::MIN;
+  case PulserPropertyRoles::INDEXVALUES:
+    return PulserPropertyRole::INDEXVALUES;
+  case PulserPropertyRoles::NUMERATOR:
+    return PulserPropertyRole::NUMERATOR;
+  case PulserPropertyRoles::OTHER:
+    return PulserPropertyRole::OTHER;
+  default:
+    // TODO: throw exception for unknown enum value?
+    return PulserPropertyRole::OTHER;
   }
 }

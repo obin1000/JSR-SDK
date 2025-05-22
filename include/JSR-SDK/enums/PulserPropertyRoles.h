@@ -1,0 +1,19 @@
+#pragma once
+
+enum class PulserPropertyRoles {
+  DIRECT = 0,
+  DIRECTSUPPORTED = 1,
+  SPECIFICVALUESUPPORTED = 2,
+  DIRECTVALUES = 3,
+  STEPSIZE = 4,
+  STEPSIZESUPPORTED = 5,
+  INDEX = 6,
+  INDEXMAX = 7,
+  INDEXSUPPORTED = 8,
+  MAX = 9,
+  MIN = 10,
+  INDEXVALUES = 11,
+  NUMERATOR = 12,
+  OTHER = 13,
+  UKNOWN = 14,
+};
