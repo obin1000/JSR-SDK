@@ -1,7 +1,7 @@
 #pragma once
 
-#include "JSR-SDK/enums/PulserPropertyDataType.h"
-#include "JSR-SDK/enums/PulserReceiverState.h"
+#include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
+#include "JSR-SDK/enums/PulserReceiverStateC.h"
 #include "JSR-SDK/enums/StatusChange.h"
 
 #include "JSR-SDK/ExceptionJSRSDK.h"
@@ -13,11 +13,11 @@ class StatusChangedEvent {
 public:
   std::string pulserProperty;
 
-  PulserReceiverState pulserState;
+  PulserReceiverStateC pulserState;
 
   // object NewValue;
 
-  PulserPropertyDataType dataType;
+  PulserPropertyDataTypeC dataType;
 
   StatusChange changeType;
 

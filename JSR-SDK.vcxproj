@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
+    <ClCompile Include="src\JSRSDKWrapper.cpp" />
     <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -32,9 +33,9 @@
     <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />
     <ClInclude Include="include\JSR-SDK\enums\PropertyUnits.h" />
     <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataType.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataTypeC.h" />
     <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverState.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverStateC.h" />
     <ClInclude Include="include\JSR-SDK\enums\StatusChange.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />

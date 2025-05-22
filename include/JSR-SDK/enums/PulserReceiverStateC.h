@@ -4,7 +4,7 @@
  * @brief Represents the various states of a pulser receiver.
  * Mirrors JSRDotNETSDK::PulserReceiverState
  */
-enum class PulserReceiverState {
+enum class PulserReceiverStateC {
   DETECTED = 0,     // The pulser receiver has been detected.
   INITIALIZING = 1, // The pulser receiver is in the process of initializing.
   READY = 2,        // The pulser receiver is ready for operation.

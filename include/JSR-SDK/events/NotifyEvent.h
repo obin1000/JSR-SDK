@@ -2,8 +2,8 @@
 
 #include "JSR-SDK/enums/DiscoveryStateFlags.h"
 #include "JSR-SDK/enums/NotifyType.h"
-#include "JSR-SDK/enums/PulserPropertyDataType.h"
-#include "JSR-SDK/enums/PulserReceiverState.h"
+#include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
+#include "JSR-SDK/enums/PulserReceiverStateC.h"
 #include "JSR-SDK/enums/StatusChange.h"
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/InstrumentID.h"
@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
-class StatusChangedEvent {
+class NotifyEvent {
 public:
   std::string model;
 
-  PulserReceiverState state;
+  PulserReceiverStateC state;
 
   // object newValue;
 
@@ -46,5 +46,5 @@ public:
 
   NotifyType notifyType;
 
-  PulserPropertyDataType DataType;
+  PulserPropertyDataTypeC DataType;
 };
