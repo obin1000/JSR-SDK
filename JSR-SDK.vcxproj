@@ -24,15 +24,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h" />
+    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlags.h" />
+    <ClInclude Include="include\JSR-SDK\enums\ErrorCode.h" />
     <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
     <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />
+    <ClInclude Include="include\JSR-SDK\enums\NotifyType.h" />
     <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />
     <ClInclude Include="include\JSR-SDK\enums\PropertyUnits.h" />
     <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataType.h" />
     <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h" />
+    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverState.h" />
+    <ClInclude Include="include\JSR-SDK\enums\StatusChange.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
+    <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
+    <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
+    <ClInclude Include="include\JSR-SDK\ExceptionJSRSDK.h" />
     <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
     <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
