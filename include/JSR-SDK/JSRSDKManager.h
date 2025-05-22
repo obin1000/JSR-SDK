@@ -278,66 +278,240 @@ public:
   // virtual void setDiscoveryEnable(object sender, bool bEnable);
 
   // === Getters and setters for variables in the manager ===
+  /**
+   * @brief Checks if the pulse repetition frequency index is supported.
+   * @return True if the pulse repetition frequency index is supported, false
+   * otherwise.
+   */
   virtual bool getPulseRepetitionFrequencyIndexSupported() = 0;
+
+  /**
+   * @brief Retrieves the maximum high voltage supply value.
+   * @return The maximum high voltage supply value.
+   */
   virtual double getHVSupplyMax() = 0;
+
+  /**
+   * @brief Retrieves the current high voltage supply value.
+   * @return The current high voltage supply value.
+   */
   virtual double getHVSupply() = 0;
+
+  /**
+   * @brief Sets the high voltage supply value.
+   * @param supply The high voltage supply value to set.
+   */
   virtual void setHVSupply(double supply) = 0;
 
+  /**
+   * @brief Checks if the high voltage supply is supported.
+   * @return True if the high voltage supply is supported, false otherwise.
+   */
   virtual bool getHVSupplySupported() = 0;
+
+  /**
+   * @brief Retrieves the numerator of the pulse repetition frequency.
+   * @return The numerator of the pulse repetition frequency.
+   */
   virtual int getPulseRepetitionFrequencyNumerator() = 0;
+
+  /**
+   * @brief Retrieves the available pulse repetition frequency values.
+   * @return A vector of available pulse repetition frequency values.
+   */
   virtual std::vector<double> getPulseRepetitionFrequencyValues() = 0;
+
+  /**
+   * @brief Retrieves the maximum index of the pulse repetition frequency.
+   * @return The maximum index of the pulse repetition frequency.
+   */
   virtual int getPulseRepetitionFrequencyIndexMax() = 0;
+
+  /**
+   * @brief Retrieves the current index of the pulse repetition frequency.
+   * @return The current index of the pulse repetition frequency.
+   */
   virtual int getPulseRepetitionFrequencyIndex() = 0;
+
+  /**
+   * @brief Sets the index of the pulse repetition frequency.
+   * @param index The index to set for the pulse repetition frequency.
+   */
   virtual void setPulseRepetitionFrequencyIndex(int index) = 0;
 
+  /**
+   * @brief Retrieves the minimum pulse repetition frequency value.
+   * @return The minimum pulse repetition frequency value.
+   */
   virtual double getPulseRepetitionFrequencyMin() = 0;
+
+  /**
+   * @brief Retrieves the maximum pulse repetition frequency value.
+   * @return The maximum pulse repetition frequency value.
+   */
   virtual double getPulseRepetitionFrequencyMax() = 0;
 
+  /**
+   * @brief Retrieves the current pulse repetition frequency value.
+   * @return The current pulse repetition frequency value.
+   */
   virtual double getPulseRepetitionFrequency() = 0;
+
+  /**
+   * @brief Sets the pulse repetition frequency value.
+   * @param frequency The pulse repetition frequency value to set.
+   */
   virtual void setPulseRepetitionFrequency(double frequency) = 0;
 
+  /**
+   * @brief Retrieves the trigger edge polarity.
+   * @return The current trigger edge polarity.
+   */
   virtual TriggerPolarity getTriggerEdgePolarity() = 0;
+
+  /**
+   * @brief Sets the trigger edge polarity.
+   * @param polarity The trigger edge polarity to set.
+   */
   virtual void setTriggerEdgePolarity(TriggerPolarity polarity) = 0;
 
+  /**
+   * @brief Checks if the trigger edge polarity is supported.
+   * @return True if the trigger edge polarity is supported, false otherwise.
+   */
   virtual bool getTriggerEdgePolaritySupported() = 0;
 
+  /**
+   * @brief Retrieves the available high-pass filter values.
+   * @return A vector of available high-pass filter values.
+   */
   virtual std::vector<double> getHighPassFilterValues() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of the high-pass filter.
+   * @return The maximum index of the high-pass filter.
+   */
   virtual int getHighPassFilterIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the high-pass filter.
+   * @return The current index of the high-pass filter.
+   */
   virtual int getHighPassFilterIndex() = 0;
+
+  /**
+   * @brief Sets the index of the high-pass filter.
+   * @param index The index to set for the high-pass filter.
+   */
   virtual void setHighPassFilterIndex(int index) = 0;
 
+  /**
+   * @brief Retrieves the maximum index of the low-pass filter.
+   * @return The maximum index of the low-pass filter.
+   */
   virtual int getLowPassFilterIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the low-pass filter.
+   * @return The current index of the low-pass filter.
+   */
   virtual int getLowPassFilterIndex() = 0;
+
+  /**
+   * @brief Sets the index of the low-pass filter.
+   * @param index The index to set for the low-pass filter.
+   */
   virtual void setLowPassFilterIndex(int index) = 0;
 
+  /**
+   * @brief Retrieves the current receiver mode.
+   * @return The current receiver mode.
+   */
   virtual RecieverMode getReceiverMode() = 0;
+
+  /**
+   * @brief Sets the receiver mode.
+   * @param mode The receiver mode to set.
+   */
   virtual void setReceiverMode(RecieverMode mode) = 0;
 
+  /**
+   * @brief Checks if the "Both" receiver mode is supported.
+   * @return True if the "Both" receiver mode is supported, false otherwise.
+   */
   virtual bool getReceiverModeBothSupported() = 0;
 
+  /**
+   * @brief Checks if the "Thru" receiver mode is supported.
+   * @return True if the "Thru" receiver mode is supported, false otherwise.
+   */
   virtual bool getReceiverModeThruSupported() = 0;
 
+  /**
+   * @brief Checks if the "Echo" receiver mode is supported.
+   * @return True if the "Echo" receiver mode is supported, false otherwise.
+   */
   virtual bool getReceiverModeEchoSupported() = 0;
 
+  /**
+   * @brief Retrieves the available gain values.
+   * @return A vector of available gain values.
+   */
   virtual std::vector<double> getGainValues() = 0;
 
+  /**
+   * @brief Retrieves the maximum index of the gain.
+   * @return The maximum index of the gain.
+   */
   virtual int getGainIndexMax() = 0;
 
+  /**
+   * @brief Retrieves the current index of the gain.
+   * @return The current index of the gain.
+   */
   virtual int getGainIndex() = 0;
+
+  /**
+   * @brief Sets the index of the gain.
+   * @param index The index to set for the gain.
+   */
   virtual void setGainIndex(int index) = 0;
 
+  /**
+   * @brief Retrieves the available low-pass filter values.
+   * @return A vector of available low-pass filter values.
+   */
   virtual std::vector<double> getLowPassFilterValues() = 0;
 
+  /**
+   * @brief Retrieves the minimum high voltage supply value.
+   * @return The minimum high voltage supply value.
+   */
   virtual double getHVSupplyMin() = 0;
 
+  /**
+   * @brief Checks if the high voltage supply index is supported.
+   * @return True if the high voltage supply index is supported, false
+   * otherwise.
+   */
   virtual bool getHVSupplyIndexSupported() = 0;
 
+  /**
+   * @brief Retrieves the current high voltage supply index.
+   * @return The current high voltage supply index.
+   */
   virtual int getHVSupplyIndex() = 0;
+
+  /**
+   * @brief Sets the high voltage supply index.
+   * @param index The high voltage supply index to set.
+   */
   virtual void setHVSupplyIndex(int index) = 0;
 
+  /**
+   * @brief Retrieves the high voltage measurement value.
+   * @return The high voltage measurement value.
+   */
   virtual double getHVMeasurement() = 0;
 
   virtual bool getHVMeasurementSupported() = 0;
