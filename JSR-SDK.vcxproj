@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
+    <ClCompile Include="src\MarshalEnums.cpp" />
     <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
