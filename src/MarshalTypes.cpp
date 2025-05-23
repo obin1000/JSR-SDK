@@ -61,13 +61,25 @@ listToVectorMarshall(IEnumerable<managedType> ^ list) {
   return vec;
 }
 
-// namespace msclr::interop {
-// template <>
-// inline double marshal_as<double, System::Double>(const System::Double &from)
-// {
-//   return from;
-// }
-// } // namespace msclr::interop
+// converting JSR-SDK::ExceptionJSRSDK <-> JSRDotNETSDK::ExceptionJSRDotNET
+static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
+                                            managedException) {
+  if (managedException == nullptr) {
+    return ExceptionJSRSDK();
+  }
+
+  ErrorCode errorCode = errorCodeFromManaged(managedException->ErrorCode);
+  std::string message =
+      msclr::interop::marshal_as<std::string>(managedException->Message);
+  std::string innerMessage =
+      managedException->InnerException != nullptr
+          ? msclr::interop::marshal_as<std::string>(
+                managedException->InnerException->Message)
+          : "None";
+
+  return ExceptionJSRSDK(errorCode, message, innerMessage);
+}
+
 
 // Converting JSR-SDK::InstrumentID <-> JSRDotNETSDK::IInstrumentIdentity^
 static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
@@ -184,23 +196,4 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
       pulserPropertyDataTypeFromManaged(managedEvent->DataType);
 
   return unmanagedEvent;
-}
-
-// converting JSR-SDK::ExceptionJSRSDK <-> JSRDotNETSDK::ExceptionJSRDotNET
-static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
-                                            managedException) {
-  if (managedException == nullptr) {
-    return ExceptionJSRSDK();
-  }
-
-  ErrorCode errorCode = errorCodeFromManaged(managedException->ErrorCode);
-  std::string message =
-      msclr::interop::marshal_as<std::string>(managedException->Message);
-  std::string innerMessage =
-      managedException->InnerException != nullptr
-          ? msclr::interop::marshal_as<std::string>(
-                managedException->InnerException->Message)
-          : "None";
-
-  return ExceptionJSRSDK(errorCode, message, innerMessage);
 }

@@ -28,7 +28,8 @@ using namespace JSRDotNETSDK;
 #undef ERROR
 
 // converting JSR-SDK::RecieverMode <-> JSRDotNETSDK::RECEIVER_MODE
-static RecieverMode receiverModeFromManaged(RECEIVER_MODE mode) {
+inline constexpr static RecieverMode
+receiverModeFromManaged(const RECEIVER_MODE &mode) {
   switch (mode) {
   case RECEIVER_MODE::BOTH:
     return RecieverMode::BOTH;
@@ -43,7 +44,8 @@ static RecieverMode receiverModeFromManaged(RECEIVER_MODE mode) {
   }
 }
 
-static RECEIVER_MODE receiverModeToManaged(RecieverMode mode) {
+inline constexpr static RECEIVER_MODE
+receiverModeToManaged(const RecieverMode &mode) {
   switch (mode) {
   case RecieverMode::BOTH:
     return RECEIVER_MODE::BOTH;
@@ -60,7 +62,8 @@ static RECEIVER_MODE receiverModeToManaged(RecieverMode mode) {
 }
 
 // converting JSR-SDK::TriggerSource <-> JSRDotNETSDK::TRIGGER_SOURCE
-static TriggerSource triggerSourceFromManaged(TRIGGER_SOURCE source) {
+inline constexpr static TriggerSource
+triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
   switch (source) {
   case TRIGGER_SOURCE::INTERNAL:
     return TriggerSource::INTERNAL;
@@ -75,7 +78,8 @@ static TriggerSource triggerSourceFromManaged(TRIGGER_SOURCE source) {
   }
 }
 
-static TRIGGER_SOURCE triggerSourceToManaged(TriggerSource source) {
+inline constexpr static TRIGGER_SOURCE
+triggerSourceToManaged(const TriggerSource &source) {
   switch (source) {
   case TriggerSource::INTERNAL:
     return TRIGGER_SOURCE::INTERNAL;
@@ -92,7 +96,8 @@ static TRIGGER_SOURCE triggerSourceToManaged(TriggerSource source) {
 }
 
 // converting JSR-SDK::TriggerPolarity <-> JSRDotNETSDK::TRIGGER_POLARITY
-static TriggerPolarity triggerPolarityFromManaged(TRIGGER_POLARITY source) {
+inline constexpr static TriggerPolarity
+triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
   switch (source) {
   case TRIGGER_POLARITY::FALLING:
     return TriggerPolarity::FALLING;
@@ -105,7 +110,8 @@ static TriggerPolarity triggerPolarityFromManaged(TRIGGER_POLARITY source) {
   }
 }
 
-static TRIGGER_POLARITY triggerPolarityToManaged(TriggerPolarity source) {
+inline constexpr static TRIGGER_POLARITY
+triggerPolarityToManaged(const TriggerPolarity &source) {
   switch (source) {
   case TriggerPolarity::FALLING:
     return TRIGGER_POLARITY::FALLING;
@@ -120,7 +126,8 @@ static TRIGGER_POLARITY triggerPolarityToManaged(TriggerPolarity source) {
 }
 
 // converting JSR-SDK::TriggerImpedance <-> JSRDotNETSDK::TRIGGER_IMPEDANCE
-static TriggerImpedance triggerImpedanceFromManaged(TRIGGER_IMPEDANCE source) {
+inline constexpr static TriggerImpedance
+triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
   switch (source) {
   case TRIGGER_IMPEDANCE::HIGH_Z:
     return TriggerImpedance::HIGH_Z;
@@ -133,7 +140,8 @@ static TriggerImpedance triggerImpedanceFromManaged(TRIGGER_IMPEDANCE source) {
   }
 }
 
-static TRIGGER_IMPEDANCE triggerImpedanceToManaged(TriggerImpedance source) {
+inline constexpr static TRIGGER_IMPEDANCE
+triggerImpedanceToManaged(const TriggerImpedance &source) {
   switch (source) {
   case TriggerImpedance::HIGH_Z:
     return TRIGGER_IMPEDANCE::HIGH_Z;
@@ -148,7 +156,8 @@ static TRIGGER_IMPEDANCE triggerImpedanceToManaged(TriggerImpedance source) {
 }
 
 // converting JSR-SDK::PulserImpedance <-> JSRDotNETSDK::PULSER_IMPEDANCE
-static PulserImpedance pulserImpedanceFromManaged(PULSER_IMPEDANCE source) {
+inline constexpr static PulserImpedance
+pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
   switch (source) {
   case PULSER_IMPEDANCE::HIGH_Z:
     return PulserImpedance::HIGH_Z;
@@ -161,7 +170,8 @@ static PulserImpedance pulserImpedanceFromManaged(PULSER_IMPEDANCE source) {
   }
 }
 
-static PULSER_IMPEDANCE pulserImpedanceToManaged(PulserImpedance source) {
+inline constexpr static PULSER_IMPEDANCE
+pulserImpedanceToManaged(const PulserImpedance &source) {
   switch (source) {
   case PulserImpedance::HIGH_Z:
     return PULSER_IMPEDANCE::HIGH_Z;
@@ -176,7 +186,8 @@ static PULSER_IMPEDANCE pulserImpedanceToManaged(PulserImpedance source) {
 }
 
 // converting JSR-SDK::IsPulsing <-> JSRDotNETSDK::IS_PULSING
-static IsPulsing isPulsingFromManaged(IS_PULSING source) {
+inline constexpr static IsPulsing
+isPulsingFromManaged(const IS_PULSING &source) {
   switch (source) {
   case IS_PULSING::ACTIVE:
     return IsPulsing::ACTIVE;
@@ -187,7 +198,7 @@ static IsPulsing isPulsingFromManaged(IS_PULSING source) {
   }
 }
 
-static IS_PULSING isPulsingToManaged(IsPulsing source) {
+inline constexpr static IS_PULSING isPulsingToManaged(const IsPulsing &source) {
   switch (source) {
   case IsPulsing::ACTIVE:
     return IS_PULSING::ACTIVE;
@@ -199,7 +210,8 @@ static IS_PULSING isPulsingToManaged(IsPulsing source) {
 }
 
 // converting JSR-SDK::PowerLimit <-> JSRDotNETSDK::POWER_LIMIT
-static PowerLimit powerLimitFromManaged(POWER_LIMIT source) {
+inline constexpr static PowerLimit
+powerLimitFromManaged(const POWER_LIMIT &source) {
   switch (source) {
   case POWER_LIMIT::OVER_LIMIT:
     return PowerLimit::OVER_LIMIT;
@@ -210,7 +222,8 @@ static PowerLimit powerLimitFromManaged(POWER_LIMIT source) {
   }
 }
 
-static POWER_LIMIT powerLimitToManaged(PowerLimit source) {
+inline constexpr static POWER_LIMIT
+powerLimitToManaged(const PowerLimit &source) {
   switch (source) {
   case PowerLimit::OVER_LIMIT:
     return POWER_LIMIT::OVER_LIMIT;
@@ -223,8 +236,8 @@ static POWER_LIMIT powerLimitToManaged(PowerLimit source) {
 
 // converting JSR-SDK::ManagerState <->
 // JSRDotNETSDK::JSRDotNETManager::MANAGER_STATE
-static ManagerState
-managerStateFromManaged(JSRDotNETManager::MANAGER_STATE state) {
+inline constexpr static ManagerState
+managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
   switch (state) {
   case JSRDotNETManager::MANAGER_STATE::NOT_STARTED:
     return ManagerState::NOT_STARTED;
@@ -239,8 +252,8 @@ managerStateFromManaged(JSRDotNETManager::MANAGER_STATE state) {
   }
 }
 
-static JSRDotNETManager::MANAGER_STATE
-managerStateToManaged(ManagerState state) {
+inline constexpr static JSRDotNETManager::MANAGER_STATE
+managerStateToManaged(const ManagerState &state) {
   switch (state) {
   case ManagerState::NOT_STARTED:
     return JSRDotNETManager::MANAGER_STATE::NOT_STARTED;
@@ -257,7 +270,8 @@ managerStateToManaged(ManagerState state) {
 }
 
 // converting JSR-SDK::ConnectionType <-> JSRDotNETSDK::CONNECTION_TYPE
-static ConnectionType connectionTypeFromManaged(CONNECTION_TYPE connection) {
+inline constexpr static ConnectionType
+connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
   switch (connection) {
   case CONNECTION_TYPE::SOFTWARE:
     return ConnectionType::SOFTWARE;
@@ -278,7 +292,7 @@ static ConnectionType connectionTypeFromManaged(CONNECTION_TYPE connection) {
   }
 }
 
-inline static CONNECTION_TYPE
+inline constexpr static CONNECTION_TYPE
 connectionTypeToManaged(const ConnectionType &connection) {
   switch (connection) {
   case ConnectionType::SOFTWARE:
@@ -315,7 +329,8 @@ marshal_as<CONNECTION_TYPE, ConnectionType>(const ConnectionType &from) {
 } // namespace msclr::interop
 
 // converting JSR-SDK::PropertyUnits <-> JSRDotNETSDK::PROPERTY_UNITS
-static PropertyUnits propertyUnitsFromManaged(PROPERTY_UNITS units) {
+inline constexpr static PropertyUnits
+propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
   switch (units) {
   case PROPERTY_UNITS::UNIT_NONE:
     return PropertyUnits::UNIT_NONE;
@@ -343,7 +358,8 @@ static PropertyUnits propertyUnitsFromManaged(PROPERTY_UNITS units) {
     return PropertyUnits::UNKNOWN;
   }
 }
-static PROPERTY_UNITS propertyUnitsToManaged(PropertyUnits units) {
+inline constexpr static PROPERTY_UNITS
+propertyUnitsToManaged(const PropertyUnits &units) {
   switch (units) {
   case PropertyUnits::UNIT_NONE:
     return PROPERTY_UNITS::UNIT_NONE;
@@ -374,8 +390,8 @@ static PROPERTY_UNITS propertyUnitsToManaged(PropertyUnits units) {
 }
 
 // converting JSR-SDK::PulserPropertyRoles <-> JSRDotNETSDK::PulserPropertyRole
-static PulserPropertyRoles
-pulserPropertyRoleFromManaged(PulserPropertyRole role) {
+inline constexpr static PulserPropertyRoles
+pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   switch (role) {
   case PulserPropertyRole::DIRECT:
     return PulserPropertyRoles::DIRECT;
@@ -409,8 +425,8 @@ pulserPropertyRoleFromManaged(PulserPropertyRole role) {
     return PulserPropertyRoles::UKNOWN;
   }
 }
-static PulserPropertyRole
-pulserPropertyRoleToManaged(PulserPropertyRoles role) {
+inline constexpr static PulserPropertyRole
+pulserPropertyRoleToManaged(const PulserPropertyRoles &role) {
   switch (role) {
   case PulserPropertyRoles::DIRECT:
     return PulserPropertyRole::DIRECT;
@@ -447,7 +463,8 @@ pulserPropertyRoleToManaged(PulserPropertyRoles role) {
 }
 
 // converting JSR-SDK::StatusChange <-> JSRDotNETSDK::STATUS_CHANGE
-static StatusChange statusChangeFromManaged(STATUS_CHANGE change) {
+inline constexpr static StatusChange
+statusChangeFromManaged(const STATUS_CHANGE &change) {
   switch (change) {
   case STATUS_CHANGE::INSTRUMENT_DISCONNECT:
     return StatusChange::INSTRUMENT_DISCONNECT;
@@ -462,7 +479,8 @@ static StatusChange statusChangeFromManaged(STATUS_CHANGE change) {
   }
 }
 
-static STATUS_CHANGE statusChangeToManaged(StatusChange change) {
+inline constexpr static STATUS_CHANGE
+statusChangeToManaged(const StatusChange &change) {
   switch (change) {
   case StatusChange::INSTRUMENT_DISCONNECT:
     return STATUS_CHANGE::INSTRUMENT_DISCONNECT;
@@ -480,8 +498,8 @@ static STATUS_CHANGE statusChangeToManaged(StatusChange change) {
 
 // converting JSR-SDK::PulserReceiverStateC <->
 // JSRDotNETSDK::PulserReceiverState
-static PulserReceiverStateC
-pulserReceiverStateFromManaged(PulserReceiverState state) {
+inline constexpr static PulserReceiverStateC
+pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   switch (state) {
   case PulserReceiverState::DETECTED:
     return PulserReceiverStateC::DETECTED;
@@ -500,8 +518,8 @@ pulserReceiverStateFromManaged(PulserReceiverState state) {
   }
 }
 
-static PulserReceiverState
-pulserReceiverStateToManaged(PulserReceiverStateC state) {
+inline constexpr static PulserReceiverState
+pulserReceiverStateToManaged(const PulserReceiverStateC &state) {
   switch (state) {
   case PulserReceiverStateC::DETECTED:
     return PulserReceiverState::DETECTED;
@@ -523,9 +541,8 @@ pulserReceiverStateToManaged(PulserReceiverStateC state) {
 
 // converting JSR-SDK::PulserPropertyDataTypeC <->
 // JSRDotNETSDK::PulserPropertyDataType
-
-static PulserPropertyDataTypeC
-pulserPropertyDataTypeFromManaged(PulserPropertyDataType type) {
+inline constexpr static PulserPropertyDataTypeC
+pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   switch (type) {
   case PulserPropertyDataType::INTEGER:
     return PulserPropertyDataTypeC::INTEGER;
@@ -558,8 +575,8 @@ pulserPropertyDataTypeFromManaged(PulserPropertyDataType type) {
   }
 }
 
-static PulserPropertyDataType
-pulserPropertyDataTypeToManaged(PulserPropertyDataTypeC type) {
+inline constexpr static PulserPropertyDataType
+pulserPropertyDataTypeToManaged(const PulserPropertyDataTypeC &type) {
   switch (type) {
   case PulserPropertyDataTypeC::INTEGER:
     return PulserPropertyDataType::INTEGER;
@@ -594,7 +611,7 @@ pulserPropertyDataTypeToManaged(PulserPropertyDataTypeC type) {
 }
 
 // converting JSR-SDK::ErrorCode <-> JSRDotNETSDK::ERROR_CODE
-static ErrorCode errorCodeFromManaged(ERROR_CODE code) {
+inline constexpr static ErrorCode errorCodeFromManaged(const ERROR_CODE &code) {
   switch (code) {
   case ERROR_CODE::UNKNOWN:
     return ErrorCode::UNKNOWN;
@@ -647,7 +664,7 @@ static ErrorCode errorCodeFromManaged(ERROR_CODE code) {
   }
 }
 
-static ERROR_CODE errorCodeToManaged(ErrorCode code) {
+inline constexpr static ERROR_CODE errorCodeToManaged(const ErrorCode &code) {
   switch (code) {
   case ErrorCode::UNKNOWN:
     return ERROR_CODE::UNKNOWN;
@@ -703,8 +720,8 @@ static ERROR_CODE errorCodeToManaged(ErrorCode code) {
 
 // converting JSR-SDK::DiscoveryStateFlagsC <->
 // JSRDotNETSDK::DiscoveryStateFlags
-static DiscoveryStateFlagsC
-discoveryStateFlagsFromManaged(DiscoveryStateFlags flags) {
+inline constexpr static DiscoveryStateFlagsC
+discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   switch (flags) {
   case DiscoveryStateFlags::NONE:
     return DiscoveryStateFlagsC::NONE;
@@ -719,8 +736,8 @@ discoveryStateFlagsFromManaged(DiscoveryStateFlags flags) {
   }
 }
 
-static DiscoveryStateFlags
-discoveryStateFlagsToManaged(DiscoveryStateFlagsC flags) {
+inline constexpr static DiscoveryStateFlags
+discoveryStateFlagsToManaged(const DiscoveryStateFlagsC &flags) {
   switch (flags) {
   case DiscoveryStateFlagsC::NONE:
     return DiscoveryStateFlags::NONE;
@@ -737,7 +754,8 @@ discoveryStateFlagsToManaged(DiscoveryStateFlagsC flags) {
 }
 
 // converting JSR-SDK::NotifyType <-> JSRDotNETSDK::NOTIFY_TYPE
-static NotifyType notifyTypeFromManaged(NOTIFY_TYPE type) {
+inline constexpr static NotifyType
+notifyTypeFromManaged(const NOTIFY_TYPE &type) {
   switch (type) {
   case NOTIFY_TYPE::PULSER_RCVR_DISCOVERED:
     return NotifyType::PULSER_RCVR_DISCOVERED;
@@ -760,7 +778,8 @@ static NotifyType notifyTypeFromManaged(NOTIFY_TYPE type) {
   }
 }
 
-static NOTIFY_TYPE notifyTypeToManaged(NotifyType type) {
+inline constexpr static NOTIFY_TYPE
+notifyTypeToManaged(const NotifyType &type) {
   switch (type) {
   case NotifyType::PULSER_RCVR_DISCOVERED:
     return NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
