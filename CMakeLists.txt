@@ -16,7 +16,7 @@ else()
 endif()
 
 set(JSR_SDK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(JSR_SDK_PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/jsr-plugins")
+set(JSR_SDK_PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins")
 
 
 add_library(JSR-SDK SHARED IMPORTED GLOBAL)
@@ -60,7 +60,7 @@ function(register_jsr_dll dll_name)
     target_link_libraries(JSR-SDK INTERFACE ${dll_name})
     install(IMPORTED_RUNTIME_ARTIFACTS
         ${dll_name}
-        DESTINATION "${CMAKE_INSTALL_BINDIR}/jsr-plugins") 
+        DESTINATION "${CMAKE_INSTALL_BINDIR}") 
 endfunction()
 
 register_jsr_dll("CyUSB")

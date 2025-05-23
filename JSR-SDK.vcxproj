@@ -203,6 +203,6 @@
       <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*" />
     </ItemGroup>
     <Message Importance="high" Text="Checking for plugin changes in external\jsr\plugins..." />
-    <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\jsr-plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 </Project>

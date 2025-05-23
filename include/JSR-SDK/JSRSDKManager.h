@@ -52,10 +52,6 @@ public:
    * @brief Tries to load plugins from the same directory as the exectutable.
    */
   virtual void loadPluginsFromBinaryDir() = 0;
-  /**
-   * @brief Tries to load plugins from <binary dir>/plugins
-   */
-  virtual void loadPluginsFromPluginsDir() = 0;
 
   // === Event handlers used for callbacks ===
   virtual void
