@@ -194,8 +194,11 @@ public:
   virtual std::vector<std::string>
   GetPulserReceiverInfo(PulserReceiverID id) = 0;
 
-  // virtual std::vector<PulserReceiverID>
-  // GetPulserReceivers(InstrumentID instrId) = 0;
+  /**
+   * @brief Retrieves a list of all Pulser/Receiver IDs detected by the SDK.
+   * @return A vector of PulserReceiverID objects representing the Pulser/Receivers.
+   */
+  virtual std::vector<PulserReceiverID> GetPulserReceivers() = 0;
 
   // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
   // 0;

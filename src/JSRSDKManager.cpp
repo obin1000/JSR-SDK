@@ -181,7 +181,15 @@ public:
                                  id.PulserReceiverIndex);
   }
 
-  // std::vector<PulserReceiverID> GetPulserReceivers(InstrumentID instrId) = 0;
+  std::vector<PulserReceiverID> GetPulserReceivers() {
+    auto managedReceivers =
+        m_manager->dotNETManager->GetPulserReceivers(nullptr);
+    std::vector<PulserReceiverID> result;
+    for each (IPulserReceiverIdentity ^ receiver in managedReceivers) {
+      result.push_back(pulsereceiverFromManaged(receiver));
+    }
+    return result;
+  }
 
   // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
   // 0;
