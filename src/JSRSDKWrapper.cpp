@@ -19,8 +19,6 @@ private:
 
   void OnStatusChangedEvent(Object ^ sender,
                             EventArgsStatusChange ^ eventData) {
-    System::Console::WriteLine("Status changed: {0}", eventData->ToString());
-
     // Call the callback if it is set
     if (statusCallback != nullptr) {
       // Convert the managed event data to unmanaged data
@@ -31,8 +29,6 @@ private:
   }
 
   void OnNotifyEvent(Object ^ sender, EventArgsManagerNotify ^ eventData) {
-    System::Console::WriteLine("Notified: {0}", eventData->ToString());
-
     // Call the callback if it is set
     if (notifyCallback != nullptr) {
       // Convert the managed event data to unmanaged data
