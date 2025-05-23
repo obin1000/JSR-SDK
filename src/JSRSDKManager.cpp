@@ -30,10 +30,8 @@ public:
   }
 
   ~JSRSDKManagerAdapter() override {
-    if (m_manager != nullptr) {
-      removeStatusChangeEventHandler();
-      removeNotifyEventHandler();
-    }
+    removeStatusChangeEventHandler();
+    removeNotifyEventHandler();
   }
 
   // === Event handlers used for callbacks ===
