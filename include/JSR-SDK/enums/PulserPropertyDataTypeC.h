@@ -14,4 +14,5 @@ enum class PulserPropertyDataTypeC {
   ENUM = 10,
   ID = 11,
   OTHER = 12,
+  UNKNOWN = 13,
 };

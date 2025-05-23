@@ -10,4 +10,5 @@ enum class NotifyType {
   PROPERTY_CHANGE = 5,
   STATE_CHANGE = 6,
   ERROR = 7,
+  UNKNOWN = 8,
 };

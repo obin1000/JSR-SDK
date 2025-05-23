@@ -11,6 +11,8 @@ private:
   std::string innerMSG;
 
 public:
+  ExceptionJSRSDK() = default;
+
   ExceptionJSRSDK(ErrorCode errorCode, std::string msg) {
     this->errorCode = errorCode;
     this->msg = msg;

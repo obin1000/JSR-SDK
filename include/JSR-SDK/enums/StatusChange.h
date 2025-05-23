@@ -5,4 +5,5 @@ enum class StatusChange {
   PROPERTY_CHANGE = 1,
   OPERATIONAL_FAULT = 2,
   STATE_CHANGE = 3,
+  UNKNOWN = 4,
 };

@@ -25,7 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h" />
-    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlags.h" />
+    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlagsC.h" />
     <ClInclude Include="include\JSR-SDK\enums\ErrorCode.h" />
     <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
     <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />

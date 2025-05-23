@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JSR-SDK/enums/DiscoveryStateFlags.h"
+#include "JSR-SDK/enums/DiscoveryStateFlagsC.h"
 #include "JSR-SDK/enums/NotifyType.h"
 #include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
 #include "JSR-SDK/enums/PulserReceiverStateC.h"
@@ -8,8 +8,10 @@
 #include "JSR-SDK/PulserReceiverID.h"
 #include "JSR-SDK/InstrumentID.h"
 
+#include <functional>
 #include <string>
 #include <vector>
+
 
 class NotifyEvent {
 public:
@@ -17,7 +19,7 @@ public:
 
   PulserReceiverStateC state;
 
-  // object newValue;
+  std::string newValue;
 
   std::string propertyName;
 
@@ -33,12 +35,12 @@ public:
 
   std::vector<std::string> info;
 
-  int PRIndex;
+  int prIndex;
 
-  PulserReceiverID PulserReceiverId;
-  std::string Serial;
+  PulserReceiverID pulserReceiverId;
+  std::string serial;
 
-  DiscoveryStateFlags DiscoverState;
+  DiscoveryStateFlagsC discoverState;
 
   InstrumentID instrumentId;
 
@@ -46,5 +48,7 @@ public:
 
   NotifyType notifyType;
 
-  PulserPropertyDataTypeC DataType;
+  PulserPropertyDataTypeC dataType;
 };
+
+using NotifyCallback = std::function<void(const NotifyEvent &)>;

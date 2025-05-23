@@ -16,12 +16,9 @@
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"
 
-#include <functional>
 #include <map>
 #include <string>
 #include <vector>
-
-using StatusChangeCallback = std::function<void(const StatusChangedEvent &)>;
 
 /**
  * @brief Abstract class representing the interface to unmanaged C++.
@@ -283,9 +280,9 @@ public:
   // virtual void setDiscoveryEnable(object sender, bool bEnable);
 
   // === Event handlers used for callbacks ===
-  //virtual void
-  //addStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
-  //virtual void removeAllStatusChangeEventHandlers() = 0;
+  // virtual void
+  // addStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
+  // virtual void removeAllStatusChangeEventHandlers() = 0;
   // virtual void addNotifyEventHandler() = 0;
   // virtual void removeAllNotifyEventHandlers() = 0;
 
