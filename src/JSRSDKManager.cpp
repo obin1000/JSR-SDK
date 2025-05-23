@@ -50,14 +50,14 @@ public:
     }
   }
 
-  void loadPluginsFromPLuginsDir() {
+  void loadPluginsFromPluginsDir() {
       try {
           // Retrieve the directory of the current executable
           String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
           String ^ binaryDir = Path::GetDirectoryName(executablePath);
 
           // Construct the plugins directory path
-          String ^ pluginsDir = Path::Combine(binaryDir, "plugins");
+          String ^ pluginsDir = Path::Combine(binaryDir, "jsr-plugins");
 
           // Load plugins from the plugins directory
           m_manager->dotNETManager->LoadPlugins(pluginsDir);

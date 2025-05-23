@@ -55,7 +55,7 @@ public:
   /**
    * @brief Tries to load plugins from <binary dir>/plugins
    */
-  virtual void loadPluginsFromPLuginsDir() = 0;
+  virtual void loadPluginsFromPluginsDir() = 0;
 
   // === Event handlers used for callbacks ===
   virtual void
