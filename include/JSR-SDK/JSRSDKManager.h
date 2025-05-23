@@ -38,7 +38,7 @@ public:
   JSRSDKManager &operator=(JSRSDKManager &&) = delete;
 
   /**
-   * @brief Constructs a manager and loads plugins from the binary directory.
+   * @brief Constructs a manager.
    */
   JSRSDKManager() = default;
 
@@ -46,6 +46,16 @@ public:
    * @brief Closes the connection to the devices and releases all resources.
    */
   virtual ~JSRSDKManager() = default;
+
+  // === Custom functions added ===
+  /**
+   * @brief Tries to load plugins from the same directory as the exectutable.
+   */
+  virtual void loadPluginsFromBinaryDir() = 0;
+  /**
+   * @brief Tries to load plugins from <binary dir>/plugins
+   */
+  virtual void loadPluginsFromPLuginsDir() = 0;
 
   // === Event handlers used for callbacks ===
   virtual void
@@ -196,7 +206,8 @@ public:
 
   /**
    * @brief Retrieves a list of all Pulser/Receiver IDs detected by the SDK.
-   * @return A vector of PulserReceiverID objects representing the Pulser/Receivers.
+   * @return A vector of PulserReceiverID objects representing the
+   * Pulser/Receivers.
    */
   virtual std::vector<PulserReceiverID> GetPulserReceivers() = 0;
 

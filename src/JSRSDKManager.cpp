@@ -33,6 +33,40 @@ public:
     removeStatusChangeEventHandler();
     removeNotifyEventHandler();
   }
+  // === Custom functions added ===
+
+  void loadPluginsFromBinaryDir() {
+    try {
+      // Retrieve the directory of the current executable
+      String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
+      String ^ binaryDir = Path::GetDirectoryName(executablePath);
+
+      // Load plugins from the binary directory
+      m_manager->dotNETManager->LoadPlugins(binaryDir);
+    } catch (System::Exception ^ exception) {
+      std::string msg =
+          msclr::interop::marshal_as<std::string>(exception->Message);
+      throw "Failed to load plugins from binary directory: " + msg;
+    }
+  }
+
+  void loadPluginsFromPLuginsDir() {
+      try {
+          // Retrieve the directory of the current executable
+          String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
+          String ^ binaryDir = Path::GetDirectoryName(executablePath);
+
+          // Construct the plugins directory path
+          String ^ pluginsDir = Path::Combine(binaryDir, "plugins");
+
+          // Load plugins from the plugins directory
+          m_manager->dotNETManager->LoadPlugins(pluginsDir);
+      } catch (System::Exception ^ exception) {
+          std::string msg =
+              msclr::interop::marshal_as<std::string>(exception->Message);
+          throw "Failed to load plugins from plugins directory: " + msg;
+      }
+  }
 
   // === Event handlers used for callbacks ===
   void replaceStatusChangeEventHandler(

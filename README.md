@@ -11,9 +11,10 @@ include(FetchContent)
 
 # Tell the JSR-SDK to use the dynamic library instead of the static one.
 SET(JSR_SDK_USE_DYNAMIC_LIB ON)
+set(JSR_SDK_VERSION "v<version>")
 FetchContent_Declare(
     JSR-SDK
-    URL      "https://github.com/obin1000/JSR-SDK/releases/download/v<version>/JSR-SDK-v<version>.zip"
+    URL      "https://github.com/obin1000/JSR-SDK/releases/download/${JSR_SDK_VERSION}/JSR-SDK-${JSR_SDK_VERSION}.zip"
     URL_HASH SHA256=<hash>
 )
 
