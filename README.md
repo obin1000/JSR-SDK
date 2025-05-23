@@ -32,13 +32,15 @@ In C++, include the header and create the JSR Manager object.
         std::cerr << "Failed to create JSRBridge\n";
         return 1;
       }
+      bridge->loadPluginsFromBinaryDir();
+
 
       auto plugins = bridge->GetPluginNames();
       for (const auto &plugin : plugins) {
         std::cout << "Found Plugin: " << plugin << "\n";
       }
 
-      std::cout << "Done! Loaded " << bridge->GetNumberOfPlugins() << " plugins\n";
+      std::cout << "Done! \n";
       DestroyJSRSDKManager(bridge);
 
     } catch (const std::exception &e) {

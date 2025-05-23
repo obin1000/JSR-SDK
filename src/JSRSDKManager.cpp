@@ -37,17 +37,22 @@ public:
   // === Custom functions added ===
 
   void loadPluginsFromBinaryDir() {
+    // Retrieve the directory of the current executable
+    String ^ binaryDir = "";
     try {
-      // Retrieve the directory of the current executable
       String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
-      String ^ binaryDir = Path::GetDirectoryName(executablePath);
-
-      // Load plugins from the binary directory
+      binaryDir = Path::GetDirectoryName(executablePath);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("Failed finding the binary directory: " + msg);
+    }
+    // Load plugins from the binary directory
+    try {
       m_manager->dotNETManager->LoadPlugins(binaryDir);
     } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("Failed loading plugins from binary dir: " + msg);
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("Failed loading plugins from binary dir: " +
+                               msg);
     }
   }
 
@@ -83,91 +88,168 @@ public:
 
   // === Functions provided by SDK ===
   void AddManagedPlugin(std::string pluginName) {
-    m_manager->dotNETManager->AddManagedPlugin(
-        marshal_as<String ^>(pluginName));
+    try {
+
+      m_manager->dotNETManager->AddManagedPlugin(
+          marshal_as<String ^>(pluginName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void AddPluginOpenOption(std::string strPluginName, std::string optionName,
                            std::string optionValue) {
-    m_manager->dotNETManager->AddPluginOpenOption(
-        marshal_as<String ^>(strPluginName), marshal_as<String ^>(optionName),
-        marshal_as<String ^>(optionValue));
+    try {
+      m_manager->dotNETManager->AddPluginOpenOption(
+          marshal_as<String ^>(strPluginName), marshal_as<String ^>(optionName),
+          marshal_as<String ^>(optionValue));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   void AddPluginType(std::string pluginType) {
-    m_manager->dotNETManager->AddPluginType(marshal_as<String ^>(pluginType));
+    try {
+      m_manager->dotNETManager->AddPluginType(marshal_as<String ^>(pluginType));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  void ForceDetach() { m_manager->dotNETManager->ForceDetach(); }
+  void ForceDetach() {
+    try {
+      m_manager->dotNETManager->ForceDetach();
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   std::vector<std::string> GetCustomSettings() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->GetCustomSettings());
+    try {
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->GetCustomSettings());
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<InstrumentID> GetInstruments(std::string pluginName) {
-    auto instruments = m_manager->dotNETManager->GetInstruments(
-        marshal_as<String ^>(pluginName));
-    std::vector<InstrumentID> result(instruments->Length);
+    try {
 
-    for each (IInstrumentIdentity ^ instrument in instruments) {
-      result.push_back(instrumentFromManaged(instrument));
+      auto instruments = m_manager->dotNETManager->GetInstruments(
+          marshal_as<String ^>(pluginName));
+
+      std::vector<InstrumentID> result(instruments->Length);
+
+      for each (IInstrumentIdentity ^ instrument in instruments) {
+        result.push_back(instrumentFromManaged(instrument));
+      }
+      return result;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
-    return result;
   }
 
   std::vector<std::string> GetManagedPluginNames() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->GetManagedPluginNames());
+    try {
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->GetManagedPluginNames());
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::map<std::string, std::vector<std::string>>
   GetPluginLibOpenOptions(std::string strPluginName) {
-    auto options = m_manager->dotNETManager->GetPluginLibOpenOptions(
-        marshal_as<String ^>(strPluginName));
-    std::map<std::string, std::vector<std::string>> results;
-    for each (KeyValuePair<String ^, List<String ^> ^> kvp in options) {
-      const std::string key = marshal_as<std::string>(kvp.Key);
+    try {
 
-      results.emplace(key, listToVectorMarshall < System::String ^,
-                      std::string > (kvp.Value));
+      auto options = m_manager->dotNETManager->GetPluginLibOpenOptions(
+          marshal_as<String ^>(strPluginName));
+      std::map<std::string, std::vector<std::string>> results;
+      for each (KeyValuePair<String ^, List<String ^> ^> kvp in options) {
+        const std::string key = marshal_as<std::string>(kvp.Key);
+
+        results.emplace(key, listToVectorMarshall < System::String ^,
+                        std::string > (kvp.Value));
+      }
+      return results;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
-    return results;
   }
 
-  // virtual IJSRDotNET GetPluginLibraryInstance(std::string strPluginName) = 0;
+  // virtual IJSRDotNET GetPluginLibraryInstance(std::string strPluginName) =
+  // 0;
 
   JSRLibMetadata GetPluginLibraryMetadata(std::string strPluginName) {
-    auto metadata = m_manager->dotNETManager->GetPluginLibraryMetadata(
-        marshal_as<String ^>(strPluginName));
-    return libMetadataFromManaged(metadata);
+    try {
+
+      auto metadata = m_manager->dotNETManager->GetPluginLibraryMetadata(
+          marshal_as<String ^>(strPluginName));
+      return libMetadataFromManaged(metadata);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   // virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
 
   std::vector<std::string> GetPluginNames() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->GetPluginNames());
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->GetPluginNames());
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   // virtual InstrumentOpenCriteria
   // GetPluginOpenOptions(std::string strPluginName) = 0;
 
   int GetPulserPropertyAttributes(std::string settingName) {
-    return m_manager->dotNETManager->GetPulserPropertyAttributes(
-        marshal_as<String ^>(settingName));
+    try {
+
+      return m_manager->dotNETManager->GetPulserPropertyAttributes(
+          marshal_as<String ^>(settingName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   PropertyUnits GetPulserPropertyUnits(std::string settingName) {
-    return propertyUnitsFromManaged(
-        m_manager->dotNETManager->GetPulserPropertyUnits(
-            marshal_as<String ^>(settingName)));
+    try {
+
+      return propertyUnitsFromManaged(
+          m_manager->dotNETManager->GetPulserPropertyUnits(
+              marshal_as<String ^>(settingName)));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string GetPulserPropertyUnitsAsString(std::string settingName,
                                              bool useShort = false) {
-    return marshal_as<std::string>(
-        m_manager->dotNETManager->GetPulserPropertyUnitsAsString(
-            marshal_as<String ^>(settingName), useShort));
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->GetPulserPropertyUnitsAsString(
+              marshal_as<String ^>(settingName), useShort));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   // TODO: Overload for other data types
   // std::string GetPulserPropertyValue(std::string strProp) {
@@ -186,10 +268,16 @@ public:
 
   std::vector<std::string>
   GetPulserReceiverInfo(std::string model, std::string serialNum, int idxPR) {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->GetPulserReceiverInfo(
-                             marshal_as<String ^>(model),
-                             marshal_as<String ^>(serialNum), idxPR));
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->GetPulserReceiverInfo(
+                               marshal_as<String ^>(model),
+                               marshal_as<String ^>(serialNum), idxPR));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> GetPulserReceiverInfo(PulserReceiverID id) {
@@ -199,40 +287,82 @@ public:
   }
 
   std::vector<PulserReceiverID> GetPulserReceivers() {
-    auto managedReceivers =
-        m_manager->dotNETManager->GetPulserReceivers(nullptr);
-    std::vector<PulserReceiverID> result;
-    for each (IPulserReceiverIdentity ^ receiver in managedReceivers) {
-      result.push_back(pulsereceiverFromManaged(receiver));
+    try {
+
+      auto managedReceivers =
+          m_manager->dotNETManager->GetPulserReceivers(nullptr);
+      std::vector<PulserReceiverID> result;
+      for each (IPulserReceiverIdentity ^ receiver in managedReceivers) {
+        result.push_back(pulsereceiverFromManaged(receiver));
+      }
+      return result;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
-    return result;
   }
 
   // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
   // 0;
 
   bool IsPulserSettingSupported(std::string settingName) {
-    return m_manager->dotNETManager->IsPulserSettingSupported(
-        marshal_as<String ^>(settingName));
+    try {
+
+      return m_manager->dotNETManager->IsPulserSettingSupported(
+          marshal_as<String ^>(settingName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   void LoadPlugins(std::string pluginPath) {
-    m_manager->dotNETManager->LoadPlugins(marshal_as<String ^>(pluginPath));
+    try {
+      m_manager->dotNETManager->LoadPlugins(marshal_as<String ^>(pluginPath));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  void NotifyThreadProc() { m_manager->dotNETManager->NotifyThreadProc(); }
+  void NotifyThreadProc() {
+    try {
+      m_manager->dotNETManager->NotifyThreadProc();
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   void RemoveAllOpenOptions(std::string strPluginName) {
-    m_manager->dotNETManager->RemoveAllOpenOptions(
-        marshal_as<String ^>(strPluginName));
+    try {
+      m_manager->dotNETManager->RemoveAllOpenOptions(
+          marshal_as<String ^>(strPluginName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   void RemoveManagedPlugin(std::string pluginName) {
-    m_manager->dotNETManager->RemoveManagedPlugin(
-        marshal_as<String ^>(pluginName));
+    try {
+
+      m_manager->dotNETManager->RemoveManagedPlugin(
+          marshal_as<String ^>(pluginName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  void RequestThreadProc() { m_manager->dotNETManager->RequestThreadProc(); }
+  void RequestThreadProc() {
+    try {
+      m_manager->dotNETManager->RequestThreadProc();
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   void SetCurrentPulserReceiver(PulserReceiverID prID) {
     SetCurrentPulserReceiver(prID.InstrumentId.ModelName,
@@ -242,28 +372,57 @@ public:
 
   void SetCurrentPulserReceiver(std::string model, std::string serialNum,
                                 int idxPR) {
-    m_manager->dotNETManager->SetCurrentPulserReceiver(
-        marshal_as<String ^>(model), marshal_as<String ^>(serialNum), idxPR);
+    try {
+      m_manager->dotNETManager->SetCurrentPulserReceiver(
+          marshal_as<String ^>(model), marshal_as<String ^>(serialNum), idxPR);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   void SetDiscoveryEnable(bool bEnable) {
-    m_manager->dotNETManager->SetDiscoveryEnable(bEnable);
+    try {
+
+      m_manager->dotNETManager->SetDiscoveryEnable(bEnable);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   // TODO: Overload for other data types
   void SetPulserPropertyValue(std::string strProp, const std::string &value) {
-    m_manager->dotNETManager->SetPulserPropertyValue(
-        marshal_as<String ^>(strProp), marshal_as<String ^>(value));
+    try {
+      m_manager->dotNETManager->SetPulserPropertyValue(
+          marshal_as<String ^>(strProp), marshal_as<String ^>(value));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   void SetPulserPropertyValue(std::string settingName, PulserPropertyRoles role,
                               const std::string &value) {
-    m_manager->dotNETManager->SetPulserPropertyValue(
-        marshal_as<String ^>(settingName), pulserPropertyRoleToManaged(role),
-        marshal_as<String ^>(value));
+    try {
+
+      m_manager->dotNETManager->SetPulserPropertyValue(
+          marshal_as<String ^>(settingName), pulserPropertyRoleToManaged(role),
+          marshal_as<String ^>(value));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  void Shutdown() { m_manager->dotNETManager->Shutdown(); }
+  void Shutdown() {
+    try {
+      m_manager->dotNETManager->Shutdown();
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   // Protected functions, so not accessible
   // virtual void addManagedPulserReceivers(IJSRDotNET lib);
   // virtual void removeManagedPulserReceivers(IJSRDotNET lib);
@@ -647,8 +806,8 @@ public:
   // std::vector<PulserSettingInfo> getPulserSettings() = 0;
 
   // PropertyChangeEventCriteria getStatusChangePropertyCriteria() = 0;
-  // void setStatusChangePropertyCriteria(PropertyChangeEventCriteria criteria)
-  // = 0;
+  // void setStatusChangePropertyCriteria(PropertyChangeEventCriteria
+  // criteria) = 0;
 
   bool getReceiverSerialNumSupported() {
     return m_manager->dotNETManager->ReceiverSerialNumSupported;
