@@ -23,9 +23,12 @@ jobs:
         run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64
       - name: Build x86 static library
         run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
+      - name: Write version to file
+        shell: pwsh
+        run: Set-Content -Path "${{github.workspace}}\VERSION" -Value "${{github.ref_name}}" -Encoding ASCII
       - name: Zip release
         shell: pwsh
-        run: Compress-Archive -Path '${{github.workspace}}\include','${{github.workspace}}\lib', '${{github.workspace}}\CMakeLists.txt', '${{github.workspace}}\LICENSE' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
+        run: Compress-Archive -Path '${{github.workspace}}\include','${{github.workspace}}\lib', '${{github.workspace}}\CMakeLists.txt', '${{github.workspace}}\LICENSE', '${{github.workspace}}\VERSION' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
       - name: Generate hash
         shell: pwsh
         run: |

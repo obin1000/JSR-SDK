@@ -13,6 +13,8 @@
 #include "JSR-SDK/enums/TriggerImpedance.h"
 #include "JSR-SDK/enums/TriggerPolarity.h"
 #include "JSR-SDK/enums/TriggerSource.h"
+#include "JSR-SDK/events/NotifyEvent.h"
+#include "JSR-SDK/events/StatusChangedEvent.h"
 
 #include <map>
 #include <string>
@@ -44,6 +46,13 @@ public:
    * @brief Closes the connection to the devices and releases all resources.
    */
   virtual ~JSRSDKManager() = default;
+
+  // === Event handlers used for callbacks ===
+  virtual void
+  replaceStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
+  virtual void removeStatusChangeEventHandler() = 0;
+  virtual void replaceNotifyEventHandler(const NotifyCallback &callback) = 0;
+  virtual void removeNotifyEventHandler() = 0;
 
   // === Static functions used to generate IDs ===
   // static std::string MakeIdString(IPulserReceiverIdentity prId) = 0;
@@ -185,8 +194,11 @@ public:
   virtual std::vector<std::string>
   GetPulserReceiverInfo(PulserReceiverID id) = 0;
 
-  // virtual std::vector<PulserReceiverID>
-  // GetPulserReceivers(InstrumentID instrId) = 0;
+  /**
+   * @brief Retrieves a list of all Pulser/Receiver IDs detected by the SDK.
+   * @return A vector of PulserReceiverID objects representing the Pulser/Receivers.
+   */
+  virtual std::vector<PulserReceiverID> GetPulserReceivers() = 0;
 
   // virtual PulserSettingInfo GetPulserSettingInfo(std::string settingName) =
   // 0;

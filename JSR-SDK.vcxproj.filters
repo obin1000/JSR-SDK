@@ -67,12 +67,45 @@
     <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlagsC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\ErrorCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\NotifyType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataTypeC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverStateC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\StatusChange.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\ExceptionJSRSDK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MarshalTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\JSRSDKWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MarshalEnums.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
