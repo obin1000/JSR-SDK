@@ -28,6 +28,49 @@ public:
   }
 
   ~JSRSDKManagerAdapter() override {}
+
+  // === Event handlers used for callbacks ===
+  void replaceStatusChangeEventHandler(
+      const StatusChangeCallback &callback) override {
+    try {
+      m_manager->SetStatusChangeCallback(new StatusChangeCallback(callback));
+    } catch (System::Exception ^ exception) {
+      std::string msg =
+          msclr::interop::marshal_as<std::string>(exception->Message);
+      throw "Failed to replace status change event handler: " + msg;
+    }
+  }
+
+  void removeStatusChangeEventHandler() override {
+    try {
+      m_manager->SetStatusChangeCallback(nullptr);
+    } catch (System::Exception ^ exception) {
+      std::string msg =
+          msclr::interop::marshal_as<std::string>(exception->Message);
+      throw "Failed to remove status change event handler: " + msg;
+    }
+  }
+
+  void replaceNotifyEventHandler(const NotifyCallback &callback) override {
+    try {
+      m_manager->SetNotifyCallback(new NotifyCallback(callback));
+    } catch (System::Exception ^ exception) {
+      std::string msg =
+          msclr::interop::marshal_as<std::string>(exception->Message);
+      throw "Failed to replace notify event handler: " + msg;
+    }
+  }
+
+  void removeNotifyEventHandler() override {
+    try {
+      m_manager->SetNotifyCallback(nullptr);
+    } catch (System::Exception ^ exception) {
+      std::string msg =
+          msclr::interop::marshal_as<std::string>(exception->Message);
+      throw "Failed to remove notify event handler: " + msg;
+    }
+  }
+
   // === Static functions used to generate IDs ===
   // static std::string MakeIdString(IPulserReceiverIdentity prId) = 0;
 
@@ -217,15 +260,6 @@ public:
   // virtual void addManagedPulserReceivers(IJSRDotNET lib);
   // virtual void removeManagedPulserReceivers(IJSRDotNET lib);
   // virtual void setDiscoveryEnable(object sender, bool bEnable);
-
-  // === Event handlers used for callbacks ===
-  // void addStatusChangeEventHandler(const StatusChangeCallback &callback) {
-  //  auto id = nextChangeHandlerId++;
-  //  statusChangeHandlers.emplace(id, callback);
-  //}
-  // virtual void removeAllStatusChangeEventHandlers() = 0;
-  // virtual void addNotifyEventHandler() = 0;
-  // virtual void removeAllNotifyEventHandlers() = 0;
 
   // === Getters and setters for variables in the manager ===
   bool getPulseRepetitionFrequencyIndexSupported() {

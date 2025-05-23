@@ -47,6 +47,13 @@ public:
    */
   virtual ~JSRSDKManager() = default;
 
+  // === Event handlers used for callbacks ===
+  virtual void
+  replaceStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
+  virtual void removeStatusChangeEventHandler() = 0;
+  virtual void replaceNotifyEventHandler(const NotifyCallback &callback) = 0;
+  virtual void removeNotifyEventHandler() = 0;
+
   // === Static functions used to generate IDs ===
   // static std::string MakeIdString(IPulserReceiverIdentity prId) = 0;
 
@@ -278,13 +285,6 @@ public:
   // virtual void addManagedPulserReceivers(IJSRDotNET lib);
   // virtual void removeManagedPulserReceivers(IJSRDotNET lib);
   // virtual void setDiscoveryEnable(object sender, bool bEnable);
-
-  // === Event handlers used for callbacks ===
-  // virtual void
-  // addStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
-  // virtual void removeAllStatusChangeEventHandlers() = 0;
-  // virtual void addNotifyEventHandler() = 0;
-  // virtual void removeAllNotifyEventHandlers() = 0;
 
   // === Getters and setters for variables in the manager ===
   /**

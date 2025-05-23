@@ -1,4 +1,6 @@
-
+#include "JSR-SDK/events/NotifyEvent.h"
+#include "JSR-SDK/events/StatusChangedEvent.h"
+#include "MarshalTypes.cpp"
 
 using namespace JSRDotNETSDK;
 
@@ -12,28 +14,55 @@ ref class JSRSDKWrapper {
 private:
   JSRDotNETManager ^ m_manager;
 
-  void OnStatusChangedEvent(Object ^ sender, EventArgsStatusChange ^ eventData) {
+  StatusChangeCallback *statusCallback = nullptr;
+  NotifyCallback *notifyCallback = nullptr;
+
+  void OnStatusChangedEvent(Object ^ sender,
+                            EventArgsStatusChange ^ eventData) {
     System::Console::WriteLine("Status changed: {0}", eventData->ToString());
+
+    // Call the callback if it is set
+    if (statusCallback != nullptr) {
+      // Convert the managed event data to unmanaged data
+      StatusChangedEvent unmanagedEvent =
+          statusChangedEventFromManaged(eventData);
+      (*statusCallback)(unmanagedEvent);
+    }
   }
 
-  void OnJsrManagerNotify(Object ^ sender, EventArgsManagerNotify ^ eventData) {
+  void OnNotifyEvent(Object ^ sender, EventArgsManagerNotify ^ eventData) {
     System::Console::WriteLine("Notified: {0}", eventData->ToString());
 
+    // Call the callback if it is set
+    if (notifyCallback != nullptr) {
+      // Convert the managed event data to unmanaged data
+      NotifyEvent unmanagedEvent = notifyEventFromManaged(eventData);
+      (*notifyCallback)(unmanagedEvent);
+    }
   }
 
 public:
-  JSRSDKWrapper() { 
-      // Create an instance of the JSRDotNETManager
-      m_manager = gcnew JSRDotNETManager("");
-      // Create the C# event receivers
-      // TODO: Only register these when the C++ side has a handler for them
-      m_manager->StatusChangeEventHandler +=
-          gcnew System::EventHandler<EventArgsStatusChange ^>(
-              this, &JSRSDKWrapper::OnStatusChangedEvent);
-      m_manager->NotifyEventHandler +=
-          gcnew System::EventHandler<EventArgsManagerNotify ^>(
-              this, &JSRSDKWrapper::OnJsrManagerNotify);
+  JSRSDKWrapper() {
+    // Create an instance of the JSRDotNETManager
+    m_manager = gcnew JSRDotNETManager("");
 
+    // Register the C# event handlers
+    m_manager->StatusChangeEventHandler +=
+        gcnew System::EventHandler<EventArgsStatusChange ^>(
+            this, &JSRSDKWrapper::OnStatusChangedEvent);
+    m_manager->NotifyEventHandler +=
+        gcnew System::EventHandler<EventArgsManagerNotify ^>(
+            this, &JSRSDKWrapper::OnNotifyEvent);
+  }
+
+  // Method to set the status change callback
+  void SetStatusChangeCallback(StatusChangeCallback *callback) {
+    statusCallback = callback;
+  }
+
+  // Method to set the notify callback
+  void SetNotifyCallback(NotifyCallback *callback) {
+    notifyCallback = callback;
   }
 
   property JSRDotNETManager ^
