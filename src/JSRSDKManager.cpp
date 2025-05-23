@@ -15,6 +15,8 @@ using namespace System::Collections::Generic;
 class JSRSDKManagerAdapter : public JSRSDKManager {
 private:
   gcroot<JSRSDKWrapper ^> m_manager;
+  StatusChangeCallback m_statusCallback;
+  NotifyCallback m_notifyCallback;
 
 public:
   JSRSDKManagerAdapter() {
@@ -27,48 +29,31 @@ public:
     }
   }
 
-  ~JSRSDKManagerAdapter() override {}
+  ~JSRSDKManagerAdapter() override {
+    if (m_manager != nullptr) {
+      removeStatusChangeEventHandler();
+      removeNotifyEventHandler();
+    }
+  }
 
   // === Event handlers used for callbacks ===
   void replaceStatusChangeEventHandler(
       const StatusChangeCallback &callback) override {
-    try {
-      m_manager->SetStatusChangeCallback(new StatusChangeCallback(callback));
-    } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw "Failed to replace status change event handler: " + msg;
-    }
+    m_statusCallback = callback;
+    m_manager->SetStatusChangeCallback(&m_statusCallback);
   }
 
   void removeStatusChangeEventHandler() override {
-    try {
-      m_manager->SetStatusChangeCallback(nullptr);
-    } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw "Failed to remove status change event handler: " + msg;
-    }
+    m_manager->SetStatusChangeCallback(nullptr);
   }
 
   void replaceNotifyEventHandler(const NotifyCallback &callback) override {
-    try {
-      m_manager->SetNotifyCallback(new NotifyCallback(callback));
-    } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw "Failed to replace notify event handler: " + msg;
-    }
+    m_notifyCallback = callback;
+    m_manager->SetNotifyCallback(&m_notifyCallback);
   }
 
   void removeNotifyEventHandler() override {
-    try {
-      m_manager->SetNotifyCallback(nullptr);
-    } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw "Failed to remove notify event handler: " + msg;
-    }
+    m_manager->SetNotifyCallback(nullptr);
   }
 
   // === Static functions used to generate IDs ===
