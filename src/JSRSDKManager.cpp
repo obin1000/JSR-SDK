@@ -16,8 +16,9 @@ using namespace System::Collections::Generic;
 class JSRSDKManagerAdapter : public JSRSDKManager {
 private:
   gcroot<JSRSDKWrapper ^> m_manager;
-  StatusChangeCallback m_statusCallback;
-  NotifyCallback m_notifyCallback;
+
+  StatusChangeCallback *m_statusCallbackPtr = nullptr;
+  NotifyCallback *m_notifyCallbackPtr = nullptr;
 
 public:
   JSRSDKManagerAdapter() {
@@ -59,21 +60,35 @@ public:
   // === Event handlers used for callbacks ===
   void replaceStatusChangeEventHandler(
       const StatusChangeCallback &callback) override {
-    m_statusCallback = callback;
-    m_manager->SetStatusChangeCallback(&m_statusCallback);
+    if (m_statusCallbackPtr) {
+      delete m_statusCallbackPtr;
+    }
+    m_statusCallbackPtr = new StatusChangeCallback(callback);
+    m_manager->SetStatusChangeCallback(m_statusCallbackPtr);
   }
 
   void removeStatusChangeEventHandler() override {
     m_manager->SetStatusChangeCallback(nullptr);
+    if (m_statusCallbackPtr) {
+      delete m_statusCallbackPtr;
+      m_statusCallbackPtr = nullptr;
+    }
   }
 
   void replaceNotifyEventHandler(const NotifyCallback &callback) override {
-    m_notifyCallback = callback;
-    m_manager->SetNotifyCallback(&m_notifyCallback);
+    if (m_notifyCallbackPtr) {
+      delete m_notifyCallbackPtr;
+    }
+    m_notifyCallbackPtr = new NotifyCallback(callback);
+    m_manager->SetNotifyCallback(m_notifyCallbackPtr);
   }
 
   void removeNotifyEventHandler() override {
     m_manager->SetNotifyCallback(nullptr);
+    if (m_notifyCallbackPtr) {
+      delete m_notifyCallbackPtr;
+      m_notifyCallbackPtr = nullptr;
+    }
   }
 
   // === Static functions used to generate IDs ===
