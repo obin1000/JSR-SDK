@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JSR-SDK", "JSR-SDK.vcxproj", "{36E91F6E-F31D-5866-D1E2-BA447C46F15F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{3B3B575B-5251-9595-CC57-C425EE8C35F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		dynamic|Win32 = dynamic|Win32
@@ -21,6 +23,14 @@ Global
 		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|Win32.Build.0 = static|Win32
 		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|x64.ActiveCfg = static|x64
 		{36E91F6E-F31D-5866-D1E2-BA447C46F15F}.static|x64.Build.0 = static|x64
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.dynamic|Win32.ActiveCfg = Release|Win32
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.dynamic|Win32.Build.0 = Release|Win32
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.dynamic|x64.ActiveCfg = Release|x64
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.dynamic|x64.Build.0 = Release|x64
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.static|Win32.ActiveCfg = Release|Win32
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.static|Win32.Build.0 = Release|Win32
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.static|x64.ActiveCfg = Release|x64
+		{3B3B575B-5251-9595-CC57-C425EE8C35F0}.static|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
