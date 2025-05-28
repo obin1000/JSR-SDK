@@ -17,8 +17,8 @@ class JSRSDKManagerAdapter : public JSRSDKManager {
 private:
   gcroot<JSRSDKWrapper ^> m_manager;
 
-  StatusChangeCallback *m_statusCallbackPtr = nullptr;
-  NotifyCallback *m_notifyCallbackPtr = nullptr;
+  std::unique_ptr<StatusChangeCallback> m_statusHolder;
+  std::unique_ptr<NotifyCallback> m_notifyHolder;
 
 public:
   JSRSDKManagerAdapter() {
@@ -58,36 +58,32 @@ public:
   }
 
   // === Event handlers used for callbacks ===
-  void replaceStatusChangeEventHandler(
-      const StatusChangeCallback &callback) override {
-    if (m_statusCallbackPtr) {
-      delete m_statusCallbackPtr;
-    }
-    m_statusCallbackPtr = new StatusChangeCallback(callback);
-    m_manager->SetStatusChangeCallback(m_statusCallbackPtr);
+  // --- Status-change ----
+  void
+  replaceStatusChangeEventHandler(const StatusChangeCallback &cb) override {
+    removeStatusChangeEventHandler();
+    m_statusHolder = std::make_unique<StatusChangeCallback>(cb);
+    m_manager->SetStatusChangeCallback(m_statusHolder.get());
   }
 
   void removeStatusChangeEventHandler() override {
-    m_manager->SetStatusChangeCallback(nullptr);
-    if (m_statusCallbackPtr) {
-      delete m_statusCallbackPtr;
-      m_statusCallbackPtr = nullptr;
+    if (m_statusHolder) {
+      m_manager->SetStatusChangeCallback(nullptr);
+      m_statusHolder.reset();
     }
   }
 
-  void replaceNotifyEventHandler(const NotifyCallback &callback) override {
-    if (m_notifyCallbackPtr) {
-      delete m_notifyCallbackPtr;
-    }
-    m_notifyCallbackPtr = new NotifyCallback(callback);
-    m_manager->SetNotifyCallback(m_notifyCallbackPtr);
+  // --- Notify ----
+  void replaceNotifyEventHandler(const NotifyCallback &cb) override {
+    removeNotifyEventHandler();
+    m_notifyHolder = std::make_unique<NotifyCallback>(cb);
+    m_manager->SetNotifyCallback(m_notifyHolder.get());
   }
 
   void removeNotifyEventHandler() override {
-    m_manager->SetNotifyCallback(nullptr);
-    if (m_notifyCallbackPtr) {
-      delete m_notifyCallbackPtr;
-      m_notifyCallbackPtr = nullptr;
+    if (m_notifyHolder) {
+      m_manager->SetNotifyCallback(nullptr);
+      m_notifyHolder.reset();
     }
   }
 
