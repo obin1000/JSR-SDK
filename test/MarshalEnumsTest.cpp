@@ -1,6 +1,6 @@
-#include "pch.h"
 #include "../src/MarshalEnums.cpp"
-#include "gtest/gtest.h"
+#include "pch.h"
+#include <gtest/gtest.h>
 
 using namespace JSRDotNETSDK;
 
@@ -18,8 +18,8 @@ TEST(EnumConversionTest, TriggerSource_RoundTrip) {
   TRIGGER_SOURCE values[] = {TRIGGER_SOURCE::INTERNAL, TRIGGER_SOURCE::EXTERNAL,
                              TRIGGER_SOURCE::LAST_VAL, TRIGGER_SOURCE::SLAVE};
   for (auto v : values) {
-    auto native = triggerSourceFromManaged(v);
-    auto back = triggerSourceToManaged(native);
+    TriggerSource native = triggerSourceFromManaged(v);
+    TRIGGER_SOURCE back = triggerSourceToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -29,8 +29,8 @@ TEST(EnumConversionTest, TriggerPolarity_RoundTrip) {
                                TRIGGER_POLARITY::RISING,
                                TRIGGER_POLARITY::LAST_VAL};
   for (auto v : values) {
-    auto native = triggerPolarityFromManaged(v);
-    auto back = triggerPolarityToManaged(native);
+    TriggerPolarity native = triggerPolarityFromManaged(v);
+    TRIGGER_POLARITY back = triggerPolarityToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -40,8 +40,8 @@ TEST(EnumConversionTest, TriggerImpedance_RoundTrip) {
                                 TRIGGER_IMPEDANCE::LOW_Z,
                                 TRIGGER_IMPEDANCE::LAST_VAL};
   for (auto v : values) {
-    auto native = triggerImpedanceFromManaged(v);
-    auto back = triggerImpedanceToManaged(native);
+    TriggerImpedance native = triggerImpedanceFromManaged(v);
+    TRIGGER_IMPEDANCE back = triggerImpedanceToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -51,8 +51,8 @@ TEST(EnumConversionTest, PulserImpedance_RoundTrip) {
                                PULSER_IMPEDANCE::LOW_Z,
                                PULSER_IMPEDANCE::LAST_VAL};
   for (auto v : values) {
-    auto native = pulserImpedanceFromManaged(v);
-    auto back = pulserImpedanceToManaged(native);
+    PulserImpedance native = pulserImpedanceFromManaged(v);
+    PULSER_IMPEDANCE back = pulserImpedanceToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -60,8 +60,8 @@ TEST(EnumConversionTest, PulserImpedance_RoundTrip) {
 TEST(EnumConversionTest, IsPulsing_RoundTrip) {
   IS_PULSING values[] = {IS_PULSING::ACTIVE, IS_PULSING::INACTIVE};
   for (auto v : values) {
-    auto native = isPulsingFromManaged(v);
-    auto back = isPulsingToManaged(native);
+    IsPulsing native = isPulsingFromManaged(v);
+    IS_PULSING back = isPulsingToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -69,8 +69,8 @@ TEST(EnumConversionTest, IsPulsing_RoundTrip) {
 TEST(EnumConversionTest, PowerLimit_RoundTrip) {
   POWER_LIMIT values[] = {POWER_LIMIT::OVER_LIMIT, POWER_LIMIT::WITHIN_LIMIT};
   for (auto v : values) {
-    auto native = powerLimitFromManaged(v);
-    auto back = powerLimitToManaged(native);
+    PowerLimit native = powerLimitFromManaged(v);
+    POWER_LIMIT back = powerLimitToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -80,8 +80,8 @@ TEST(EnumConversionTest, ManagerState_RoundTrip) {
   MS values[] = {MS::NOT_STARTED, MS::PLUGINS_LOADED, MS::RUNNING,
                  MS::SHUTTING_DOWN};
   for (auto v : values) {
-    auto native = managerStateFromManaged(v);
-    auto back = managerStateToManaged(native);
+    ManagerState native = managerStateFromManaged(v);
+    MS back = managerStateToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -93,8 +93,8 @@ TEST(EnumConversionTest, ConnectionType_RoundTrip) {
       CONNECTION_TYPE::ETHERNET, CONNECTION_TYPE::FIREWIRE,
       CONNECTION_TYPE::BLUETOOTH};
   for (auto v : values) {
-    auto native = connectionTypeFromManaged(v);
-    auto back = connectionTypeToManaged(native);
+    ConnectionType native = connectionTypeFromManaged(v);
+    CONNECTION_TYPE back = connectionTypeToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -108,8 +108,8 @@ TEST(EnumConversionTest, PropertyUnits_RoundTrip) {
       PROPERTY_UNITS::UNIT_VOLTS,       PROPERTY_UNITS::UNIT_OHMS,
       PROPERTY_UNITS::UNIT_PICOFARADS};
   for (auto v : values) {
-    auto native = propertyUnitsFromManaged(v);
-    auto back = propertyUnitsToManaged(native);
+    PropertyUnits native = propertyUnitsFromManaged(v);
+    PROPERTY_UNITS back = propertyUnitsToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -130,8 +130,8 @@ TEST(EnumConversionTest, PulserPropertyRole_RoundTrip) {
                                  PulserPropertyRole::NUMERATOR,
                                  PulserPropertyRole::OTHER};
   for (auto v : values) {
-    auto native = pulserPropertyRoleFromManaged(v);
-    auto back = pulserPropertyRoleToManaged(native);
+    PulserPropertyRoles native = pulserPropertyRoleFromManaged(v);
+    PulserPropertyRole back = pulserPropertyRoleToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -141,8 +141,8 @@ TEST(EnumConversionTest, StatusChange_RoundTrip) {
       STATUS_CHANGE::INSTRUMENT_DISCONNECT, STATUS_CHANGE::PROPERTY_CHANGE,
       STATUS_CHANGE::OPERATIONAL_FAULT, STATUS_CHANGE::STATE_CHANGE};
   for (auto v : values) {
-    auto native = statusChangeFromManaged(v);
-    auto back = statusChangeToManaged(native);
+    StatusChange native = statusChangeFromManaged(v);
+    STATUS_CHANGE back = statusChangeToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -153,8 +153,8 @@ TEST(EnumConversionTest, PulserReceiverState_RoundTrip) {
       PulserReceiverState::READY,     PulserReceiverState::ERROR,
       PulserReceiverState::NO_PULSER, PulserReceiverState::DETACHED};
   for (auto v : values) {
-    auto native = pulserReceiverStateFromManaged(v);
-    auto back = pulserReceiverStateToManaged(native);
+    PulserReceiverStateC native = pulserReceiverStateFromManaged(v);
+    PulserReceiverState back = pulserReceiverStateToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -174,8 +174,8 @@ TEST(EnumConversionTest, PulserPropertyDataType_RoundTrip) {
                                      PulserPropertyDataType::ID,
                                      PulserPropertyDataType::OTHER};
   for (auto v : values) {
-    auto native = pulserPropertyDataTypeFromManaged(v);
-    auto back = pulserPropertyDataTypeToManaged(native);
+    PulserPropertyDataTypeC native = pulserPropertyDataTypeFromManaged(v);
+    PulserPropertyDataType back = pulserPropertyDataTypeToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -205,8 +205,8 @@ TEST(EnumConversionTest, ErrorCode_RoundTrip) {
                          ERROR_CODE::DEVICE_NOT_READY,
                          ERROR_CODE::SUCCESS};
   for (auto v : values) {
-    auto native = errorCodeFromManaged(v);
-    auto back = errorCodeToManaged(native);
+    ErrorCode native = errorCodeFromManaged(v);
+    ERROR_CODE back = errorCodeToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -216,8 +216,8 @@ TEST(EnumConversionTest, DiscoveryStateFlags_RoundTrip) {
       DiscoveryStateFlags::NONE, DiscoveryStateFlags::ACTIVE,
       DiscoveryStateFlags::PENDING, DiscoveryStateFlags::STOPPED_ON_ERR};
   for (auto v : values) {
-    auto native = discoveryStateFlagsFromManaged(v);
-    auto back = discoveryStateFlagsToManaged(native);
+    DiscoveryStateFlagsC native = discoveryStateFlagsFromManaged(v);
+    DiscoveryStateFlags back = discoveryStateFlagsToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
@@ -232,8 +232,8 @@ TEST(EnumConversionTest, NotifyType_RoundTrip) {
                           NOTIFY_TYPE::STATE_CHANGE,
                           NOTIFY_TYPE::ERROR};
   for (auto v : values) {
-    auto native = notifyTypeFromManaged(v);
-    auto back = notifyTypeToManaged(native);
+    NotifyType native = notifyTypeFromManaged(v);
+    NOTIFY_TYPE back = notifyTypeToManaged(native);
     EXPECT_EQ(v, back);
   }
 }
