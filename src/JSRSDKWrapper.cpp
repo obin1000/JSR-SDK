@@ -20,7 +20,6 @@ private:
 
   void OnStatusChangedEvent(Object ^ sender,
                             EventArgsStatusChange ^ eventData) {
-    System::Console::WriteLine("Status");
     if (m_nativeStatusCb) {
       StatusChangedEvent nativeEvt;
       (*m_nativeStatusCb)(nativeEvt);
