@@ -441,377 +441,1017 @@ public:
 
   // === Getters and setters for variables in the manager ===
   bool getPulseRepetitionFrequencyIndexSupported() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyIndexSupported;
+    try {
+      return m_manager->dotNETManager->PulseRepetitionFrequencyIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
-  double getHVSupplyMax() { return m_manager->dotNETManager->HVSupplyMax; }
-  double getHVSupply() { return m_manager->dotNETManager->HVSupply; }
+  double getHVSupplyMax() {
+    try {
+      return m_manager->dotNETManager->HVSupplyMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
+  double getHVSupply() {
+    try {
+      return m_manager->dotNETManager->HVSupply;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   void setHVSupply(double hvSupply) {
-    m_manager->dotNETManager->HVSupply = hvSupply;
+    try {
+
+      m_manager->dotNETManager->HVSupply = hvSupply;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   bool getHVSupplySupported() {
-    return m_manager->dotNETManager->HVSupplySupported;
+    try {
+
+      return m_manager->dotNETManager->HVSupplySupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   int getPulseRepetitionFrequencyNumerator() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyNumerator;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequencyNumerator;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   std::vector<double> getPulseRepetitionFrequencyValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->PulseRepetitionFrequencyValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->PulseRepetitionFrequencyValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   int getPulseRepetitionFrequencyIndexMax() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyIndexMax;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequencyIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   int getPulseRepetitionFrequencyIndex() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyIndex;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequencyIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulseRepetitionFrequencyIndex(int index) {
-    m_manager->dotNETManager->PulseRepetitionFrequencyIndex = index;
+    try {
+
+      m_manager->dotNETManager->PulseRepetitionFrequencyIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   double getPulseRepetitionFrequencyMin() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyMin;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequencyMin;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   double getPulseRepetitionFrequencyMax() {
-    return m_manager->dotNETManager->PulseRepetitionFrequencyMax;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequencyMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   double getPulseRepetitionFrequency() {
-    return m_manager->dotNETManager->PulseRepetitionFrequency;
+    try {
+
+      return m_manager->dotNETManager->PulseRepetitionFrequency;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulseRepetitionFrequency(double frequency) {
-    m_manager->dotNETManager->PulseRepetitionFrequency = frequency;
+    try {
+
+      m_manager->dotNETManager->PulseRepetitionFrequency = frequency;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   TriggerPolarity getTriggerEdgePolarity() {
-    return triggerPolarityFromManaged(
-        m_manager->dotNETManager->TriggerEdgePolarity);
+    try {
+
+      return triggerPolarityFromManaged(
+          m_manager->dotNETManager->TriggerEdgePolarity);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setTriggerEdgePolarity(TriggerPolarity polarity) {
-    m_manager->dotNETManager->TriggerEdgePolarity =
-        triggerPolarityToManaged(polarity);
+    try {
+
+      m_manager->dotNETManager->TriggerEdgePolarity =
+          triggerPolarityToManaged(polarity);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getTriggerEdgePolaritySupported() {
-    return m_manager->dotNETManager->TriggerEdgePolaritySupported;
+    try {
+
+      return m_manager->dotNETManager->TriggerEdgePolaritySupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getHighPassFilterValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->HighPassFilterValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->HighPassFilterValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getHighPassFilterIndexMax() {
-    return m_manager->dotNETManager->HighPassFilterIndexMax;
+    try {
+
+      return m_manager->dotNETManager->HighPassFilterIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getHighPassFilterIndex() {
-    return m_manager->dotNETManager->HighPassFilterIndex;
+    try {
+
+      return m_manager->dotNETManager->HighPassFilterIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setHighPassFilterIndex(int index) {
-    m_manager->dotNETManager->HighPassFilterIndex = index;
+    try {
+
+      m_manager->dotNETManager->HighPassFilterIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getLowPassFilterIndexMax() {
-    return m_manager->dotNETManager->LowPassFilterIndexMax;
+    try {
+
+      return m_manager->dotNETManager->LowPassFilterIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getLowPassFilterIndex() {
-    return m_manager->dotNETManager->LowPassFilterIndex;
+    try {
+
+      return m_manager->dotNETManager->LowPassFilterIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setLowPassFilterIndex(int index) {
-    m_manager->dotNETManager->LowPassFilterIndex = index;
+    try {
+
+      m_manager->dotNETManager->LowPassFilterIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   RecieverMode getReceiverMode() {
-    return receiverModeFromManaged(m_manager->dotNETManager->ReceiverMode);
+    try {
+
+      return receiverModeFromManaged(m_manager->dotNETManager->ReceiverMode);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setReceiverMode(RecieverMode mode) {
-    m_manager->dotNETManager->ReceiverMode = receiverModeToManaged(mode);
+    try {
+
+      m_manager->dotNETManager->ReceiverMode = receiverModeToManaged(mode);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverModeBothSupported() {
-    return m_manager->dotNETManager->ReceiverModeBothSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverModeBothSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverModeThruSupported() {
-    return m_manager->dotNETManager->ReceiverModeThruSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverModeThruSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverModeEchoSupported() {
-    return m_manager->dotNETManager->ReceiverModeEchoSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverModeEchoSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getGainValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->GainValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->GainValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  int getGainIndexMax() { return m_manager->dotNETManager->GainIndexMax; }
+  int getGainIndexMax() {
+    try {
+      return m_manager->dotNETManager->GainIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
-  int getGainIndex() { return m_manager->dotNETManager->GainIndex; }
-  void setGainIndex(int index) { m_manager->dotNETManager->GainIndex = index; }
+  int getGainIndex() {
+    try {
+      return m_manager->dotNETManager->GainIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
+  void setGainIndex(int index) {
+    try {
+      m_manager->dotNETManager->GainIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   std::vector<double> getLowPassFilterValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->LowPassFilterValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->LowPassFilterValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  double getHVSupplyMin() { return m_manager->dotNETManager->HVSupplyMin; }
+  double getHVSupplyMin() {
+    try {
+      return m_manager->dotNETManager->HVSupplyMin;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   bool getHVSupplyIndexSupported() {
-    return m_manager->dotNETManager->HVSupplyIndexSupported;
+    try {
+
+      return m_manager->dotNETManager->HVSupplyIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  int getHVSupplyIndex() { return m_manager->dotNETManager->HVSupplyIndex; }
+  int getHVSupplyIndex() {
+    try {
+      return m_manager->dotNETManager->HVSupplyIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   void setHVSupplyIndex(int index) {
-    m_manager->dotNETManager->HVSupplyIndex = index;
+    try {
+
+      m_manager->dotNETManager->HVSupplyIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  double getHVMeasurement() { return m_manager->dotNETManager->HVMeasurement; }
+  double getHVMeasurement() {
+    try {
+      return m_manager->dotNETManager->HVMeasurement;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   bool getHVMeasurementSupported() {
-    return m_manager->dotNETManager->HVMeasurementSupported;
+    try {
+
+      return m_manager->dotNETManager->HVMeasurementSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getUnitModelName() {
-    return marshal_as<std::string>(m_manager->dotNETManager->UnitModelName);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->UnitModelName);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setUnitModelName(std::string name) {
-    m_manager->dotNETManager->UnitModelName = marshal_as<String ^>(name);
+    try {
+
+      m_manager->dotNETManager->UnitModelName = marshal_as<String ^>(name);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getUnitSerialNum() {
-    return marshal_as<std::string>(m_manager->dotNETManager->UnitSerialNum);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->UnitSerialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setUnitSerialNum(std::string serialNum) {
-    m_manager->dotNETManager->UnitSerialNum = marshal_as<String ^>(serialNum);
+    try {
+
+      m_manager->dotNETManager->UnitSerialNum = marshal_as<String ^>(serialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserOEMDataSupported() {
-    return m_manager->dotNETManager->PulserOEMDataSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserOEMDataSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverOEMDataSupported() {
-    return m_manager->dotNETManager->ReceiverOEMDataSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverOEMDataSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getUnitModelNameSupported() {
-    return m_manager->dotNETManager->UnitModelNameSupported;
+    try {
+
+      return m_manager->dotNETManager->UnitModelNameSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getUnitSerialNumSupported() {
-    return m_manager->dotNETManager->UnitSerialNumSupported;
+    try {
+
+      return m_manager->dotNETManager->UnitSerialNumSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   TriggerSource getTriggerSource() {
-    return triggerSourceFromManaged(m_manager->dotNETManager->TriggerSource);
+    try {
+
+      return triggerSourceFromManaged(m_manager->dotNETManager->TriggerSource);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setTriggerSource(TriggerSource source) {
-    m_manager->dotNETManager->TriggerSource = triggerSourceToManaged(source);
+    try {
+
+      m_manager->dotNETManager->TriggerSource = triggerSourceToManaged(source);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> getPulserTriggerSourceValueNames() {
-    return listToVectorMarshall < System::String ^,
-           std::string >
-               (m_manager->dotNETManager->PulserTriggerSourceValueNames);
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string >
+                 (m_manager->dotNETManager->PulserTriggerSourceValueNames);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getPulserTriggerSourceIndexMax() {
-    return m_manager->dotNETManager->PulserTriggerSourceIndexMax;
+    try {
+
+      return m_manager->dotNETManager->PulserTriggerSourceIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getPulserTriggerSourceIndex() {
-    return m_manager->dotNETManager->PulserTriggerSourceIndex;
+    try {
+
+      return m_manager->dotNETManager->PulserTriggerSourceIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserTriggerSourceIndex(int index) {
-    m_manager->dotNETManager->PulserTriggerSourceIndex = index;
+    try {
+
+      m_manager->dotNETManager->PulserTriggerSourceIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getGainIndexSupported() {
-    return m_manager->dotNETManager->GainIndexSupported;
+    try {
+
+      return m_manager->dotNETManager->GainIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getTriggerSourceSlaveSupported() {
-    return m_manager->dotNETManager->TriggerSourceSlaveSupported;
+    try {
+
+      return m_manager->dotNETManager->TriggerSourceSlaveSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getTriggerSourceExternalSupported() {
-    return m_manager->dotNETManager->TriggerSourceExternalSupported;
+    try {
+
+      return m_manager->dotNETManager->TriggerSourceExternalSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  bool getTriggerEnable() { return m_manager->dotNETManager->TriggerEnable; }
+  bool getTriggerEnable() {
+    try {
+      return m_manager->dotNETManager->TriggerEnable;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   void setTriggerEnable(bool enable) {
-    m_manager->dotNETManager->TriggerEnable = enable;
+    try {
+
+      m_manager->dotNETManager->TriggerEnable = enable;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> getPulseEnergyValueNames() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->PulseEnergyValueNames);
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->PulseEnergyValueNames);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getPulseEnergyIndexMax() {
-    return m_manager->dotNETManager->PulseEnergyIndexMax;
+    try {
+
+      return m_manager->dotNETManager->PulseEnergyIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getPulseEnergyIndex() {
-    return m_manager->dotNETManager->PulseEnergyIndex;
+    try {
+
+      return m_manager->dotNETManager->PulseEnergyIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulseEnergyIndex(int index) {
-    m_manager->dotNETManager->PulseEnergyIndex = index;
+    try {
+
+      m_manager->dotNETManager->PulseEnergyIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulseEnergyIndexSupported() {
-    return m_manager->dotNETManager->PulseEnergyIndexSupported;
+    try {
+
+      return m_manager->dotNETManager->PulseEnergyIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getDampingValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->DampingValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->DampingValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  int getDampingIndexMax() { return m_manager->dotNETManager->DampingIndexMax; }
+  int getDampingIndexMax() {
+    try {
+      return m_manager->dotNETManager->DampingIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
-  int getDampingIndex() { return m_manager->dotNETManager->DampingIndex; }
+  int getDampingIndex() {
+    try {
+      return m_manager->dotNETManager->DampingIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   void setDampingIndex(int index) {
-    m_manager->dotNETManager->DampingIndex = index;
+    try {
+
+      m_manager->dotNETManager->DampingIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getDampingIndexSupported() {
-    return m_manager->dotNETManager->DampingIndexSupported;
+    try {
+
+      return m_manager->dotNETManager->DampingIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getHVSupplyValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->HVSupplyValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->HVSupplyValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getHVSupplyIndexMax() {
-    return m_manager->dotNETManager->HVSupplyIndexMax;
+    try {
+
+      return m_manager->dotNETManager->HVSupplyIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getTriggerSourceInternalSupported() {
-    return m_manager->dotNETManager->TriggerSourceInternalSupported;
+    try {
+
+      return m_manager->dotNETManager->TriggerSourceInternalSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getGainStepSizeSupported() {
-    return m_manager->dotNETManager->GainStepSizeSupported;
+    try {
+
+      return m_manager->dotNETManager->GainStepSizeSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  double getGainStepSize() { return m_manager->dotNETManager->GainStepSize; }
+  double getGainStepSize() {
+    try {
+      return m_manager->dotNETManager->GainStepSize;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
-  double getGainMax() { return m_manager->dotNETManager->GainMax; }
+  double getGainMax() {
+    try {
+      return m_manager->dotNETManager->GainMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   std::string getPulserSerialNum() {
-    return marshal_as<std::string>(m_manager->dotNETManager->PulserSerialNum);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->PulserSerialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserSerialNum(std::string serialNum) {
-    m_manager->dotNETManager->PulserSerialNum = marshal_as<String ^>(serialNum);
+    try {
+
+      m_manager->dotNETManager->PulserSerialNum =
+          marshal_as<String ^>(serialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserSerialNumSupported() {
-    return m_manager->dotNETManager->PulserSerialNumSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserSerialNumSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverHWRevSupported() {
-    return m_manager->dotNETManager->ReceiverHWRevSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverHWRevSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getReceiverHWRev() {
-    return marshal_as<std::string>(m_manager->dotNETManager->ReceiverHWRev);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->ReceiverHWRev);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setReceiverHWRev(std::string hwRev) {
-    m_manager->dotNETManager->ReceiverHWRev = marshal_as<String ^>(hwRev);
+    try {
+
+      m_manager->dotNETManager->ReceiverHWRev = marshal_as<String ^>(hwRev);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserHWRevSupported() {
-    return m_manager->dotNETManager->PulserHWRevSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserHWRevSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getPulserHWRev() {
-    return marshal_as<std::string>(m_manager->dotNETManager->PulserHWRev);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->PulserHWRev);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserHWRev(std::string hwRev) {
-    m_manager->dotNETManager->PulserHWRev = marshal_as<String ^>(hwRev);
+    try {
+
+      m_manager->dotNETManager->PulserHWRev = marshal_as<String ^>(hwRev);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverFirmwareVerSupported() {
-    return m_manager->dotNETManager->ReceiverFirmwareVerSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverFirmwareVerSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getReceiverFirmwareVer() {
-    return marshal_as<std::string>(
-        m_manager->dotNETManager->ReceiverFirmwareVer);
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->ReceiverFirmwareVer);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserFirmwareVerSupported() {
-    return m_manager->dotNETManager->PulserFirmwareVerSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserFirmwareVerSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getPulserFirmwareVer() {
-    return marshal_as<std::string>(m_manager->dotNETManager->PulserFirmwareVer);
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->PulserFirmwareVer);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  double getMaxFrequency() { return m_manager->dotNETManager->MaxFrequency; }
+  double getMaxFrequency() {
+    try {
+      return m_manager->dotNETManager->MaxFrequency;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   TriggerImpedance getTriggerImpedance() {
-    return triggerImpedanceFromManaged(
-        m_manager->dotNETManager->TriggerImpedance);
+    try {
+
+      return triggerImpedanceFromManaged(
+          m_manager->dotNETManager->TriggerImpedance);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setTriggerImpedance(TriggerImpedance impedance) {
-    m_manager->dotNETManager->TriggerImpedance =
-        triggerImpedanceToManaged(impedance);
+    try {
+
+      m_manager->dotNETManager->TriggerImpedance =
+          triggerImpedanceToManaged(impedance);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getTriggerImpedanceSupported() {
-    return m_manager->dotNETManager->TriggerImpedanceSupported;
+    try {
+
+      return m_manager->dotNETManager->TriggerImpedanceSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   PulserImpedance getPulserImpedance() {
-    return pulserImpedanceFromManaged(
-        m_manager->dotNETManager->PulserImpedance);
+    try {
+
+      return pulserImpedanceFromManaged(
+          m_manager->dotNETManager->PulserImpedance);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserImpedance(PulserImpedance impedance) {
-    m_manager->dotNETManager->PulserImpedance =
-        pulserImpedanceToManaged(impedance);
+    try {
+
+      m_manager->dotNETManager->PulserImpedance =
+          pulserImpedanceToManaged(impedance);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserImpedanceSupported() {
-    return m_manager->dotNETManager->PulserImpedanceSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserImpedanceSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   double getEnergyPerPulse() {
-    return m_manager->dotNETManager->EnergyPerPulse;
+    try {
+
+      return m_manager->dotNETManager->EnergyPerPulse;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> getInfo() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->Info);
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->Info);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   IsPulsing getPulserIsPulsing() {
-    return isPulsingFromManaged(m_manager->dotNETManager->PulserIsPulsing);
+    try {
+
+      return isPulsingFromManaged(m_manager->dotNETManager->PulserIsPulsing);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   PowerLimit getPulserPowerLimitStatus() {
-    return powerLimitFromManaged(
-        m_manager->dotNETManager->PulserPowerLimitStatus);
+    try {
+
+      return powerLimitFromManaged(
+          m_manager->dotNETManager->PulserPowerLimitStatus);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getPulserTriggerCount() {
-    return m_manager->dotNETManager->PulserTriggerCount;
+    try {
+
+      return m_manager->dotNETManager->PulserTriggerCount;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserTriggerCountSupported() {
-    return m_manager->dotNETManager->PulserTriggerCountSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserTriggerCountSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  bool getHVSupplyEnable() { return m_manager->dotNETManager->HVSupplyEnable; }
+  bool getHVSupplyEnable() {
+    try {
+      return m_manager->dotNETManager->HVSupplyEnable;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
   void setHVSupplyEnable(bool enable) {
-    m_manager->dotNETManager->HVSupplyEnable = enable;
+    try {
+
+      m_manager->dotNETManager->HVSupplyEnable = enable;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getHVSupplyEnableSupported() {
-    return m_manager->dotNETManager->HVSupplyEnableSupported;
+    try {
+
+      return m_manager->dotNETManager->HVSupplyEnableSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   // std::vector<PulserSettingInfo> getPulserSettings() = 0;
@@ -821,190 +1461,430 @@ public:
   // criteria) = 0;
 
   bool getReceiverSerialNumSupported() {
-    return m_manager->dotNETManager->ReceiverSerialNumSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverSerialNumSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getIsPulserPresentSupported() {
-    return m_manager->dotNETManager->IsPulserPresentSupported;
+    try {
+
+      return m_manager->dotNETManager->IsPulserPresentSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getReceiverSerialNum() {
-    return marshal_as<std::string>(m_manager->dotNETManager->ReceiverSerialNum);
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->ReceiverSerialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setReceiverSerialNum(std::string serialNum) {
-    m_manager->dotNETManager->ReceiverSerialNum =
-        marshal_as<String ^>(serialNum);
+    try {
+
+      m_manager->dotNETManager->ReceiverSerialNum =
+          marshal_as<String ^>(serialNum);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserModelNameSupported() {
-    return m_manager->dotNETManager->PulserModelNameSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserModelNameSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  double getGainMin() { return m_manager->dotNETManager->GainMin; }
+  double getGainMin() {
+    try {
+      return m_manager->dotNETManager->GainMin;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
-  double getGain() { return m_manager->dotNETManager->Gain; }
-  void setGain(double gain) { m_manager->dotNETManager->Gain = gain; }
+  double getGain() {
+    try {
+      return m_manager->dotNETManager->Gain;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
+  void setGain(double gain) {
+    try {
+      m_manager->dotNETManager->Gain = gain;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   bool getHasManualControls() {
-    return m_manager->dotNETManager->HasManualControls;
+    try {
+
+      return m_manager->dotNETManager->HasManualControls;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> getLEDBlinkModeValues() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->LEDBlinkModeValues);
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->LEDBlinkModeValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getLEDBlinkModeIndexMax() {
-    return m_manager->dotNETManager->LEDBlinkModeIndexMax;
+    try {
+
+      return m_manager->dotNETManager->LEDBlinkModeIndexMax;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   int getLEDBlinkModeIndex() {
-    return m_manager->dotNETManager->LEDBlinkModeIndex;
+    try {
+
+      return m_manager->dotNETManager->LEDBlinkModeIndex;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setLEDBlinkModeIndex(int index) {
-    m_manager->dotNETManager->LEDBlinkModeIndex = index;
+    try {
+
+      m_manager->dotNETManager->LEDBlinkModeIndex = index;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getLEDBlinkModeIndexSupported() {
-    return m_manager->dotNETManager->LEDBlinkModeIndexSupported;
+    try {
+
+      return m_manager->dotNETManager->LEDBlinkModeIndexSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   PulserReceiverID getId() {
-    return pulsereceiverFromManaged(m_manager->dotNETManager->Id);
+    try {
+
+      return pulsereceiverFromManaged(m_manager->dotNETManager->Id);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getIsPulserReceiverSelected() {
-    return m_manager->dotNETManager->IsPulserReceiverSelected;
+    try {
+
+      return m_manager->dotNETManager->IsPulserReceiverSelected;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getLastExceptionContextMessage() {
-    return marshal_as<std::string>(
-        m_manager->dotNETManager->LastExceptionContextMessage);
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->LastExceptionContextMessage);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getLastExceptionOrNull() {
-    Exception ^ exception = m_manager->dotNETManager->LastExceptionOrNull;
-    if (exception != nullptr) {
-      return marshal_as<std::string>(exception->Message);
-    } else {
-      return "";
+    try {
+
+      Exception ^ exception = m_manager->dotNETManager->LastExceptionOrNull;
+      if (exception != nullptr) {
+        return marshal_as<std::string>(exception->Message);
+      } else {
+        return "";
+      }
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
   // void setLastExceptionOrNull(Exception exception) = 0;
 
   std::string getPluginPath() {
-    return marshal_as<std::string>(m_manager->dotNETManager->PluginPath);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->PluginPath);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPluginPath(std::string path) {
-    m_manager->dotNETManager->PluginPath = marshal_as<String ^>(path);
+    try {
+
+      m_manager->dotNETManager->PluginPath = marshal_as<String ^>(path);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getPulserModelName() {
-    return marshal_as<std::string>(m_manager->dotNETManager->PulserModelName);
+    try {
+
+      return marshal_as<std::string>(m_manager->dotNETManager->PulserModelName);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserModelName(std::string name) {
-    m_manager->dotNETManager->PulserModelName = marshal_as<String ^>(name);
+    try {
+
+      m_manager->dotNETManager->PulserModelName = marshal_as<String ^>(name);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
-  bool getPluginsLoaded() { return m_manager->dotNETManager->PluginsLoaded; }
+  bool getPluginsLoaded() {
+    try {
+      return m_manager->dotNETManager->PluginsLoaded;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
+  }
 
   ManagerState getManagerState() {
-    return managerStateFromManaged(m_manager->dotNETManager->ManagerState);
+    try {
+
+      return managerStateFromManaged(m_manager->dotNETManager->ManagerState);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getPulserMaxPRFsSupported() {
-    return m_manager->dotNETManager->PulserMaxPRFsSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserMaxPRFsSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getPulserMaxPRFs() {
-    auto values = m_manager->dotNETManager->PulserMaxPRFs;
-    std::vector<double> result(values->Length);
+    try {
 
-    for each (double value in values) {
-      result.push_back(value);
+      auto values = m_manager->dotNETManager->PulserMaxPRFs;
+      std::vector<double> result(values->Length);
+
+      for each (double value in values) {
+        result.push_back(value);
+      }
+      return result;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
-    return result;
   }
 
   bool getPulserEnergyCapacitorValuesSupported() {
-    return m_manager->dotNETManager->PulserEnergyCapacitorValuesSupported;
+    try {
+
+      return m_manager->dotNETManager->PulserEnergyCapacitorValuesSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<double> getPulserEnergyCapacitorValues() {
-    return listToVector<System::Double, double>(
-        m_manager->dotNETManager->PulserEnergyCapacitorValues);
+    try {
+
+      return listToVector<System::Double, double>(
+          m_manager->dotNETManager->PulserEnergyCapacitorValues);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<std::string> getReceiverSupplyVoltages() {
-    return listToVectorMarshall < System::String ^,
-           std::string > (m_manager->dotNETManager->ReceiverSupplyVoltages);
+    try {
+
+      return listToVectorMarshall < System::String ^,
+             std::string > (m_manager->dotNETManager->ReceiverSupplyVoltages);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverSupplyVoltagesSupported() {
-    return m_manager->dotNETManager->ReceiverSupplyVoltagesSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverSupplyVoltagesSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<unsigned char> getReceiverOEMData() {
-    array<System::Byte> ^ data = m_manager->dotNETManager->ReceiverOEMData;
-    if (data == nullptr)
-      return {};
+    try {
 
-    std::vector<unsigned char> nativeData(data->Length);
-    for (int i = 0; i < data->Length; ++i)
-      nativeData[i] = data[i];
+      array<System::Byte> ^ data = m_manager->dotNETManager->ReceiverOEMData;
+      if (data == nullptr)
+        return {};
 
-    return nativeData;
+      std::vector<unsigned char> nativeData(data->Length);
+      for (int i = 0; i < data->Length; ++i)
+        nativeData[i] = data[i];
+
+      return nativeData;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setReceiverOEMData(std::vector<unsigned char> data) {
-    array<System::Byte> ^ managedArray =
-        gcnew array<System::Byte>(static_cast<int>(data.size()));
+    try {
 
-    int index = 0;
-    for (auto byte : data)
-      managedArray[index++] = byte;
+      array<System::Byte> ^ managedArray =
+          gcnew array<System::Byte>(static_cast<int>(data.size()));
 
-    m_manager->dotNETManager->ReceiverOEMData = managedArray;
+      int index = 0;
+      for (auto byte : data)
+        managedArray[index++] = byte;
+
+      m_manager->dotNETManager->ReceiverOEMData = managedArray;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::vector<unsigned char> getPulserOEMData() {
-    array<System::Byte> ^ data = m_manager->dotNETManager->PulserOEMData;
-    if (data == nullptr)
-      return {};
+    try {
 
-    std::vector<unsigned char> nativeData(data->Length);
-    for (int i = 0; i < data->Length; ++i)
-      nativeData[i] = data[i];
+      array<System::Byte> ^ data = m_manager->dotNETManager->PulserOEMData;
+      if (data == nullptr)
+        return {};
 
-    return nativeData;
+      std::vector<unsigned char> nativeData(data->Length);
+      for (int i = 0; i < data->Length; ++i)
+        nativeData[i] = data[i];
+
+      return nativeData;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setPulserOEMData(std::vector<unsigned char> data) {
-    array<System::Byte> ^ managedArray =
-        gcnew array<System::Byte>(static_cast<int>(data.size()));
+    try {
 
-    int index = 0;
-    for (auto byte : data)
-      managedArray[index++] = byte;
+      array<System::Byte> ^ managedArray =
+          gcnew array<System::Byte>(static_cast<int>(data.size()));
 
-    m_manager->dotNETManager->PulserOEMData = managedArray;
+      int index = 0;
+      for (auto byte : data)
+        managedArray[index++] = byte;
+
+      m_manager->dotNETManager->PulserOEMData = managedArray;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getReceiverModelNameSupported() {
-    return m_manager->dotNETManager->ReceiverModelNameSupported;
+    try {
+
+      return m_manager->dotNETManager->ReceiverModelNameSupported;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   std::string getReceiverModelName() {
-    return marshal_as<std::string>(m_manager->dotNETManager->ReceiverModelName);
+    try {
+
+      return marshal_as<std::string>(
+          m_manager->dotNETManager->ReceiverModelName);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
   void setReceiverModelName(std::string name) {
-    m_manager->dotNETManager->ReceiverModelName = marshal_as<String ^>(name);
+    try {
+
+      m_manager->dotNETManager->ReceiverModelName = marshal_as<String ^>(name);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getArePluginsAvailable() {
-    return m_manager->dotNETManager->ArePluginsAvailable;
+    try {
+
+      return m_manager->dotNETManager->ArePluginsAvailable;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 
   bool getIsPulserPresent() {
-    return m_manager->dotNETManager->IsPulserPresent;
+    try {
+
+      return m_manager->dotNETManager->IsPulserPresent;
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+    }
   }
 };
 
