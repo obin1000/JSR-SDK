@@ -256,3 +256,52 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
 
   return unmanagedEvent;
 }
+
+// Marshal template specializations for complex types
+namespace msclr::interop {
+
+// ExceptionJSRSDK marshals
+template <>
+inline ExceptionJSRSDK
+marshal_as<ExceptionJSRSDK, ExceptionJSRDotNET^>(ExceptionJSRDotNET^ const& from) {
+  return exceptionFromManaged(from);
+}
+
+// InstrumentID marshals
+template <>
+inline InstrumentID
+marshal_as<InstrumentID, IInstrumentIdentity^>(IInstrumentIdentity^ const& from) {
+  return instrumentFromManaged(from);
+}
+
+// PulserReceiverID marshals
+template <>
+inline PulserReceiverID
+marshal_as<PulserReceiverID, IPulserReceiverIdentity^>(IPulserReceiverIdentity^ const& from) {
+  return pulsereceiverFromManaged(from);
+}
+
+// JSRLibMetadata marshals
+template <>
+inline JSRLibMetadata
+marshal_as<JSRLibMetadata, IJSRDotNETLibMetadata^>(IJSRDotNETLibMetadata^ const& from) {
+  return libMetadataFromManaged(from);
+}
+
+// StatusChangedEvent marshals
+template <>
+inline StatusChangedEvent
+marshal_as<StatusChangedEvent, EventArgsStatusChange^>(EventArgsStatusChange^ const& from) {
+  return statusChangedEventFromManaged(from);
+}
+
+// NotifyEvent marshals
+template <>
+inline NotifyEvent
+marshal_as<NotifyEvent, EventArgsManagerNotify^>(EventArgsManagerNotify^ const& from) {
+  return notifyEventFromManaged(from);
+}
+
+} // namespace msclr::interop
+
+
