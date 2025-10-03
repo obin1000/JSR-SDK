@@ -23,22 +23,23 @@
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h" />
-    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlagsC.h" />
-    <ClInclude Include="include\JSR-SDK\enums\ErrorCode.h" />
-    <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h" />
-    <ClInclude Include="include\JSR-SDK\enums\ManagerState.h" />
-    <ClInclude Include="include\JSR-SDK\enums\NotifyType.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PropertyUnits.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataTypeC.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h" />
-    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverStateC.h" />
-    <ClInclude Include="include\JSR-SDK\enums\StatusChange.h" />
-    <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h" />
-    <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h" />
-    <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_CONNECTION_TYPE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_DISCOVERY_STATE_FLAGS.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_ERROR_CODE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_IS_PULSING.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_MANAGER_STATE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_NOTIFY_TYPE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_POWER_LIMIT.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PROPERTY_UNITS.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_IMPEDANCE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_DATA_TYPE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLES.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_RECEIVER_STATE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_RECEIVER_MODE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_STATUS_CHANGE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_IMPEDANCE.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_POLARITY.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h" />
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
     <ClInclude Include="include\JSR-SDK\marshals\MarshalEnums.h" />
@@ -48,7 +49,6 @@
     <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
     <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
-    <ClInclude Include="include\JSR-SDK\enums\ReceiverMode.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">
@@ -109,24 +109,16 @@
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='dynamic|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
@@ -211,8 +203,6 @@
       <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*" />
     </ItemGroup>
     <Message Importance="high" Text="Checking for plugin changes in external\jsr\plugins..." />
-    <Copy SourceFiles="@(PluginSourceFiles)"
-      DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 </Project>

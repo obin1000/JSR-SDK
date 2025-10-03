@@ -1,6 +1,6 @@
 #pragma once
 
-enum class ErrorCode {
+enum class C_ERROR_CODE {
   UNKNOWN = -1000,
   DEVICE_NOT_FOUND = -999,
   PLUGINS_NOT_LOADED = -998,

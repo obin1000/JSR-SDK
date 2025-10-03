@@ -3,7 +3,7 @@
  * Defines roles for pulser properties.
  * Mirrors JSRDotNETSDK::PULSER_PROPERTY_ROLES.
  **/
-enum class PulserPropertyRoles {
+enum class C_PULSER_PROPERTY_ROLES {
   DIRECT = 0,                 // Direct role.
   DIRECTSUPPORTED = 1,        // Direct role is supported.
   SPECIFICVALUESUPPORTED = 2, // Specific values are supported.

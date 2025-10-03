@@ -3,7 +3,7 @@
  * Represents the source of the trigger.
  * Mirrors JSRDotNETSDK::TRIGGER_SOURCE.
  **/
-enum class TriggerSource {
+enum class C_TRIGGER_SOURCE {
   INTERNAL = 0, // Internal trigger source.
   EXTERNAL = 1, // External trigger source.
   SLAVE = 2,    // Slave trigger source.

@@ -3,7 +3,7 @@
  * Represents the units of a property.
  * Mirrors JSRDotNETSDK::PROPERTY_UNIT.
  **/
-enum class PropertyUnits {
+enum class C_PROPERTY_UNITS {
   UNIT_NONE = 0,        // No unit.
   UNIT_HERTZ = 1,       // Hertz.
   UNIT_KILOHERTZ = 2,   // Kilohertz.

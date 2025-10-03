@@ -4,7 +4,7 @@
  * Represents the type of connection used by the system.
  * Mirrors JSRDotNETSDK::CONNECTION_TYPE.
  **/
-enum class ConnectionType {
+enum class C_CONNECTION_TYPE {
   SOFTWARE = 0,   // Software-based connection.
   SERIALPORT = 1, // Serial port connection.
   PCI = 2,        // PCI connection.

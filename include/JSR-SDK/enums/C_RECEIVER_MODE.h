@@ -3,7 +3,7 @@
  * Represents the mode of the receiver.
  * Mirrors JSRDotNETSDK::RECEIVER_MODE.
  **/
-enum class RecieverMode {
+enum class C_RECEIVER_MODE {
   ECHO = 0,     // Echo mode.
   THRU = 1,     // Through mode.
   BOTH = 2,     // Both modes.

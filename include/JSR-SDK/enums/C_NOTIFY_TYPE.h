@@ -1,7 +1,6 @@
 #pragma once
 
-
-enum class NotifyType {
+enum class C_NOTIFY_TYPE {
   PULSER_RCVR_DISCOVERED = 0,
   CURRENT_PULSER_RCVR_CHANGED = 1,
   PULSER_RCVR_DETACH = 2,

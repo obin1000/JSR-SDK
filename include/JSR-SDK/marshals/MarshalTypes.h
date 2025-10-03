@@ -144,9 +144,9 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
     std::string > (metadata->OpenOptions);
 
   if (metadata->ConnectionType != nullptr)
-    unmanaged.ConnectionType =
-        listToVectorMarshall<CONNECTION_TYPE, ConnectionType>(
-            metadata->ConnectionType);
+        unmanaged.ConnectionType =
+            listToVectorMarshall<CConnectionType, CConnectionType>(
+                metadata->ConnectionType);
 
   return unmanaged;
 }

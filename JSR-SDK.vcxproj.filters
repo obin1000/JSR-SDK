@@ -35,61 +35,10 @@
     <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\ReceiverMode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\TriggerPolarity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\IsPulsing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PowerLimit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PulserImpedance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\TriggerImpedance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\ManagerState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PropertyUnits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyRoles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\DiscoveryStateFlagsC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\ErrorCode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\NotifyType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PulserPropertyDataTypeC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\PulserReceiverStateC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\StatusChange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h">
@@ -99,6 +48,57 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\marshals\MarshalTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_DISCOVERY_STATE_FLAGS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_ERROR_CODE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_IS_PULSING.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_MANAGER_STATE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_NOTIFY_TYPE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_POWER_LIMIT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_PROPERTY_UNITS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_IMPEDANCE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_DATA_TYPE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLES.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_RECEIVER_STATE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_RECEIVER_MODE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_STATUS_CHANGE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_IMPEDANCE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_POLARITY.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_CONNECTION_TYPE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

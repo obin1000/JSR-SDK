@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PulserPropertyDataTypeC {
+enum class C_PULSER_PROPERTY_DATA_TYPE {
   INTEGER = 0,
   BYTE = 1,
   DOUBLE = 2,

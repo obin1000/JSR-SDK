@@ -1,6 +1,6 @@
 #pragma once
 
-enum class StatusChange {
+enum class C_STATUS_CHANGE {
   INSTRUMENT_DISCONNECT = 0,
   PROPERTY_CHANGE = 1,
   OPERATIONAL_FAULT = 2,
