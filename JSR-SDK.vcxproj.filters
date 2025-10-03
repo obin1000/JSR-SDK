@@ -101,6 +101,9 @@
     <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">

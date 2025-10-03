@@ -1,68 +1,77 @@
-#include "JSR-SDK/events/NotifyEvent.h"
-#include "JSR-SDK/events/StatusChangedEvent.h"
-#include "JSR-SDK/marshals/MarshalTypes.h"
+#include "JSR-SDK/JSRSDKWrapper.h"
 
 using namespace JSRDotNETSDK;
+using namespace System;
 using namespace System::Runtime::InteropServices;
 
-/**
- * This wrapper holds the instance of JSRDotNETSDKManager and manages events and
- * callbacks.
- * This is the C# side of the wrapper.
- **/
-public
-ref class JSRSDKWrapper {
-private:
-  JSRDotNETManager ^ m_manager;
+// Constructor
+JSRSDKWrapper::JSRSDKWrapper()
+    : m_nativeStatusCb(nullptr), m_nativeNotifyCb(nullptr) {
+  // Create an instance of the JSRDotNETManager
+  m_manager = gcnew JSRDotNETManager("");
 
-  StatusChangeCallback *m_nativeStatusCb = nullptr;
-  NotifyCallback *m_nativeNotifyCb = nullptr;
+  // Subscribe to events
+  m_manager->StatusChangeEventHandler +=
+      gcnew EventHandler<EventArgsStatusChange ^>(
+          this, &JSRSDKWrapper::OnStatusChangedEvent);
 
-  void OnStatusChangedEvent(Object ^ sender,
-                            EventArgsStatusChange ^ eventData) {
-    if (m_nativeStatusCb) {
-      StatusChangedEvent nativeEvt;
-      (*m_nativeStatusCb)(nativeEvt);
-    }
-  }
+  m_manager->NotifyEventHandler += gcnew EventHandler<EventArgsManagerNotify ^>(
+      this, &JSRSDKWrapper::OnNotifyEvent);
+}
 
-  void OnNotifyEvent(Object ^ sender, EventArgsManagerNotify ^ eventData) {
-    if (m_nativeNotifyCb) {
-      NotifyEvent nativeEvt = notifyEventFromManaged(eventData);
-      (*m_nativeNotifyCb)(nativeEvt);
-    }
-  }
-
-public:
-  JSRSDKWrapper() {
-    // Create an instance of the JSRDotNETManager
-    m_manager = gcnew JSRDotNETManager("");
-
-    m_manager->StatusChangeEventHandler +=
-        gcnew System::EventHandler<EventArgsStatusChange ^>(
-            this, &JSRSDKWrapper::OnStatusChangedEvent);
-    m_manager->NotifyEventHandler +=
-        gcnew System::EventHandler<EventArgsManagerNotify ^>(
-            this, &JSRSDKWrapper::OnNotifyEvent);
-  }
-
-  ~JSRSDKWrapper() {
+// Destructor
+JSRSDKWrapper::~JSRSDKWrapper() {
+  if (m_manager != nullptr) {
     // Unsubscribe from events
     m_manager->StatusChangeEventHandler -=
-        gcnew System::EventHandler<EventArgsStatusChange ^>(
+        gcnew EventHandler<EventArgsStatusChange ^>(
             this, &JSRSDKWrapper::OnStatusChangedEvent);
+
     m_manager->NotifyEventHandler -=
-        gcnew System::EventHandler<EventArgsManagerNotify ^>(
+        gcnew EventHandler<EventArgsManagerNotify ^>(
             this, &JSRSDKWrapper::OnNotifyEvent);
   }
 
-  // Called from the unmanaged adapter
-  void SetStatusChangeCallback(StatusChangeCallback *cb) {
-    m_nativeStatusCb = cb;
+  // Call finalizer to clean up unmanaged resources
+  this->!JSRSDKWrapper();
+}
+
+// Finalizer
+JSRSDKWrapper::!JSRSDKWrapper() {
+  // Clean up unmanaged resources
+  m_nativeStatusCb = nullptr;
+  m_nativeNotifyCb = nullptr;
+}
+
+// Event handler for status change events
+void JSRSDKWrapper::OnStatusChangedEvent(Object ^ sender,
+                                         EventArgsStatusChange ^ eventData) {
+  if (m_nativeStatusCb != nullptr) {
+    StatusChangedEvent nativeEvt;
+    // Marshal managed event data to native if needed
+    // TODO: Populate nativeEvt from eventData
+    (*m_nativeStatusCb)(nativeEvt);
   }
+}
 
-  void SetNotifyCallback(NotifyCallback *cb) { m_nativeNotifyCb = cb; }
+// Event handler for notify events
+void JSRSDKWrapper::OnNotifyEvent(Object ^ sender,
+                                  EventArgsManagerNotify ^ eventData) {
+  if (m_nativeNotifyCb != nullptr) {
+    NotifyEvent nativeEvt = notifyEventFromManaged(eventData);
+    (*m_nativeNotifyCb)(nativeEvt);
+  }
+}
 
-  property JSRDotNETManager ^
-      dotNETManager { JSRDotNETManager ^ get() { return m_manager; } }
-};
+// Set the native status change callback
+void JSRSDKWrapper::SetStatusChangeCallback(StatusChangeCallback *cb) {
+  m_nativeStatusCb = cb;
+}
+
+// Set the native notify callback
+void JSRSDKWrapper::SetNotifyCallback(NotifyCallback *cb) {
+  m_nativeNotifyCb = cb;
+}
+
+// Property getter for DotNETManager
+JSRDotNETManager ^ JSRSDKWrapper::dotNETManager::get() { return m_manager; }

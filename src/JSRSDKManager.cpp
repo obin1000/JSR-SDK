@@ -1,6 +1,6 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
 #include "JSR-SDK/marshals/MarshalTypes.h"
-#include "JSRSDKWrapper.cpp"
+#include "JSR-SDK/JSRSDKWrapper.h"
 
 #include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
