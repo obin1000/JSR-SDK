@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JSR-SDK/enums/ConnectionType.h"
+#include "JSR-SDK/enums/C_CONNECTION_TYPE.h"
 
 #include <string>
 #include <vector>
@@ -33,7 +33,7 @@ public:
   /**
    * @brief A list of supported connection types for the library.
    */
-  std::vector<ConnectionType> ConnectionType;
+  std::vector<C_CONNECTION_TYPE> ConnectionType;
 
   /**
    * @brief A list of models supported by the library.

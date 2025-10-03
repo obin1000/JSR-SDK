@@ -1,8 +1,9 @@
 #pragma once
 
-#include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
-#include "JSR-SDK/enums/PulserReceiverStateC.h"
-#include "JSR-SDK/enums/StatusChange.h"
+#include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
+#include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
+#include "JSR-SDK/enums/C_STATUS_CHANGE.h"
+#include "JSR-SDK/enums/C_ERROR_CODE.h"
 
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
@@ -16,19 +17,19 @@ public:
 
   std::string pulserProperty;
 
-  PulserReceiverStateC pulserState;
+  C_PULSER_RECEIVER_STATE pulserState;
 
   std::string newValue;
 
-  PulserPropertyDataTypeC dataType;
+  C_PULSER_PROPERTY_DATA_TYPE dataType;
 
-  StatusChange changeType;
+  C_STATUS_CHANGE changeType;
 
   PulserReceiverID pulserReceiverId;
 
   std::string errorMessage;
 
-  ErrorCode errorCode;
+  C_ERROR_CODE errorCode;
 
   ExceptionJSRSDK thrownException;
 };

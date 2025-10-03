@@ -1,10 +1,10 @@
 #pragma once
 
-#include "JSR-SDK/enums/DiscoveryStateFlagsC.h"
-#include "JSR-SDK/enums/NotifyType.h"
-#include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
-#include "JSR-SDK/enums/PulserReceiverStateC.h"
-#include "JSR-SDK/enums/StatusChange.h"
+#include "JSR-SDK/enums/C_DISCOVERY_STATE_FLAGS.h"
+#include "JSR-SDK/enums/C_NOTIFY_TYPE.h"
+#include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
+#include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
+#include "JSR-SDK/enums/C_STATUS_CHANGE.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
 #include "JSR-SDK/structs/InstrumentID.h"
 
@@ -17,7 +17,7 @@ class NotifyEvent {
 public:
   std::string model;
 
-  PulserReceiverStateC state;
+  C_PULSER_RECEIVER_STATE state;
 
   std::string newValue;
 
@@ -40,15 +40,15 @@ public:
   PulserReceiverID pulserReceiverId;
   std::string serial;
 
-  DiscoveryStateFlagsC discoverState;
+  C_DISCOVERY_STATE_FLAGS discoverState;
 
   InstrumentID instrumentId;
 
   std::string pluginName;
 
-  NotifyType notifyType;
+  C_NOTIFY_TYPE notifyType;
 
-  PulserPropertyDataTypeC dataType;
+  C_PULSER_PROPERTY_DATA_TYPE dataType;
 };
 
 using NotifyCallback = std::function<void(const NotifyEvent &)>;

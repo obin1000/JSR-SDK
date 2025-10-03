@@ -77,7 +77,7 @@
     <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_DATA_TYPE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLES.h">
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\enums\C_PULSER_RECEIVER_STATE.h">

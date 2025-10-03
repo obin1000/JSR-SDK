@@ -3,16 +3,16 @@
 #include "structs/InstrumentID.h"
 #include "structs/JSRLibMetadata.h"
 #include "structs/PulserReceiverID.h"
-#include "enums/IsPulsing.h"
-#include "enums/ManagerState.h"
-#include "enums/PowerLimit.h"
-#include "enums/PropertyUnits.h"
-#include "enums/PulserImpedance.h"
-#include "enums/PulserPropertyRoles.h"
-#include "enums/ReceiverMode.h"
-#include "enums/TriggerImpedance.h"
-#include "enums/TriggerPolarity.h"
-#include "enums/TriggerSource.h"
+#include "enums/C_IS_PULSING.h"
+#include "enums/C_MANAGER_STATE.h"
+#include "enums/C_POWER_LIMIT.h"
+#include "enums/C_PROPERTY_UNITS.h"
+#include "enums/C_PULSER_IMPEDANCE.h"
+#include "enums/C_PULSER_PROPERTY_ROLE.h"
+#include "enums/C_RECEIVER_MODE.h"
+#include "enums/C_TRIGGER_IMPEDANCE.h"
+#include "enums/C_TRIGGER_POLARITY.h"
+#include "enums/C_TRIGGER_SOURCE.h"
 #include "events/NotifyEvent.h"
 #include "events/StatusChangedEvent.h"
 
@@ -159,7 +159,7 @@ public:
    * @param settingName The name of the pulser property.
    * @return A PropertyUnits enum value representing the units of the property.
    */
-  virtual PropertyUnits GetPulserPropertyUnits(std::string settingName) = 0;
+  virtual C_PROPERTY_UNITS GetPulserPropertyUnits(std::string settingName) = 0;
 
   /**
    * @brief Retrieves the units of a specific pulser property as a string.
@@ -283,7 +283,7 @@ public:
    * @param value The value to set for the property.
    */
   virtual void SetPulserPropertyValue(std::string settingName,
-                                      PulserPropertyRoles role,
+                                      C_PULSER_PROPERTY_ROLE role,
                                       const std::string &value) = 0;
 
   /**
@@ -386,13 +386,13 @@ public:
    * @brief Retrieves the trigger edge polarity.
    * @return The current trigger edge polarity.
    */
-  virtual TriggerPolarity getTriggerEdgePolarity() = 0;
+  virtual C_TRIGGER_POLARITY getTriggerEdgePolarity() = 0;
 
   /**
    * @brief Sets the trigger edge polarity.
    * @param polarity The trigger edge polarity to set.
    */
-  virtual void setTriggerEdgePolarity(TriggerPolarity polarity) = 0;
+  virtual void setTriggerEdgePolarity(C_TRIGGER_POLARITY polarity) = 0;
 
   /**
    * @brief Checks if the trigger edge polarity is supported.
@@ -446,13 +446,13 @@ public:
    * @brief Retrieves the current receiver mode.
    * @return The current receiver mode.
    */
-  virtual RecieverMode getReceiverMode() = 0;
+  virtual C_RECEIVER_MODE getReceiverMode() = 0;
 
   /**
    * @brief Sets the receiver mode.
    * @param mode The receiver mode to set.
    */
-  virtual void setReceiverMode(RecieverMode mode) = 0;
+  virtual void setReceiverMode(C_RECEIVER_MODE mode) = 0;
 
   /**
    * @brief Checks if the "Both" receiver mode is supported.
@@ -578,13 +578,13 @@ public:
    * @brief Retrieves the current trigger source.
    * @return The current trigger source as a TriggerSource enum value.
    */
-  virtual TriggerSource getTriggerSource() = 0;
+  virtual C_TRIGGER_SOURCE getTriggerSource() = 0;
 
   /**
    * @brief Sets the trigger source.
    * @param source The trigger source to set as a TriggerSource enum value.
    */
-  virtual void setTriggerSource(TriggerSource source) = 0;
+  virtual void setTriggerSource(C_TRIGGER_SOURCE source) = 0;
 
   /**
    * @brief Retrieves the names of available pulser trigger source values.
@@ -828,14 +828,14 @@ public:
    * @brief Retrieves the trigger impedance.
    * @return The trigger impedance as a TriggerImpedance enum value.
    */
-  virtual TriggerImpedance getTriggerImpedance() = 0;
+  virtual C_TRIGGER_IMPEDANCE getTriggerImpedance() = 0;
 
   /**
    * @brief Sets the trigger impedance.
    * @param impedance The trigger impedance to set as a TriggerImpedance enum
    * value.
    */
-  virtual void setTriggerImpedance(TriggerImpedance impedance) = 0;
+  virtual void setTriggerImpedance(C_TRIGGER_IMPEDANCE impedance) = 0;
 
   /**
    * @brief Checks if the trigger impedance is supported.
@@ -847,14 +847,14 @@ public:
    * @brief Retrieves the pulser impedance.
    * @return The pulser impedance as a PulserImpedance enum value.
    */
-  virtual PulserImpedance getPulserImpedance() = 0;
+  virtual C_PULSER_IMPEDANCE getPulserImpedance() = 0;
 
   /**
    * @brief Sets the pulser impedance.
    * @param impedance The pulser impedance to set as a PulserImpedance enum
    * value.
    */
-  virtual void setPulserImpedance(PulserImpedance impedance) = 0;
+  virtual void setPulserImpedance(C_PULSER_IMPEDANCE impedance) = 0;
 
   /**
    * @brief Checks if the pulser impedance is supported.
@@ -878,13 +878,13 @@ public:
    * @brief Retrieves the pulser's current pulsing state.
    * @return The pulsing state as an IsPulsing enum value.
    */
-  virtual IsPulsing getPulserIsPulsing() = 0;
+  virtual C_IS_PULSING getPulserIsPulsing() = 0;
 
   /**
    * @brief Retrieves the pulser's power limit status.
    * @return The power limit status as a PowerLimit enum value.
    */
-  virtual PowerLimit getPulserPowerLimitStatus() = 0;
+  virtual C_POWER_LIMIT getPulserPowerLimitStatus() = 0;
 
   /**
    * @brief Retrieves the pulser trigger count.
@@ -1066,7 +1066,7 @@ public:
    * @brief Retrieves the current state of the manager.
    * @return The current state of the manager as a ManagerState enum value.
    */
-  virtual ManagerState getManagerState() = 0;
+  virtual C_MANAGER_STATE getManagerState() = 0;
 
   /**
    * @brief Checks if the maximum PRFs for the pulser are supported.

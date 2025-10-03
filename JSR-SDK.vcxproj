@@ -33,7 +33,7 @@
     <ClInclude Include="include\JSR-SDK\enums\C_PROPERTY_UNITS.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_PULSER_IMPEDANCE.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_DATA_TYPE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLES.h" />
+    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLE.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_PULSER_RECEIVER_STATE.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_RECEIVER_MODE.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_STATUS_CHANGE.h" />

@@ -1,30 +1,31 @@
 #pragma once
 
-#include "JSR-SDK/enums/ErrorCode.h"
+#include "JSR-SDK/enums/C_ERROR_CODE.h"
 
 #include <string>
 
 class ExceptionJSRSDK {
 private:
-  ErrorCode errorCode;
+  C_ERROR_CODE errorCode;
   std::string msg;
   std::string innerMSG;
 
 public:
   ExceptionJSRSDK() = default;
 
-  ExceptionJSRSDK(ErrorCode errorCode, std::string msg) {
+  ExceptionJSRSDK(C_ERROR_CODE errorCode, std::string msg) {
     this->errorCode = errorCode;
     this->msg = msg;
     this->innerMSG = "None";
   }
-  ExceptionJSRSDK(ErrorCode errorCode, std::string msg, std::string innerMSG) {
+  ExceptionJSRSDK(C_ERROR_CODE errorCode, std::string msg,
+                  std::string innerMSG) {
     this->errorCode = errorCode;
     this->msg = msg;
     this->innerMSG = innerMSG;
   }
 
-  ErrorCode getErrorCode() { return errorCode; }
+  C_ERROR_CODE getErrorCode() { return errorCode; }
   std::string getMessage() { return msg; }
   std::string getInnerMessage() { return innerMSG; }
 };

@@ -1,6 +1,6 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
-#include "JSRSDKWrapper.cpp"
 #include "JSR-SDK/marshals/MarshalTypes.h"
+#include "JSRSDKWrapper.cpp"
 
 #include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
@@ -239,7 +239,7 @@ public:
     }
   }
 
-  PropertyUnits GetPulserPropertyUnits(std::string settingName) {
+  C_PROPERTY_UNITS GetPulserPropertyUnits(std::string settingName) {
     try {
 
       return propertyUnitsFromManaged(
@@ -414,7 +414,8 @@ public:
     }
   }
 
-  void SetPulserPropertyValue(std::string settingName, PulserPropertyRoles role,
+  void SetPulserPropertyValue(std::string settingName,
+                              C_PULSER_PROPERTY_ROLE role,
                               const std::string &value) {
     try {
 
@@ -568,7 +569,7 @@ public:
     }
   }
 
-  TriggerPolarity getTriggerEdgePolarity() {
+  C_TRIGGER_POLARITY getTriggerEdgePolarity() {
     try {
 
       return triggerPolarityFromManaged(
@@ -578,7 +579,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
-  void setTriggerEdgePolarity(TriggerPolarity polarity) {
+  void setTriggerEdgePolarity(C_TRIGGER_POLARITY polarity) {
     try {
 
       m_manager->dotNETManager->TriggerEdgePolarity =
@@ -660,7 +661,6 @@ public:
   }
   void setLowPassFilterIndex(int index) {
     try {
-
       m_manager->dotNETManager->LowPassFilterIndex = index;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -668,18 +668,16 @@ public:
     }
   }
 
-  RecieverMode getReceiverMode() {
+  C_RECEIVER_MODE getReceiverMode() {
     try {
-
       return receiverModeFromManaged(m_manager->dotNETManager->ReceiverMode);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
-  void setReceiverMode(RecieverMode mode) {
+  void setReceiverMode(C_RECEIVER_MODE mode) {
     try {
-
       m_manager->dotNETManager->ReceiverMode = receiverModeToManaged(mode);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -689,7 +687,6 @@ public:
 
   bool getReceiverModeBothSupported() {
     try {
-
       return m_manager->dotNETManager->ReceiverModeBothSupported;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -899,18 +896,16 @@ public:
     }
   }
 
-  TriggerSource getTriggerSource() {
+  C_TRIGGER_SOURCE getTriggerSource() {
     try {
-
       return triggerSourceFromManaged(m_manager->dotNETManager->TriggerSource);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
-  void setTriggerSource(TriggerSource source) {
+  void setTriggerSource(C_TRIGGER_SOURCE source) {
     try {
-
       m_manager->dotNETManager->TriggerSource = triggerSourceToManaged(source);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -1303,7 +1298,7 @@ public:
     }
   }
 
-  TriggerImpedance getTriggerImpedance() {
+  C_TRIGGER_IMPEDANCE getTriggerImpedance() {
     try {
 
       return triggerImpedanceFromManaged(
@@ -1313,7 +1308,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
-  void setTriggerImpedance(TriggerImpedance impedance) {
+  void setTriggerImpedance(C_TRIGGER_IMPEDANCE impedance) {
     try {
 
       m_manager->dotNETManager->TriggerImpedance =
@@ -1334,7 +1329,7 @@ public:
     }
   }
 
-  PulserImpedance getPulserImpedance() {
+  C_PULSER_IMPEDANCE getPulserImpedance() {
     try {
 
       return pulserImpedanceFromManaged(
@@ -1344,7 +1339,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
-  void setPulserImpedance(PulserImpedance impedance) {
+  void setPulserImpedance(C_PULSER_IMPEDANCE impedance) {
     try {
 
       m_manager->dotNETManager->PulserImpedance =
@@ -1386,7 +1381,7 @@ public:
     }
   }
 
-  IsPulsing getPulserIsPulsing() {
+  C_IS_PULSING getPulserIsPulsing() {
     try {
 
       return isPulsingFromManaged(m_manager->dotNETManager->PulserIsPulsing);
@@ -1396,7 +1391,7 @@ public:
     }
   }
 
-  PowerLimit getPulserPowerLimitStatus() {
+  C_POWER_LIMIT getPulserPowerLimitStatus() {
     try {
 
       return powerLimitFromManaged(
@@ -1692,7 +1687,7 @@ public:
     }
   }
 
-  ManagerState getManagerState() {
+  C_MANAGER_STATE getManagerState() {
     try {
 
       return managerStateFromManaged(m_manager->dotNETManager->ManagerState);

@@ -1,12 +1,10 @@
 ﻿#pragma once
 
 #include "MarshalEnums.h"
-
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/InstrumentID.h"
 #include "JSR-SDK/structs/JSRLibMetadata.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
-
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"
 
@@ -68,7 +66,7 @@ static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
     return ExceptionJSRSDK();
   }
 
-  ErrorCode errorCode = errorCodeFromManaged(managedException->ErrorCode);
+  C_ERROR_CODE errorCode = errorCodeFromManaged(managedException->ErrorCode);
   std::string message =
       msclr::interop::marshal_as<std::string>(managedException->Message);
   std::string innerMessage =
@@ -145,7 +143,7 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
 
   if (metadata->ConnectionType != nullptr)
         unmanaged.ConnectionType =
-            listToVectorMarshall<CConnectionType, CConnectionType>(
+            listToVectorMarshall<CONNECTION_TYPE, C_CONNECTION_TYPE>(
                 metadata->ConnectionType);
 
   return unmanaged;
