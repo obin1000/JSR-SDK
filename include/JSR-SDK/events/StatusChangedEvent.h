@@ -4,8 +4,8 @@
 #include "JSR-SDK/enums/PulserReceiverStateC.h"
 #include "JSR-SDK/enums/StatusChange.h"
 
-#include "JSR-SDK/ExceptionJSRSDK.h"
-#include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/structs/ExceptionJSRSDK.h"
+#include "JSR-SDK/structs/PulserReceiverID.h"
 
 #include <functional>
 #include <string>

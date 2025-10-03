@@ -11,7 +11,8 @@
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+      <Extensions>
+        rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -25,13 +26,13 @@
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h">
+    <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\InstrumentID.h">
+    <ClInclude Include="include\JSR-SDK\structs\InstrumentID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\PulserReceiverID.h">
+    <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\enums\ReceiverMode.h">
@@ -91,7 +92,7 @@
     <ClInclude Include="include\JSR-SDK\enums\StatusChange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\ExceptionJSRSDK.h">
+    <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

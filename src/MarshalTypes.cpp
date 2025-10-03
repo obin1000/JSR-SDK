@@ -2,10 +2,10 @@
 
 #include "MarshalEnums.cpp"
 
-#include "JSR-SDK/ExceptionJSRSDK.h"
-#include "JSR-SDK/InstrumentID.h"
-#include "JSR-SDK/JSRLibMetadata.h"
-#include "JSR-SDK/PulserReceiverID.h"
+#include "JSR-SDK/structs/ExceptionJSRSDK.h"
+#include "JSR-SDK/structs/InstrumentID.h"
+#include "JSR-SDK/structs/JSRLibMetadata.h"
+#include "JSR-SDK/structs/PulserReceiverID.h"
 
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"

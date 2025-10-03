@@ -5,8 +5,8 @@
 #include "JSR-SDK/enums/PulserPropertyDataTypeC.h"
 #include "JSR-SDK/enums/PulserReceiverStateC.h"
 #include "JSR-SDK/enums/StatusChange.h"
-#include "JSR-SDK/PulserReceiverID.h"
-#include "JSR-SDK/InstrumentID.h"
+#include "JSR-SDK/structs/PulserReceiverID.h"
+#include "JSR-SDK/structs/InstrumentID.h"
 
 #include <functional>
 #include <string>

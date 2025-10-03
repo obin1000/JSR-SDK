@@ -43,11 +43,11 @@
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
-    <ClInclude Include="include\JSR-SDK\ExceptionJSRSDK.h" />
-    <ClInclude Include="include\JSR-SDK\InstrumentID.h" />
-    <ClInclude Include="include\JSR-SDK\JSRLibMetadata.h" />
+    <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h" />
+    <ClInclude Include="include\JSR-SDK\structs\InstrumentID.h" />
+    <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
-    <ClInclude Include="include\JSR-SDK\PulserReceiverID.h" />
+    <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
     <ClInclude Include="include\JSR-SDK\enums\ReceiverMode.h" />
   </ItemGroup>
   <ItemGroup>
