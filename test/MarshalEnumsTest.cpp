@@ -1,4 +1,4 @@
-#include "../src/MarshalEnums.cpp"
+#include "JSR-SDK/marshals/MarshalEnums.h"
 #include "pch.h"
 #include <gtest/gtest.h>
 

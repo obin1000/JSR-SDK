@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "MarshalEnums.cpp"
+#include "MarshalEnums.h"
 
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/InstrumentID.h"
@@ -17,7 +17,7 @@ using namespace System::Collections::Generic;
 using namespace msclr::interop;
 
 /**
- * @file MarshalTypes.cpp
+ * @file MarshalTypes.h
  * @brief This file contains the conversion functions between JSR-SDK types and
  * JSRDotNETSDK types.
  * These can't be exposed through the headers as it contains references to

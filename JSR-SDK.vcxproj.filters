@@ -95,18 +95,18 @@
     <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\marshals\MarshalEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\marshals\MarshalTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MarshalTypes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\JSRSDKWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MarshalEnums.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

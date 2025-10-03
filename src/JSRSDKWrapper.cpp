@@ -1,6 +1,6 @@
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"
-#include "MarshalTypes.cpp"
+#include "JSR-SDK/marshals/MarshalTypes.h"
 
 using namespace JSRDotNETSDK;
 using namespace System::Runtime::InteropServices;

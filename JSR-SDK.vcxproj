@@ -21,8 +21,6 @@
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
-    <ClCompile Include="src\MarshalEnums.cpp" />
-    <ClCompile Include="src\MarshalTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\JSR-SDK\enums\ConnectionType.h" />
@@ -43,6 +41,8 @@
     <ClInclude Include="include\JSR-SDK\enums\TriggerSource.h" />
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
+    <ClInclude Include="include\JSR-SDK\marshals\MarshalEnums.h" />
+    <ClInclude Include="include\JSR-SDK\marshals\MarshalTypes.h" />
     <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h" />
     <ClInclude Include="include\JSR-SDK\structs\InstrumentID.h" />
     <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
@@ -109,16 +109,24 @@
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+      Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+      Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='dynamic|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+      Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+      Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
@@ -203,6 +211,8 @@
       <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*" />
     </ItemGroup>
     <Message Importance="high" Text="Checking for plugin changes in external\jsr\plugins..." />
-    <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginSourceFiles)"
+      DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
   </Target>
 </Project>

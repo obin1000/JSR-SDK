@@ -2,11 +2,7 @@
 #include "pch.h"
 #include <gtest/gtest.h>
 
-// Pull in the conversion helpers we want to test.
-// NOTE: This file contains several `static`‑scope functions.  Including the
-// .cpp directly makes them visible in this translation unit without changing
-// the production code.
-#include "../src/MarshalTypes.cpp"
+#include "JSR-SDK/marshals/MarshalTypes.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -18,7 +14,7 @@ using namespace JSRDotNETSDK;
 //  The production interfaces live in the C# SDK assembly.  Here we create
 //  minimal C++/CLI stubs that satisfy the compiler so we can feed known data
 //  through the conversion pipeline.  Only the members actually accessed by
-//  MarshalTypes.cpp are implemented.
+//  MarshalTypes.h are implemented.
 //--------------------------------------------------------------------------
 
 // --- IInstrumentIdentity --------------------------------------------------
