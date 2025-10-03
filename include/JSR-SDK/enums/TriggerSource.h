@@ -8,5 +8,4 @@ enum class TriggerSource {
   EXTERNAL = 1, // External trigger source.
   SLAVE = 2,    // Slave trigger source.
   LAST_VAL = 3, // Last valid trigger source.
-  UNKNOWN = 4,  // Unknown trigger source.
 };

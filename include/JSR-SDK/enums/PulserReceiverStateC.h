@@ -11,5 +11,4 @@ enum class PulserReceiverStateC {
   ERRORC = 3,        // The pulser receiver has encountered an error.
   NO_PULSER = 4,    // No pulser is connected to the receiver.
   DETACHED = 5,     // The pulser receiver has been detached.
-  UNKNOWN = 6,       // The state of the pulser receiver is unknown.
 };

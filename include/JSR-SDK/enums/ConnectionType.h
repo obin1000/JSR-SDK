@@ -12,5 +12,4 @@ enum class ConnectionType {
   ETHERNET = 4,   // Ethernet connection.
   FIREWIRE = 5,   // FireWire connection.
   BLUETOOTH = 6,  // Bluetooth connection.
-  UNKNOWN = 7,    // Unknown connection type.
 };

@@ -5,5 +5,4 @@ enum class DiscoveryStateFlagsC {
   ACTIVE = 1,
   PENDING = 2,
   STOPPED_ON_ERR = 4,
-  UNKNOWN = 8,
 };

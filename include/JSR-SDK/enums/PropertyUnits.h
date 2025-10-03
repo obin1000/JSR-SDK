@@ -15,5 +15,4 @@ enum class PropertyUnits {
   UNIT_VOLTS = 8,       // Volts.
   UNIT_OHMS = 9,        // Ohms.
   UNIT_PICOFARADS = 10, // Picofarads.
-  UNKNOWN = 11,         // Unknown unit.
 };

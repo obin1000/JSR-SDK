@@ -18,5 +18,4 @@ enum class PulserPropertyRoles {
   INDEXVALUES = 11,           // Index values.
   NUMERATOR = 12,             // Numerator role.
   OTHER = 13,                 // Other role.
-  UKNOWN = 14,                // Unknown role.
 };

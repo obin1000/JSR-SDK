@@ -19,6 +19,7 @@
 #include "JSR-SDK/enums/TriggerSource.h"
 
 #include <msclr/marshal_cppstd.h>
+#include <stdexcept>
 
 using namespace JSRDotNETSDK;
 
@@ -40,7 +41,7 @@ receiverModeFromManaged(const RECEIVER_MODE &mode) {
   case RECEIVER_MODE::THRU:
     return RecieverMode::THRU;
   default:
-    return RecieverMode::UNKNOWN;
+    throw std::invalid_argument("Unknown RECEIVER_MODE value");
   }
 }
 
@@ -56,8 +57,7 @@ receiverModeToManaged(const RecieverMode &mode) {
   case RecieverMode::THRU:
     return RECEIVER_MODE::THRU;
   default:
-    // TODO: throw exception for unknown enum value?
-    return RECEIVER_MODE::LAST_VAL;
+    throw std::invalid_argument("Unknown RecieverMode value");
   }
 }
 
@@ -74,7 +74,7 @@ triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
   case TRIGGER_SOURCE::SLAVE:
     return TriggerSource::SLAVE;
   default:
-    return TriggerSource::UNKNOWN;
+    throw std::invalid_argument("Unknown TRIGGER_SOURCE value");
   }
 }
 
@@ -90,8 +90,7 @@ triggerSourceToManaged(const TriggerSource &source) {
   case TriggerSource::SLAVE:
     return TRIGGER_SOURCE::SLAVE;
   default:
-    // TODO: throw exception for unknown enum value?
-    return TRIGGER_SOURCE::LAST_VAL;
+    throw std::invalid_argument("Unknown TriggerSource value");
   }
 }
 
@@ -106,7 +105,7 @@ triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
   case TRIGGER_POLARITY::LAST_VAL:
     return TriggerPolarity::LAST_VAL;
   default:
-    return TriggerPolarity::UNKNOWN;
+    throw std::invalid_argument("Unknown TRIGGER_POLARITY value");
   }
 }
 
@@ -120,8 +119,7 @@ triggerPolarityToManaged(const TriggerPolarity &source) {
   case TriggerPolarity::LAST_VAL:
     return TRIGGER_POLARITY::LAST_VAL;
   default:
-    // TODO: throw exception for unknown enum value?
-    return TRIGGER_POLARITY::LAST_VAL;
+    throw std::invalid_argument("Unknown TriggerPolarity value");
   }
 }
 
@@ -136,7 +134,7 @@ triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
   case TRIGGER_IMPEDANCE::LAST_VAL:
     return TriggerImpedance::LAST_VAL;
   default:
-    return TriggerImpedance::UNKNOWN;
+    throw std::invalid_argument("Unknown TRIGGER_IMPEDANCE value");
   }
 }
 
@@ -150,8 +148,7 @@ triggerImpedanceToManaged(const TriggerImpedance &source) {
   case TriggerImpedance::LAST_VAL:
     return TRIGGER_IMPEDANCE::LAST_VAL;
   default:
-    // TODO: throw exception for unknown enum value?
-    return TRIGGER_IMPEDANCE::LAST_VAL;
+    throw std::invalid_argument("Unknown TriggerImpedance value");
   }
 }
 
@@ -166,7 +163,7 @@ pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
   case PULSER_IMPEDANCE::LAST_VAL:
     return PulserImpedance::LAST_VAL;
   default:
-    return PulserImpedance::UNKNOWN;
+    throw std::invalid_argument("Unknown PULSER_IMPEDANCE value");
   }
 }
 
@@ -180,8 +177,7 @@ pulserImpedanceToManaged(const PulserImpedance &source) {
   case PulserImpedance::LAST_VAL:
     return PULSER_IMPEDANCE::LAST_VAL;
   default:
-    // TODO: throw exception for unknown enum value?
-    return PULSER_IMPEDANCE::LAST_VAL;
+    throw std::invalid_argument("Unknown PulserImpedance value");
   }
 }
 
@@ -193,8 +189,10 @@ isPulsingFromManaged(const IS_PULSING &source) {
     return IsPulsing::ACTIVE;
   case IS_PULSING::INACTIVE:
     return IsPulsing::INACTIVE;
-  default:
+  case IS_PULSING::UNKNOWN:
     return IsPulsing::UNKNOWN;
+  default:
+    throw std::invalid_argument("Unknown IS_PULSING value");
   }
 }
 
@@ -204,8 +202,10 @@ inline constexpr static IS_PULSING isPulsingToManaged(const IsPulsing &source) {
     return IS_PULSING::ACTIVE;
   case IsPulsing::INACTIVE:
     return IS_PULSING::INACTIVE;
-  default:
+  case IsPulsing::UNKNOWN:
     return IS_PULSING::UNKNOWN;
+  default:
+    throw std::invalid_argument("Unknown IsPulsing value");
   }
 }
 
@@ -218,7 +218,7 @@ powerLimitFromManaged(const POWER_LIMIT &source) {
   case POWER_LIMIT::WITHIN_LIMIT:
     return PowerLimit::WITHIN_LIMIT;
   default:
-    return PowerLimit::UNKNOWN;
+    throw std::invalid_argument("Unknown POWER_LIMIT value");
   }
 }
 
@@ -230,7 +230,7 @@ powerLimitToManaged(const PowerLimit &source) {
   case PowerLimit::WITHIN_LIMIT:
     return POWER_LIMIT::WITHIN_LIMIT;
   default:
-    return POWER_LIMIT::UNKNOWN;
+    throw std::invalid_argument("Unknown PowerLimit value");
   }
 }
 
@@ -248,7 +248,7 @@ managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
   case JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN:
     return ManagerState::SHUTTING_DOWN;
   default:
-    return ManagerState::UNKNOWN;
+    throw std::invalid_argument("Unknown MANAGER_STATE value");
   }
 }
 
@@ -264,8 +264,7 @@ managerStateToManaged(const ManagerState &state) {
   case ManagerState::SHUTTING_DOWN:
     return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
   default:
-    // TODO: throw exception for unknown enum value?
-    return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
+    throw std::invalid_argument("Unknown ManagerState value");
   }
 }
 
@@ -288,7 +287,7 @@ connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
   case CONNECTION_TYPE::BLUETOOTH:
     return ConnectionType::BLUETOOTH;
   default:
-    return ConnectionType::UNKNOWN;
+    throw std::invalid_argument("Unknown CONNECTION_TYPE value");
   }
 }
 
@@ -310,23 +309,9 @@ connectionTypeToManaged(const ConnectionType &connection) {
   case ConnectionType::BLUETOOTH:
     return CONNECTION_TYPE::BLUETOOTH;
   default:
-    // TODO: throw exception for unknown enum value?
-    return CONNECTION_TYPE::SOFTWARE;
+    throw std::invalid_argument("Unknown ConnectionType value");
   }
 }
-
-namespace msclr::interop {
-template <>
-inline ConnectionType
-marshal_as<ConnectionType, CONNECTION_TYPE>(const CONNECTION_TYPE &from) {
-  return connectionTypeFromManaged(from);
-}
-template <>
-inline CONNECTION_TYPE
-marshal_as<CONNECTION_TYPE, ConnectionType>(const ConnectionType &from) {
-  return connectionTypeToManaged(from);
-}
-} // namespace msclr::interop
 
 // converting JSR-SDK::PropertyUnits <-> JSRDotNETSDK::PROPERTY_UNITS
 inline constexpr static PropertyUnits
@@ -355,7 +340,7 @@ propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
   case PROPERTY_UNITS::UNIT_PICOFARADS:
     return PropertyUnits::UNIT_PICOFARADS;
   default:
-    return PropertyUnits::UNKNOWN;
+    throw std::invalid_argument("Unknown PROPERTY_UNITS value");
   }
 }
 inline constexpr static PROPERTY_UNITS
@@ -384,8 +369,7 @@ propertyUnitsToManaged(const PropertyUnits &units) {
   case PropertyUnits::UNIT_PICOFARADS:
     return PROPERTY_UNITS::UNIT_PICOFARADS;
   default:
-    // TODO: throw exception for unknown enum value?
-    return PROPERTY_UNITS::UNIT_NONE;
+    throw std::invalid_argument("Unknown PropertyUnits value");
   }
 }
 
@@ -422,7 +406,7 @@ pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   case PulserPropertyRole::OTHER:
     return PulserPropertyRoles::OTHER;
   default:
-    return PulserPropertyRoles::UKNOWN;
+    throw std::invalid_argument("Unknown PulserPropertyRole value");
   }
 }
 inline constexpr static PulserPropertyRole
@@ -457,8 +441,7 @@ pulserPropertyRoleToManaged(const PulserPropertyRoles &role) {
   case PulserPropertyRoles::OTHER:
     return PulserPropertyRole::OTHER;
   default:
-    // TODO: throw exception for unknown enum value?
-    return PulserPropertyRole::OTHER;
+    throw std::invalid_argument("Unknown PulserPropertyRoles value");
   }
 }
 
@@ -475,7 +458,7 @@ statusChangeFromManaged(const STATUS_CHANGE &change) {
   case STATUS_CHANGE::STATE_CHANGE:
     return StatusChange::STATE_CHANGE;
   default:
-    return StatusChange::UNKNOWN;
+    throw std::invalid_argument("Unknown STATUS_CHANGE value");
   }
 }
 
@@ -491,8 +474,7 @@ statusChangeToManaged(const StatusChange &change) {
   case StatusChange::STATE_CHANGE:
     return STATUS_CHANGE::STATE_CHANGE;
   default:
-    // TODO: throw exception for unknown enum value?
-    return STATUS_CHANGE::INSTRUMENT_DISCONNECT;
+    throw std::invalid_argument("Unknown StatusChange value");
   }
 }
 
@@ -514,7 +496,7 @@ pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   case PulserReceiverState::DETACHED:
     return PulserReceiverStateC::DETACHED;
   default:
-    return PulserReceiverStateC::UNKNOWN;
+    throw std::invalid_argument("Unknown PulserReceiverState value");
   }
 }
 
@@ -534,8 +516,7 @@ pulserReceiverStateToManaged(const PulserReceiverStateC &state) {
   case PulserReceiverStateC::DETACHED:
     return PulserReceiverState::DETACHED;
   default:
-    // TODO: throw exception for unknown enum value?
-    return PulserReceiverState::ERROR;
+    throw std::invalid_argument("Unknown PulserReceiverStateC value");
   }
 }
 
@@ -571,7 +552,7 @@ pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   case PulserPropertyDataType::OTHER:
     return PulserPropertyDataTypeC::OTHER;
   default:
-    return PulserPropertyDataTypeC::UNKNOWN;
+    throw std::invalid_argument("Unknown PulserPropertyDataType value");
   }
 }
 
@@ -605,8 +586,7 @@ pulserPropertyDataTypeToManaged(const PulserPropertyDataTypeC &type) {
   case PulserPropertyDataTypeC::OTHER:
     return PulserPropertyDataType::OTHER;
   default:
-    // TODO: throw exception for unknown enum value?
-    return PulserPropertyDataType::OTHER;
+    throw std::invalid_argument("Unknown PulserPropertyDataTypeC value");
   }
 }
 
@@ -660,7 +640,7 @@ inline constexpr static ErrorCode errorCodeFromManaged(const ERROR_CODE &code) {
   case ERROR_CODE::SUCCESS:
     return ErrorCode::SUCCESS;
   default:
-    return ErrorCode::UNKNOWN;
+    throw std::invalid_argument("Unknown ERROR_CODE value");
   }
 }
 
@@ -713,8 +693,7 @@ inline constexpr static ERROR_CODE errorCodeToManaged(const ErrorCode &code) {
   case ErrorCode::SUCCESS:
     return ERROR_CODE::SUCCESS;
   default:
-    // TODO: throw exception for unknown enum value?
-    return ERROR_CODE::UNKNOWN;
+    throw std::invalid_argument("Unknown ErrorCode value");
   }
 }
 
@@ -732,7 +711,7 @@ discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   case DiscoveryStateFlags::STOPPED_ON_ERR:
     return DiscoveryStateFlagsC::STOPPED_ON_ERR;
   default:
-    return DiscoveryStateFlagsC::UNKNOWN;
+    throw std::invalid_argument("Unknown DiscoveryStateFlags value");
   }
 }
 
@@ -748,8 +727,7 @@ discoveryStateFlagsToManaged(const DiscoveryStateFlagsC &flags) {
   case DiscoveryStateFlagsC::STOPPED_ON_ERR:
     return DiscoveryStateFlags::STOPPED_ON_ERR;
   default:
-    // TODO: throw exception for unknown enum value?
-    return DiscoveryStateFlags::NONE;
+    throw std::invalid_argument("Unknown DiscoveryStateFlagsC value");
   }
 }
 
@@ -774,7 +752,7 @@ notifyTypeFromManaged(const NOTIFY_TYPE &type) {
   case NOTIFY_TYPE::ERROR:
     return NotifyType::ERROR;
   default:
-    return NotifyType::UNKNOWN;
+    throw std::invalid_argument("Unknown NOTIFY_TYPE value");
   }
 }
 
@@ -798,7 +776,213 @@ notifyTypeToManaged(const NotifyType &type) {
   case NotifyType::ERROR:
     return NOTIFY_TYPE::ERROR;
   default:
-    // TODO: throw exception for unknown enum value?
-    return NOTIFY_TYPE::ERROR;
+    throw std::invalid_argument("Unknown NotifyType value");
   }
 }
+
+namespace msclr::interop {
+
+// RecieverMode marshals
+template <>
+inline RecieverMode
+marshal_as<RecieverMode, RECEIVER_MODE>(const RECEIVER_MODE &from) {
+  return receiverModeFromManaged(from);
+}
+template <>
+inline RECEIVER_MODE
+marshal_as<RECEIVER_MODE, RecieverMode>(const RecieverMode &from) {
+  return receiverModeToManaged(from);
+}
+
+// TriggerSource marshals
+template <>
+inline TriggerSource
+marshal_as<TriggerSource, TRIGGER_SOURCE>(const TRIGGER_SOURCE &from) {
+  return triggerSourceFromManaged(from);
+}
+template <>
+inline TRIGGER_SOURCE
+marshal_as<TRIGGER_SOURCE, TriggerSource>(const TriggerSource &from) {
+  return triggerSourceToManaged(from);
+}
+
+// TriggerPolarity marshals
+template <>
+inline TriggerPolarity
+marshal_as<TriggerPolarity, TRIGGER_POLARITY>(const TRIGGER_POLARITY &from) {
+  return triggerPolarityFromManaged(from);
+}
+template <>
+inline TRIGGER_POLARITY
+marshal_as<TRIGGER_POLARITY, TriggerPolarity>(const TriggerPolarity &from) {
+  return triggerPolarityToManaged(from);
+}
+
+// TriggerImpedance marshals
+template <>
+inline TriggerImpedance
+marshal_as<TriggerImpedance, TRIGGER_IMPEDANCE>(const TRIGGER_IMPEDANCE &from) {
+  return triggerImpedanceFromManaged(from);
+}
+template <>
+inline TRIGGER_IMPEDANCE
+marshal_as<TRIGGER_IMPEDANCE, TriggerImpedance>(const TriggerImpedance &from) {
+  return triggerImpedanceToManaged(from);
+}
+
+// PulserImpedance marshals
+template <>
+inline PulserImpedance
+marshal_as<PulserImpedance, PULSER_IMPEDANCE>(const PULSER_IMPEDANCE &from) {
+  return pulserImpedanceFromManaged(from);
+}
+template <>
+inline PULSER_IMPEDANCE
+marshal_as<PULSER_IMPEDANCE, PulserImpedance>(const PulserImpedance &from) {
+  return pulserImpedanceToManaged(from);
+}
+
+// IsPulsing marshals
+template <>
+inline IsPulsing marshal_as<IsPulsing, IS_PULSING>(const IS_PULSING &from) {
+  return isPulsingFromManaged(from);
+}
+template <>
+inline IS_PULSING marshal_as<IS_PULSING, IsPulsing>(const IsPulsing &from) {
+  return isPulsingToManaged(from);
+}
+
+// PowerLimit marshals
+template <>
+inline PowerLimit marshal_as<PowerLimit, POWER_LIMIT>(const POWER_LIMIT &from) {
+  return powerLimitFromManaged(from);
+}
+template <>
+inline POWER_LIMIT marshal_as<POWER_LIMIT, PowerLimit>(const PowerLimit &from) {
+  return powerLimitToManaged(from);
+}
+
+// ManagerState marshals
+template <>
+inline ManagerState marshal_as<ManagerState, JSRDotNETManager::MANAGER_STATE>(
+    const JSRDotNETManager::MANAGER_STATE &from) {
+  return managerStateFromManaged(from);
+}
+template <>
+inline JSRDotNETManager::MANAGER_STATE
+marshal_as<JSRDotNETManager::MANAGER_STATE, ManagerState>(
+    const ManagerState &from) {
+  return managerStateToManaged(from);
+}
+
+// ConnectionType marshals
+template <>
+inline ConnectionType
+marshal_as<ConnectionType, CONNECTION_TYPE>(const CONNECTION_TYPE &from) {
+  return connectionTypeFromManaged(from);
+}
+template <>
+inline CONNECTION_TYPE
+marshal_as<CONNECTION_TYPE, ConnectionType>(const ConnectionType &from) {
+  return connectionTypeToManaged(from);
+}
+
+// PropertyUnits marshals
+template <>
+inline PropertyUnits
+marshal_as<PropertyUnits, PROPERTY_UNITS>(const PROPERTY_UNITS &from) {
+  return propertyUnitsFromManaged(from);
+}
+template <>
+inline PROPERTY_UNITS
+marshal_as<PROPERTY_UNITS, PropertyUnits>(const PropertyUnits &from) {
+  return propertyUnitsToManaged(from);
+}
+
+// PulserPropertyRoles marshals
+template <>
+inline PulserPropertyRoles marshal_as<PulserPropertyRoles, PulserPropertyRole>(
+    const PulserPropertyRole &from) {
+  return pulserPropertyRoleFromManaged(from);
+}
+template <>
+inline PulserPropertyRole marshal_as<PulserPropertyRole, PulserPropertyRoles>(
+    const PulserPropertyRoles &from) {
+  return pulserPropertyRoleToManaged(from);
+}
+
+// StatusChange marshals
+template <>
+inline StatusChange
+marshal_as<StatusChange, STATUS_CHANGE>(const STATUS_CHANGE &from) {
+  return statusChangeFromManaged(from);
+}
+template <>
+inline STATUS_CHANGE
+marshal_as<STATUS_CHANGE, StatusChange>(const StatusChange &from) {
+  return statusChangeToManaged(from);
+}
+
+// PulserReceiverStateC marshals
+template <>
+inline PulserReceiverStateC
+marshal_as<PulserReceiverStateC, PulserReceiverState>(
+    const PulserReceiverState &from) {
+  return pulserReceiverStateFromManaged(from);
+}
+template <>
+inline PulserReceiverState
+marshal_as<PulserReceiverState, PulserReceiverStateC>(
+    const PulserReceiverStateC &from) {
+  return pulserReceiverStateToManaged(from);
+}
+
+// PulserPropertyDataTypeC marshals
+template <>
+inline PulserPropertyDataTypeC
+marshal_as<PulserPropertyDataTypeC, PulserPropertyDataType>(
+    const PulserPropertyDataType &from) {
+  return pulserPropertyDataTypeFromManaged(from);
+}
+template <>
+inline PulserPropertyDataType
+marshal_as<PulserPropertyDataType, PulserPropertyDataTypeC>(
+    const PulserPropertyDataTypeC &from) {
+  return pulserPropertyDataTypeToManaged(from);
+}
+
+// ErrorCode marshals
+template <>
+inline ErrorCode marshal_as<ErrorCode, ERROR_CODE>(const ERROR_CODE &from) {
+  return errorCodeFromManaged(from);
+}
+template <>
+inline ERROR_CODE marshal_as<ERROR_CODE, ErrorCode>(const ErrorCode &from) {
+  return errorCodeToManaged(from);
+}
+
+// DiscoveryStateFlagsC marshals
+template <>
+inline DiscoveryStateFlagsC
+marshal_as<DiscoveryStateFlagsC, DiscoveryStateFlags>(
+    const DiscoveryStateFlags &from) {
+  return discoveryStateFlagsFromManaged(from);
+}
+template <>
+inline DiscoveryStateFlags
+marshal_as<DiscoveryStateFlags, DiscoveryStateFlagsC>(
+    const DiscoveryStateFlagsC &from) {
+  return discoveryStateFlagsToManaged(from);
+}
+
+// NotifyType marshals
+template <>
+inline NotifyType marshal_as<NotifyType, NOTIFY_TYPE>(const NOTIFY_TYPE &from) {
+  return notifyTypeFromManaged(from);
+}
+template <>
+inline NOTIFY_TYPE marshal_as<NOTIFY_TYPE, NotifyType>(const NotifyType &from) {
+  return notifyTypeToManaged(from);
+}
+
+} // namespace msclr::interop
