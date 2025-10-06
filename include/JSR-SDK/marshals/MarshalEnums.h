@@ -37,7 +37,7 @@ receiverModeFromManaged(const RECEIVER_MODE &mode) {
   case RECEIVER_MODE::THRU:
     return C_RECEIVER_MODE::THRU;
   default:
-    throw std::invalid_argument("Unknown RECEIVER_MODE value");
+    return C_RECEIVER_MODE::BOTH;
   }
 }
 inline constexpr static RECEIVER_MODE
@@ -52,7 +52,7 @@ receiverModeToManaged(const C_RECEIVER_MODE &mode) {
   case C_RECEIVER_MODE::THRU:
     return RECEIVER_MODE::THRU;
   default:
-    throw std::invalid_argument("Unknown C_RECEIVER_MODE value");
+    return RECEIVER_MODE::BOTH;
   }
 }
 
@@ -69,7 +69,7 @@ triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
   case TRIGGER_SOURCE::LAST_VAL:
     return C_TRIGGER_SOURCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown TRIGGER_SOURCE value");
+    return C_TRIGGER_SOURCE::INTERNAL;
   }
 }
 inline constexpr static TRIGGER_SOURCE
@@ -84,7 +84,7 @@ triggerSourceToManaged(const C_TRIGGER_SOURCE &source) {
   case C_TRIGGER_SOURCE::LAST_VAL:
     return TRIGGER_SOURCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown C_TRIGGER_SOURCE value");
+    return TRIGGER_SOURCE::INTERNAL;
   }
 }
 
@@ -99,7 +99,7 @@ triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
   case TRIGGER_POLARITY::LAST_VAL:
     return C_TRIGGER_POLARITY::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown TRIGGER_POLARITY value");
+    return C_TRIGGER_POLARITY::FALLING;
   }
 }
 inline constexpr static TRIGGER_POLARITY
@@ -112,7 +112,7 @@ triggerPolarityToManaged(const C_TRIGGER_POLARITY &source) {
   case C_TRIGGER_POLARITY::LAST_VAL:
     return TRIGGER_POLARITY::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown C_TRIGGER_POLARITY value");
+    return TRIGGER_POLARITY::FALLING;
   }
 }
 
@@ -127,7 +127,7 @@ triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
   case TRIGGER_IMPEDANCE::LAST_VAL:
     return C_TRIGGER_IMPEDANCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown TRIGGER_IMPEDANCE value");
+    return C_TRIGGER_IMPEDANCE::HIGH_Z;
   }
 }
 inline constexpr static TRIGGER_IMPEDANCE
@@ -140,7 +140,7 @@ triggerImpedanceToManaged(const C_TRIGGER_IMPEDANCE &source) {
   case C_TRIGGER_IMPEDANCE::LAST_VAL:
     return TRIGGER_IMPEDANCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown C_TRIGGER_IMPEDANCE value");
+    return TRIGGER_IMPEDANCE::HIGH_Z;
   }
 }
 
@@ -155,7 +155,7 @@ pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
   case PULSER_IMPEDANCE::LAST_VAL:
     return C_PULSER_IMPEDANCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown PULSER_IMPEDANCE value");
+    return C_PULSER_IMPEDANCE::HIGH_Z;
   }
 }
 inline constexpr static PULSER_IMPEDANCE
@@ -168,7 +168,7 @@ pulserImpedanceToManaged(const C_PULSER_IMPEDANCE &source) {
   case C_PULSER_IMPEDANCE::LAST_VAL:
     return PULSER_IMPEDANCE::LAST_VAL;
   default:
-    throw std::invalid_argument("Unknown C_PULSER_IMPEDANCE value");
+    return PULSER_IMPEDANCE::HIGH_Z;
   }
 }
 
@@ -183,7 +183,7 @@ isPulsingFromManaged(const IS_PULSING &source) {
   case IS_PULSING::UNKNOWN:
     return C_IS_PULSING::UNKNOWN;
   default:
-    throw std::invalid_argument("Unknown IS_PULSING value");
+    return C_IS_PULSING::ACTIVE;
   }
 }
 inline constexpr static IS_PULSING
@@ -196,7 +196,7 @@ isPulsingToManaged(const C_IS_PULSING &source) {
   case C_IS_PULSING::UNKNOWN:
     return IS_PULSING::UNKNOWN;
   default:
-    throw std::invalid_argument("Unknown C_IS_PULSING value");
+    return IS_PULSING::ACTIVE;
   }
 }
 
@@ -209,7 +209,7 @@ powerLimitFromManaged(const POWER_LIMIT &source) {
   case POWER_LIMIT::WITHIN_LIMIT:
     return C_POWER_LIMIT::WITHIN_LIMIT;
   default:
-    throw std::invalid_argument("Unknown POWER_LIMIT value");
+    return C_POWER_LIMIT::OVER_LIMIT;
   }
 }
 inline constexpr static POWER_LIMIT
@@ -220,7 +220,7 @@ powerLimitToManaged(const C_POWER_LIMIT &source) {
   case C_POWER_LIMIT::WITHIN_LIMIT:
     return POWER_LIMIT::WITHIN_LIMIT;
   default:
-    throw std::invalid_argument("Unknown C_POWER_LIMIT value");
+    return POWER_LIMIT::OVER_LIMIT;
   }
 }
 
@@ -237,7 +237,7 @@ managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
   case JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN:
     return C_MANAGER_STATE::SHUTTING_DOWN;
   default:
-    throw std::invalid_argument("Unknown MANAGER_STATE value");
+    return C_MANAGER_STATE::NOT_STARTED;
   }
 }
 inline constexpr static JSRDotNETManager::MANAGER_STATE
@@ -252,7 +252,7 @@ managerStateToManaged(const C_MANAGER_STATE &state) {
   case C_MANAGER_STATE::SHUTTING_DOWN:
     return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
   default:
-    throw std::invalid_argument("Unknown C_MANAGER_STATE value");
+    return JSRDotNETManager::MANAGER_STATE::NOT_STARTED;
   }
 }
 
@@ -275,7 +275,7 @@ connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
   case CONNECTION_TYPE::BLUETOOTH:
     return C_CONNECTION_TYPE::BLUETOOTH;
   default:
-    throw std::invalid_argument("Unknown CONNECTION_TYPE value");
+    return C_CONNECTION_TYPE::SOFTWARE;
   }
 }
 inline constexpr static CONNECTION_TYPE
@@ -296,7 +296,7 @@ connectionTypeToManaged(const C_CONNECTION_TYPE &connection) {
   case C_CONNECTION_TYPE::BLUETOOTH:
     return CONNECTION_TYPE::BLUETOOTH;
   default:
-    throw std::invalid_argument("Unknown C_CONNECTION_TYPE value");
+    return CONNECTION_TYPE::SOFTWARE;
   }
 }
 
@@ -310,7 +310,7 @@ propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
     return C_PROPERTY_UNITS::UNIT_HERTZ;
   case PROPERTY_UNITS::UNIT_KILOHERTZ:
     return C_PROPERTY_UNITS::UNIT_KILOHERTZ;
-  case PROPERTY_UNITS::UNIT_MEGAHERTZ:
+  case PROPERTY_UNITS::UNIT_MEGAHERTZ:          
     return C_PROPERTY_UNITS::UNIT_MEGAHERTZ;
   case PROPERTY_UNITS::UNIT_MICROJOULES:
     return C_PROPERTY_UNITS::UNIT_MICROJOULES;
@@ -327,7 +327,7 @@ propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
   case PROPERTY_UNITS::UNIT_PICOFARADS:
     return C_PROPERTY_UNITS::UNIT_PICOFARADS;
   default:
-    throw std::invalid_argument("Unknown PROPERTY_UNITS value");
+    return C_PROPERTY_UNITS::UNIT_NONE;
   }
 }
 inline constexpr static PROPERTY_UNITS
@@ -356,11 +356,11 @@ propertyUnitsToManaged(const C_PROPERTY_UNITS &units) {
   case C_PROPERTY_UNITS::UNIT_PICOFARADS:
     return PROPERTY_UNITS::UNIT_PICOFARADS;
   default:
-    throw std::invalid_argument("Unknown C_PROPERTY_UNITS value");
+    return PROPERTY_UNITS::UNIT_NONE;
   }
 }
 
-// converting JSRDotNETSDK::PulserPropertyRole <-> C_PULSER_PROPERTY_ROLE
+// PulserPropertyRole <-> C_PULSER_PROPERTY_ROLE
 inline constexpr static C_PULSER_PROPERTY_ROLE
 pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   switch (role) {
@@ -393,7 +393,7 @@ pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   case PulserPropertyRole::OTHER:
     return C_PULSER_PROPERTY_ROLE::OTHER;
   default:
-    throw std::invalid_argument("Unknown PULSER_PROPERTY_ROLES value");
+    return C_PULSER_PROPERTY_ROLE::DIRECT;
   }
 }
 inline constexpr static PulserPropertyRole
@@ -428,11 +428,11 @@ pulserPropertyRoleToManaged(const C_PULSER_PROPERTY_ROLE &role) {
   case C_PULSER_PROPERTY_ROLE::OTHER:
     return PulserPropertyRole::OTHER;
   default:
-    throw std::invalid_argument("Unknown C_PULSER_PROPERTY_ROLE value");
+    return PulserPropertyRole::DIRECT;
   }
 }
 
-// converting JSRDotNETSDK::STATUS_CHANGE <-> C_STATUS_CHANGE
+// STATUS_CHANGE <-> C_STATUS_CHANGE
 inline constexpr static C_STATUS_CHANGE
 statusChangeFromManaged(const STATUS_CHANGE &change) {
   switch (change) {
@@ -445,7 +445,7 @@ statusChangeFromManaged(const STATUS_CHANGE &change) {
   case STATUS_CHANGE::STATE_CHANGE:
     return C_STATUS_CHANGE::STATE_CHANGE;
   default:
-    throw std::invalid_argument("Unknown STATUS_CHANGE value");
+    return C_STATUS_CHANGE::INSTRUMENT_DISCONNECT;
   }
 }
 inline constexpr static STATUS_CHANGE
@@ -460,11 +460,11 @@ statusChangeToManaged(const C_STATUS_CHANGE &change) {
   case C_STATUS_CHANGE::STATE_CHANGE:
     return STATUS_CHANGE::STATE_CHANGE;
   default:
-    throw std::invalid_argument("Unknown C_STATUS_CHANGE value");
+    return STATUS_CHANGE::INSTRUMENT_DISCONNECT;
   }
 }
 
-// converting JSRDotNETSDK::PulserReceiverState <-> C_PULSER_RECEIVER_STATE
+// PulserReceiverState <-> C_PULSER_RECEIVER_STATE
 inline constexpr static C_PULSER_RECEIVER_STATE
 pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   switch (state) {
@@ -481,7 +481,7 @@ pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   case PulserReceiverState::DETACHED:
     return C_PULSER_RECEIVER_STATE::DETACHED;
   default:
-    throw std::invalid_argument("Unknown PulserReceiverState value");
+    return C_PULSER_RECEIVER_STATE::DETECTED;
   }
 }
 inline constexpr static PulserReceiverState
@@ -500,12 +500,11 @@ pulserReceiverStateToManaged(const C_PULSER_RECEIVER_STATE &state) {
   case C_PULSER_RECEIVER_STATE::DETACHED:
     return PulserReceiverState::DETACHED;
   default:
-    throw std::invalid_argument("Unknown C_PULSER_RECEIVER_STATE value");
+    return PulserReceiverState::DETECTED;
   }
 }
 
-// converting JSRDotNETSDK::PulserPropertyDataType <->
-// C_PULSER_PROPERTY_DATA_TYPE
+// PulserPropertyDataType <-> C_PULSER_PROPERTY_DATA_TYPE
 inline constexpr static C_PULSER_PROPERTY_DATA_TYPE
 pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   switch (type) {
@@ -536,7 +535,7 @@ pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   case PulserPropertyDataType::OTHER:
     return C_PULSER_PROPERTY_DATA_TYPE::OTHER;
   default:
-    throw std::invalid_argument("Unknown PulserPropertyDataType value");
+    return C_PULSER_PROPERTY_DATA_TYPE::INTEGER;
   }
 }
 inline constexpr static PulserPropertyDataType
@@ -569,11 +568,11 @@ pulserPropertyDataTypeToManaged(const C_PULSER_PROPERTY_DATA_TYPE &type) {
   case C_PULSER_PROPERTY_DATA_TYPE::OTHER:
     return PulserPropertyDataType::OTHER;
   default:
-    throw std::invalid_argument("Unknown C_PULSER_PROPERTY_DATA_TYPE value");
+    return PulserPropertyDataType::INTEGER;
   }
 }
 
-// converting JSRDotNETSDK::ErrorCode <-> C_ERROR_CODE
+// ErrorCode <-> C_ERROR_CODE
 inline constexpr static C_ERROR_CODE
 errorCodeFromManaged(const ERROR_CODE &code) {
   switch (code) {
@@ -624,7 +623,7 @@ errorCodeFromManaged(const ERROR_CODE &code) {
   case ERROR_CODE::SUCCESS:
     return C_ERROR_CODE::SUCCESS;
   default:
-    throw std::invalid_argument("Unknown ERROR_CODE value");
+    return C_ERROR_CODE::UNKNOWN;
   }
 }
 inline constexpr static ERROR_CODE
@@ -677,11 +676,11 @@ errorCodeToManaged(const C_ERROR_CODE &code) {
   case C_ERROR_CODE::SUCCESS:
     return ERROR_CODE::SUCCESS;
   default:
-    throw std::invalid_argument("Unknown C_ERROR_CODE value");
+    return ERROR_CODE::UNKNOWN;
   }
 }
 
-// converting JSRDotNETSDK::DiscoveryStateFlags <-> C_DISCOVERY_STATE_FLAGS
+// DiscoveryStateFlags <-> C_DISCOVERY_STATE_FLAGS
 inline constexpr static C_DISCOVERY_STATE_FLAGS
 discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   switch (flags) {
@@ -694,7 +693,7 @@ discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   case DiscoveryStateFlags::STOPPED_ON_ERR:
     return C_DISCOVERY_STATE_FLAGS::STOPPED_ON_ERR;
   default:
-    throw std::invalid_argument("Unknown DiscoveryStateFlags value");
+    return C_DISCOVERY_STATE_FLAGS::NONE;
   }
 }
 inline constexpr static DiscoveryStateFlags
@@ -709,11 +708,11 @@ discoveryStateFlagsToManaged(const C_DISCOVERY_STATE_FLAGS &flags) {
   case C_DISCOVERY_STATE_FLAGS::STOPPED_ON_ERR:
     return DiscoveryStateFlags::STOPPED_ON_ERR;
   default:
-    throw std::invalid_argument("Unknown C_DISCOVERY_STATE_FLAGS value");
+    return DiscoveryStateFlags::NONE;
   }
 }
 
-// converting JSRDotNETSDK::NotifyType <-> C_NOTIFY_TYPE
+// NotifyType <-> C_NOTIFY_TYPE
 inline constexpr static C_NOTIFY_TYPE
 notifyTypeFromManaged(const JSRDotNETSDK::NOTIFY_TYPE &type) {
   switch (type) {
@@ -734,7 +733,7 @@ notifyTypeFromManaged(const JSRDotNETSDK::NOTIFY_TYPE &type) {
   case JSRDotNETSDK::NOTIFY_TYPE::ERROR:
     return C_NOTIFY_TYPE::ERROR;
   default:
-    throw std::invalid_argument("Unknown NOTIFY_TYPE value");
+    return C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
   }
 }
 inline constexpr static JSRDotNETSDK::NOTIFY_TYPE
@@ -757,7 +756,7 @@ notifyTypeToManaged(const C_NOTIFY_TYPE &type) {
   case C_NOTIFY_TYPE::ERROR:
     return JSRDotNETSDK::NOTIFY_TYPE::ERROR;
   default:
-    throw std::invalid_argument("Unknown C_NOTIFY_TYPE value");
+    return JSRDotNETSDK::NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
   }
 }
 
