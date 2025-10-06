@@ -20,6 +20,7 @@
 
 #include <msclr/marshal_cppstd.h>
 #include <stdexcept>
+#include <iostream> // Include iostream for std::cerr
 
 using namespace JSRDotNETSDK;
 #undef ERROR
@@ -37,6 +38,7 @@ receiverModeFromManaged(const RECEIVER_MODE &mode) {
   case RECEIVER_MODE::THRU:
     return C_RECEIVER_MODE::THRU;
   default:
+    std::cerr << "[MarshalEnums] Unknown RECEIVER_MODE value in receiverModeFromManaged, returning BOTH" << std::endl;
     return C_RECEIVER_MODE::BOTH;
   }
 }
@@ -52,6 +54,7 @@ receiverModeToManaged(const C_RECEIVER_MODE &mode) {
   case C_RECEIVER_MODE::THRU:
     return RECEIVER_MODE::THRU;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_RECEIVER_MODE value in receiverModeToManaged, returning BOTH" << std::endl;
     return RECEIVER_MODE::BOTH;
   }
 }
@@ -69,6 +72,7 @@ triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
   case TRIGGER_SOURCE::LAST_VAL:
     return C_TRIGGER_SOURCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown TRIGGER_SOURCE value in triggerSourceFromManaged, returning INTERNAL" << std::endl;
     return C_TRIGGER_SOURCE::INTERNAL;
   }
 }
@@ -84,6 +88,7 @@ triggerSourceToManaged(const C_TRIGGER_SOURCE &source) {
   case C_TRIGGER_SOURCE::LAST_VAL:
     return TRIGGER_SOURCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_TRIGGER_SOURCE value in triggerSourceToManaged, returning INTERNAL" << std::endl;
     return TRIGGER_SOURCE::INTERNAL;
   }
 }
@@ -99,6 +104,7 @@ triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
   case TRIGGER_POLARITY::LAST_VAL:
     return C_TRIGGER_POLARITY::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown TRIGGER_POLARITY value in triggerPolarityFromManaged, returning FALLING" << std::endl;
     return C_TRIGGER_POLARITY::FALLING;
   }
 }
@@ -112,6 +118,7 @@ triggerPolarityToManaged(const C_TRIGGER_POLARITY &source) {
   case C_TRIGGER_POLARITY::LAST_VAL:
     return TRIGGER_POLARITY::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_TRIGGER_POLARITY value in triggerPolarityToManaged, returning FALLING" << std::endl;
     return TRIGGER_POLARITY::FALLING;
   }
 }
@@ -127,6 +134,7 @@ triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
   case TRIGGER_IMPEDANCE::LAST_VAL:
     return C_TRIGGER_IMPEDANCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown TRIGGER_IMPEDANCE value in triggerImpedanceFromManaged, returning HIGH_Z" << std::endl;
     return C_TRIGGER_IMPEDANCE::HIGH_Z;
   }
 }
@@ -140,6 +148,7 @@ triggerImpedanceToManaged(const C_TRIGGER_IMPEDANCE &source) {
   case C_TRIGGER_IMPEDANCE::LAST_VAL:
     return TRIGGER_IMPEDANCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_TRIGGER_IMPEDANCE value in triggerImpedanceToManaged, returning HIGH_Z" << std::endl;
     return TRIGGER_IMPEDANCE::HIGH_Z;
   }
 }
@@ -155,6 +164,7 @@ pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
   case PULSER_IMPEDANCE::LAST_VAL:
     return C_PULSER_IMPEDANCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown PULSER_IMPEDANCE value in pulserImpedanceFromManaged, returning HIGH_Z" << std::endl;
     return C_PULSER_IMPEDANCE::HIGH_Z;
   }
 }
@@ -168,6 +178,7 @@ pulserImpedanceToManaged(const C_PULSER_IMPEDANCE &source) {
   case C_PULSER_IMPEDANCE::LAST_VAL:
     return PULSER_IMPEDANCE::LAST_VAL;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_PULSER_IMPEDANCE value in pulserImpedanceToManaged, returning HIGH_Z" << std::endl;
     return PULSER_IMPEDANCE::HIGH_Z;
   }
 }
@@ -183,6 +194,7 @@ isPulsingFromManaged(const IS_PULSING &source) {
   case IS_PULSING::UNKNOWN:
     return C_IS_PULSING::UNKNOWN;
   default:
+    std::cerr << "[MarshalEnums] Unknown IS_PULSING value in isPulsingFromManaged, returning ACTIVE" << std::endl;
     return C_IS_PULSING::ACTIVE;
   }
 }
@@ -196,6 +208,7 @@ isPulsingToManaged(const C_IS_PULSING &source) {
   case C_IS_PULSING::UNKNOWN:
     return IS_PULSING::UNKNOWN;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_IS_PULSING value in isPulsingToManaged, returning ACTIVE" << std::endl;
     return IS_PULSING::ACTIVE;
   }
 }
@@ -209,7 +222,8 @@ powerLimitFromManaged(const POWER_LIMIT &source) {
   case POWER_LIMIT::WITHIN_LIMIT:
     return C_POWER_LIMIT::WITHIN_LIMIT;
   default:
-    return C_POWER_LIMIT::OVER_LIMIT;
+    std::cerr << "[MarshalEnums] Unknown POWER_LIMIT value in powerLimitFromManaged, returning WITHIN_LIMIT" << std::endl;
+    return C_POWER_LIMIT::WITHIN_LIMIT;
   }
 }
 inline constexpr static POWER_LIMIT
@@ -220,7 +234,8 @@ powerLimitToManaged(const C_POWER_LIMIT &source) {
   case C_POWER_LIMIT::WITHIN_LIMIT:
     return POWER_LIMIT::WITHIN_LIMIT;
   default:
-    return POWER_LIMIT::OVER_LIMIT;
+    std::cerr << "[MarshalEnums] Unknown C_POWER_LIMIT value in powerLimitToManaged, returning WITHIN_LIMIT" << std::endl;
+    return POWER_LIMIT::WITHIN_LIMIT;
   }
 }
 
@@ -237,6 +252,7 @@ managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
   case JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN:
     return C_MANAGER_STATE::SHUTTING_DOWN;
   default:
+    std::cerr << "[MarshalEnums] Unknown MANAGER_STATE value in managerStateFromManaged, returning NOT_STARTED" << std::endl;
     return C_MANAGER_STATE::NOT_STARTED;
   }
 }
@@ -252,6 +268,7 @@ managerStateToManaged(const C_MANAGER_STATE &state) {
   case C_MANAGER_STATE::SHUTTING_DOWN:
     return JSRDotNETManager::MANAGER_STATE::SHUTTING_DOWN;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_MANAGER_STATE value in managerStateToManaged, returning NOT_STARTED" << std::endl;
     return JSRDotNETManager::MANAGER_STATE::NOT_STARTED;
   }
 }
@@ -275,6 +292,7 @@ connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
   case CONNECTION_TYPE::BLUETOOTH:
     return C_CONNECTION_TYPE::BLUETOOTH;
   default:
+    std::cerr << "[MarshalEnums] Unknown CONNECTION_TYPE value in connectionTypeFromManaged, returning SOFTWARE" << std::endl;
     return C_CONNECTION_TYPE::SOFTWARE;
   }
 }
@@ -296,6 +314,7 @@ connectionTypeToManaged(const C_CONNECTION_TYPE &connection) {
   case C_CONNECTION_TYPE::BLUETOOTH:
     return CONNECTION_TYPE::BLUETOOTH;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_CONNECTION_TYPE value in connectionTypeToManaged, returning SOFTWARE" << std::endl;
     return CONNECTION_TYPE::SOFTWARE;
   }
 }
@@ -327,6 +346,7 @@ propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
   case PROPERTY_UNITS::UNIT_PICOFARADS:
     return C_PROPERTY_UNITS::UNIT_PICOFARADS;
   default:
+    std::cerr << "[MarshalEnums] Unknown PROPERTY_UNITS value in propertyUnitsFromManaged, returning UNIT_NONE" << std::endl;
     return C_PROPERTY_UNITS::UNIT_NONE;
   }
 }
@@ -356,6 +376,7 @@ propertyUnitsToManaged(const C_PROPERTY_UNITS &units) {
   case C_PROPERTY_UNITS::UNIT_PICOFARADS:
     return PROPERTY_UNITS::UNIT_PICOFARADS;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_PROPERTY_UNITS value in propertyUnitsToManaged, returning UNIT_NONE" << std::endl;
     return PROPERTY_UNITS::UNIT_NONE;
   }
 }
@@ -393,6 +414,7 @@ pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   case PulserPropertyRole::OTHER:
     return C_PULSER_PROPERTY_ROLE::OTHER;
   default:
+    std::cerr << "[MarshalEnums] Unknown PulserPropertyRole value in pulserPropertyRoleFromManaged, returning DIRECT" << std::endl;
     return C_PULSER_PROPERTY_ROLE::DIRECT;
   }
 }
@@ -428,6 +450,7 @@ pulserPropertyRoleToManaged(const C_PULSER_PROPERTY_ROLE &role) {
   case C_PULSER_PROPERTY_ROLE::OTHER:
     return PulserPropertyRole::OTHER;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_PULSER_PROPERTY_ROLE value in pulserPropertyRoleToManaged, returning DIRECT" << std::endl;
     return PulserPropertyRole::DIRECT;
   }
 }
@@ -445,6 +468,7 @@ statusChangeFromManaged(const STATUS_CHANGE &change) {
   case STATUS_CHANGE::STATE_CHANGE:
     return C_STATUS_CHANGE::STATE_CHANGE;
   default:
+    std::cerr << "[MarshalEnums] Unknown STATUS_CHANGE value in statusChangeFromManaged, returning INSTRUMENT_DISCONNECT" << std::endl;
     return C_STATUS_CHANGE::INSTRUMENT_DISCONNECT;
   }
 }
@@ -460,6 +484,7 @@ statusChangeToManaged(const C_STATUS_CHANGE &change) {
   case C_STATUS_CHANGE::STATE_CHANGE:
     return STATUS_CHANGE::STATE_CHANGE;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_STATUS_CHANGE value in statusChangeToManaged, returning INSTRUMENT_DISCONNECT" << std::endl;
     return STATUS_CHANGE::INSTRUMENT_DISCONNECT;
   }
 }
@@ -481,6 +506,7 @@ pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   case PulserReceiverState::DETACHED:
     return C_PULSER_RECEIVER_STATE::DETACHED;
   default:
+    std::cerr << "[MarshalEnums] Unknown PulserReceiverState value in pulserReceiverStateFromManaged, returning DETECTED" << std::endl;
     return C_PULSER_RECEIVER_STATE::DETECTED;
   }
 }
@@ -500,6 +526,7 @@ pulserReceiverStateToManaged(const C_PULSER_RECEIVER_STATE &state) {
   case C_PULSER_RECEIVER_STATE::DETACHED:
     return PulserReceiverState::DETACHED;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_PULSER_RECEIVER_STATE value in pulserReceiverStateToManaged, returning DETECTED" << std::endl;
     return PulserReceiverState::DETECTED;
   }
 }
@@ -535,6 +562,7 @@ pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   case PulserPropertyDataType::OTHER:
     return C_PULSER_PROPERTY_DATA_TYPE::OTHER;
   default:
+    std::cerr << "[MarshalEnums] Unknown PulserPropertyDataType value in pulserPropertyDataTypeFromManaged, returning INTEGER" << std::endl;
     return C_PULSER_PROPERTY_DATA_TYPE::INTEGER;
   }
 }
@@ -568,6 +596,7 @@ pulserPropertyDataTypeToManaged(const C_PULSER_PROPERTY_DATA_TYPE &type) {
   case C_PULSER_PROPERTY_DATA_TYPE::OTHER:
     return PulserPropertyDataType::OTHER;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_PULSER_PROPERTY_DATA_TYPE value in pulserPropertyDataTypeToManaged, returning INTEGER" << std::endl;
     return PulserPropertyDataType::INTEGER;
   }
 }
@@ -623,6 +652,7 @@ errorCodeFromManaged(const ERROR_CODE &code) {
   case ERROR_CODE::SUCCESS:
     return C_ERROR_CODE::SUCCESS;
   default:
+    std::cerr << "[MarshalEnums] Unknown ERROR_CODE value in errorCodeFromManaged, returning UNKNOWN" << std::endl;
     return C_ERROR_CODE::UNKNOWN;
   }
 }
@@ -676,6 +706,7 @@ errorCodeToManaged(const C_ERROR_CODE &code) {
   case C_ERROR_CODE::SUCCESS:
     return ERROR_CODE::SUCCESS;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_ERROR_CODE value in errorCodeToManaged, returning UNKNOWN" << std::endl;
     return ERROR_CODE::UNKNOWN;
   }
 }
@@ -693,6 +724,7 @@ discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   case DiscoveryStateFlags::STOPPED_ON_ERR:
     return C_DISCOVERY_STATE_FLAGS::STOPPED_ON_ERR;
   default:
+    std::cerr << "[MarshalEnums] Unknown DiscoveryStateFlags value in discoveryStateFlagsFromManaged, returning NONE" << std::endl;
     return C_DISCOVERY_STATE_FLAGS::NONE;
   }
 }
@@ -708,6 +740,7 @@ discoveryStateFlagsToManaged(const C_DISCOVERY_STATE_FLAGS &flags) {
   case C_DISCOVERY_STATE_FLAGS::STOPPED_ON_ERR:
     return DiscoveryStateFlags::STOPPED_ON_ERR;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_DISCOVERY_STATE_FLAGS value in discoveryStateFlagsToManaged, returning NONE" << std::endl;
     return DiscoveryStateFlags::NONE;
   }
 }
@@ -733,6 +766,7 @@ notifyTypeFromManaged(const JSRDotNETSDK::NOTIFY_TYPE &type) {
   case JSRDotNETSDK::NOTIFY_TYPE::ERROR:
     return C_NOTIFY_TYPE::ERROR;
   default:
+    std::cerr << "[MarshalEnums] Unknown NOTIFY_TYPE value in notifyTypeFromManaged, returning PULSER_RCVR_DISCOVERED" << std::endl;
     return C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
   }
 }
@@ -756,6 +790,7 @@ notifyTypeToManaged(const C_NOTIFY_TYPE &type) {
   case C_NOTIFY_TYPE::ERROR:
     return JSRDotNETSDK::NOTIFY_TYPE::ERROR;
   default:
+    std::cerr << "[MarshalEnums] Unknown C_NOTIFY_TYPE value in notifyTypeToManaged, returning PULSER_RCVR_DISCOVERED" << std::endl;
     return JSRDotNETSDK::NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
   }
 }
