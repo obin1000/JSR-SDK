@@ -1,8 +1,5 @@
 #pragma once
 
-#include "structs/InstrumentID.h"
-#include "structs/JSRLibMetadata.h"
-#include "structs/PulserReceiverID.h"
 #include "enums/C_IS_PULSING.h"
 #include "enums/C_MANAGER_STATE.h"
 #include "enums/C_POWER_LIMIT.h"
@@ -15,6 +12,9 @@
 #include "enums/C_TRIGGER_SOURCE.h"
 #include "events/NotifyEvent.h"
 #include "events/StatusChangedEvent.h"
+#include "structs/InstrumentID.h"
+#include "structs/JSRLibMetadata.h"
+#include "structs/PulserReceiverID.h"
 
 #include <map>
 #include <string>
@@ -69,6 +69,24 @@ public:
   // static void ParseIdString(std::string sID, out std::string model,
   //                           out std::string serialNum,
   //                           out int idxPR) = 0;
+
+  // === InstrumentOpenCriteria  ===
+  /**
+   * @brief Adds a port to exclude when the plugin will search for instruments.
+   * If this list is empty, then all ports will be searched. The "port string"
+   * is specific to the method used for searching for instruments: e.g. COM port
+   * for SERIAL, IP Address for ETHERNET, etc.
+   * @param port The port to add.
+   */
+  virtual void AddPortToExclude(std::string plugin, std::string port) = 0;
+  /**
+   * @brief Adds a port to include when the plugin will search for instruments.
+   * If this list is empty, then all ports will be searched. The "port string"
+   * is specific to the method used for searching for instruments: e.g. COM port
+   * for SERIAL, IP Address for ETHERNET, etc.
+   * @param port The port to add.
+   */
+  virtual void AddPortToInclude(std::string plugin, std::string port) = 0;
 
   // === Functions provided by SDK ===
 

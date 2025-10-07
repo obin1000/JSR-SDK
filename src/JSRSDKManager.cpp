@@ -98,6 +98,27 @@ public:
   //                           out std::string serialNum,
   //                           out int idxPR) = 0;
 
+  // === InstrumentOpenCriteria  ===
+
+  void AddPortToExclude(std::string plugin, std::string port) override {
+    try {
+      m_manager->dotNETManager->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+          ->AddPortToExclude(marshal_as<String ^>(port));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+  void AddPortToInclude(std::string plugin, std::string port) override {
+    try {
+      m_manager->dotNETManager
+          ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+          ->AddPortToInclude(marshal_as<String ^>(port));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
   // === Functions provided by SDK ===
   void AddManagedPlugin(std::string pluginName) {
     try {
