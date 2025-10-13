@@ -79,6 +79,8 @@ public:
    * @param port The port to add.
    */
   virtual void AddPortToExclude(std::string plugin, std::string port) = 0;
+  virtual std::vector<std::string> GetPortsToExclude(std::string plugin) = 0;
+
   /**
    * @brief Adds a port to include when the plugin will search for instruments.
    * If this list is empty, then all ports will be searched. The "port string"
@@ -87,14 +89,18 @@ public:
    * @param port The port to add.
    */
   virtual void AddPortToInclude(std::string plugin, std::string port) = 0;
+  virtual std::vector<std::string> GetPortsToInclude(std::string plugin) = 0;
 
-  virtual bool AddOpenOption(std::string plugin, std::string openOptionName, std::string openOptionValue) = 0;
+  virtual bool AddOpenOption(std::string plugin, std::string openOptionName,
+                             std::string openOptionValue) = 0;
 
-  virtual std::string GetOpenOption(std::string plugin, std::string openOptionName) = 0;
+  virtual std::string GetOpenOption(std::string plugin,
+                                    std::string openOptionName) = 0;
 
   virtual std::vector<std::string> GetOpenOptionNames(std::string plugin) = 0;
 
-  virtual bool RemoveOpenOption(std::string plugin, std::string openOptionName) = 0;
+  virtual bool RemoveOpenOption(std::string plugin,
+                                std::string openOptionName) = 0;
 
   // === Functions provided by SDK ===
 

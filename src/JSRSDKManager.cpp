@@ -110,11 +110,36 @@ public:
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
     }
   }
+  std::vector<std::string> GetPortsToExclude(std::string plugin) {
+    try {
+      return listToVectorMarshall < System::String ^,
+             std::string >
+                 (m_manager->dotNETManager
+                      ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+                      ->PortsToExclude);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+
   void AddPortToInclude(std::string plugin, std::string port) override {
     try {
       m_manager->dotNETManager
           ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
           ->AddPortToInclude(marshal_as<String ^>(port));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+  std::vector<std::string> GetPortsToInclude(std::string plugin) {
+    try {
+      return listToVectorMarshall < System::String ^,
+             std::string >
+                 (m_manager->dotNETManager
+                      ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+                      ->PortsToInclude);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
