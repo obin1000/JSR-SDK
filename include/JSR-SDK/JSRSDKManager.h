@@ -88,6 +88,14 @@ public:
    */
   virtual void AddPortToInclude(std::string plugin, std::string port) = 0;
 
+  virtual bool AddOpenOption(std::string plugin, std::string openOptionName, std::string openOptionValue) = 0;
+
+  virtual std::string GetOpenOption(std::string plugin, std::string openOptionName) = 0;
+
+  virtual std::vector<std::string> GetOpenOptionNames(std::string plugin) = 0;
+
+  virtual bool RemoveOpenOption(std::string plugin, std::string openOptionName) = 0;
+
   // === Functions provided by SDK ===
 
   /**

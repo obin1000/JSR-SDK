@@ -30,6 +30,7 @@ JSRSDKWrapper::~JSRSDKWrapper() {
     m_manager->NotifyEventHandler -=
         gcnew EventHandler<EventArgsManagerNotify ^>(
             this, &JSRSDKWrapper::OnNotifyEvent);
+    m_manager->Shutdown();
   }
 
   // Call finalizer to clean up unmanaged resources
@@ -74,4 +75,9 @@ void JSRSDKWrapper::SetNotifyCallback(NotifyCallback *cb) {
 }
 
 // Property getter for DotNETManager
-JSRDotNETManager ^ JSRSDKWrapper::dotNETManager::get() { return m_manager; }
+JSRDotNETManager ^ JSRSDKWrapper::dotNETManager::get() {
+  if (m_manager == nullptr) {
+    throw std::runtime_error("C# dotNETManager was not correctly initialized");
+  }
+  return m_manager;
+}

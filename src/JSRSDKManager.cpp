@@ -1,6 +1,6 @@
 ﻿#include "JSR-SDK/JSRSDKManager.h"
-#include "JSR-SDK/marshals/MarshalTypes.h"
 #include "JSR-SDK/JSRSDKWrapper.h"
+#include "JSR-SDK/marshals/MarshalTypes.h"
 
 #include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
@@ -28,7 +28,7 @@ public:
     } catch (System::Exception ^ exception) {
       std::string msg =
           msclr::interop::marshal_as<std::string>(exception->Message);
-      throw "Failed creating JSR Bridge object: " + msg;
+      throw std::runtime_error("Failed creating JSR wrapper object: " + msg);
     }
   }
 
@@ -102,7 +102,8 @@ public:
 
   void AddPortToExclude(std::string plugin, std::string port) override {
     try {
-      m_manager->dotNETManager->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+      m_manager->dotNETManager
+          ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
           ->AddPortToExclude(marshal_as<String ^>(port));
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -119,6 +120,58 @@ public:
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
     }
   }
+
+  bool AddOpenOption(std::string plugin, std::string openOptionName,
+                     std::string openOptionValue) override {
+    try {
+      return m_manager->dotNETManager
+          ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+          ->AddOpenOption(marshal_as<String ^>(openOptionName),
+                          marshal_as<String ^>(openOptionValue));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+
+  std::string GetOpenOption(std::string plugin,
+                            std::string openOptionName) override {
+    try {
+      return marshal_as<std::string>(
+          m_manager->dotNETManager
+              ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+              ->GetOpenOption(marshal_as<String ^>(openOptionName)));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+
+  std::vector<std::string> GetOpenOptionNames(std::string plugin) override {
+    try {
+      return listToVectorMarshall < System::String ^,
+             std::string >
+                 (m_manager->dotNETManager
+                      ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+                      ->GetOpenOptionNames());
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+
+  bool RemoveOpenOption(std::string plugin,
+                        std::string openOptionName) override {
+    try {
+      return m_manager->dotNETManager
+          ->GetPluginOpenOptions(marshal_as<String ^>(plugin))
+          ->RemoveOpenOption(marshal_as<String ^>(openOptionName));
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+    }
+  }
+
   // === Functions provided by SDK ===
   void AddManagedPlugin(std::string pluginName) {
     try {
@@ -415,12 +468,21 @@ public:
   }
 
   void SetDiscoveryEnable(bool bEnable) {
+    JSRDotNETSDK::JSRDotNETManager ^ manager;
     try {
-
-      m_manager->dotNETManager->SetDiscoveryEnable(bEnable);
+      manager = m_manager->dotNETManager;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      throw std::runtime_error("JSTdotNETSDK manager produced Exception: " +
+                               msg);
+    }
+    try {
+
+      manager->SetDiscoveryEnable(bEnable);
+    } catch (System::Exception ^ exception) {
+      std::string msg = marshal_as<std::string>(exception->Message);
+      throw std::runtime_error("JSTdotNETSDK enable produced Exception: " +
+                               msg);
     }
   }
 
@@ -1913,7 +1975,7 @@ __declspec(dllexport) JSRSDKManager *CreateJSRSDKManager() {
   } catch (System::Exception ^ exception) {
     std::string msg =
         msclr::interop::marshal_as<std::string>(exception->Message);
-    throw "Failed creating JSR Bridge object: " + msg;
+    throw std::runtime_error("Failed creating JSR adapter object: " + msg);
   }
 }
 
