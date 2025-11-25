@@ -3,6 +3,16 @@ project(JSR-SDK LANGUAGES C CXX)
 
 option(JSR_SDK_USE_DYNAMIC_LIB "Use the dynamic library instead of the static" ON)
 
+# Options to selectively include DLL dependencies
+option(JSR_SDK_INCLUDE_CYUSB "Include CyUSB DLL" ON)
+option(JSR_SDK_INCLUDE_DOTNET_DIAG "Include JSRDotNET_Diag DLL" ON)
+option(JSR_SDK_INCLUDE_USB_COMMON "Include JSRDotNET_USB_Common DLL" ON)
+option(JSR_SDK_INCLUDE_USB_DPR650 "Include JSRDotNET_USB_DPR650 DLL" ON)
+option(JSR_SDK_INCLUDE_USB_PUREVIEWHID "Include JSRDotNET_USB_PureViewHid DLL" ON)
+option(JSR_SDK_INCLUDE_DOTNETDPR "Include JSRDotNETDPR DLL" ON)
+option(JSR_SDK_INCLUDE_NEWTONSOFT_JSON "Include Newtonsoft.json DLL" ON)
+option(JSR_SDK_INCLUDE_SIMPLEHID "Include SimpleHID DLL" ON)
+
 
 if(NOT WIN32)
     message(FATAL_ERROR "JSR-SDK is Windows-only.")
@@ -55,19 +65,42 @@ function(register_jsr_dll dll_name)
     add_library(${dll_name} SHARED IMPORTED GLOBAL)
     set_target_properties(${dll_name} PROPERTIES
         IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/${dll_name}.dll"
-        IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/${dll_name}.lib")
+      IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/${dll_name}.lib")
 
     target_link_libraries(JSR-SDK INTERFACE ${dll_name})
     install(IMPORTED_RUNTIME_ARTIFACTS
-        ${dll_name}
+      ${dll_name}
         DESTINATION "${CMAKE_INSTALL_BINDIR}") 
 endfunction()
 
-register_jsr_dll("CyUSB")
-register_jsr_dll("JSRDotNET_Diag")
-register_jsr_dll("JSRDotNET_USB_Common")
-register_jsr_dll("JSRDotNET_USB_DPR650")
-register_jsr_dll("JSRDotNET_USB_PureViewHid")
-register_jsr_dll("JSRDotNETDPR")
-register_jsr_dll("Newtonsoft.json")
-register_jsr_dll("SimpleHID")
+if(JSR_SDK_INCLUDE_CYUSB)
+    register_jsr_dll("CyUSB")
+endif()
+
+if(JSR_SDK_INCLUDE_DOTNET_DIAG)
+    register_jsr_dll("JSRDotNET_Diag")
+endif()
+
+if(JSR_SDK_INCLUDE_USB_COMMON)
+    register_jsr_dll("JSRDotNET_USB_Common")
+endif()
+
+if(JSR_SDK_INCLUDE_USB_DPR650)
+    register_jsr_dll("JSRDotNET_USB_DPR650")
+endif()
+
+if(JSR_SDK_INCLUDE_USB_PUREVIEWHID)
+    register_jsr_dll("JSRDotNET_USB_PureViewHid")
+endif()
+
+if(JSR_SDK_INCLUDE_DOTNETDPR)
+    register_jsr_dll("JSRDotNETDPR")
+endif()
+
+if(JSR_SDK_INCLUDE_NEWTONSOFT_JSON)
+    register_jsr_dll("Newtonsoft.json")
+endif()
+
+if(JSR_SDK_INCLUDE_SIMPLEHID)
+    register_jsr_dll("SimpleHID")
+endif()
