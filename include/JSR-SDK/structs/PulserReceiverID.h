@@ -1,49 +1,74 @@
+/**
+ * @file PulserReceiverID.h
+ * @brief C-compatible Pulser/Receiver identification structure
+ * 
+ * Represents a Pulser/Receiver with an associated instrument and index.
+ * Mirrors JSRDotNETSDK::PulserReceiverIdentity
+ */
+
 #pragma once
 
 #include "InstrumentID.h"
-#include <string>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @class PulserReceiverID
- * @brief Represents a Pulser/Receiver with an associated instrument and index.
- *
- * This class provides functionality to describe a Pulser/Receiver by combining
- * its index and the description of the associated instrument.
- * Mirrors JSRDotNETSDK::PulserReceiverIdentity
+ * @brief Pulser/Receiver identification structure
+ * 
+ * Combines an instrument ID with a pulser/receiver index to uniquely
+ * identify a specific pulser/receiver instance.
+ * Safe to use across DLL boundaries.
  */
-class PulserReceiverID {
-public:
-  /**
-   * @brief The instrument associated with this Pulser/Receiver.
-   */
-  InstrumentID InstrumentId;
+typedef struct {
+    /** @brief The instrument associated with this Pulser/Receiver */
+    InstrumentID InstrumentId;
+    
+    /** @brief The index of the Pulser/Receiver */
+    int PulserReceiverIndex;
+} PulserReceiverID;
 
-  /**
-   * @brief The index of the Pulser/Receiver.
-   */
-  int PulserReceiverIndex;
+/**
+ * @brief Initialize a PulserReceiverID to default values
+ * @param id Pointer to PulserReceiverID structure
+ */
+static inline void PulserReceiverID_Init(PulserReceiverID* id) {
+    if (!id) return;
+    InstrumentID_Init(&id->InstrumentId);
+    id->PulserReceiverIndex = 0;
+}
 
-  /**
-   * @brief Constructs a detailed description of the Pulser/Receiver.
-   *
-   * The description includes the Pulser/Receiver index and the description
-   * of the associated instrument.
-   *
-   * @return A string containing the Pulser/Receiver description.
-   */
-  std::string GetDescription() const {
-    std::string description =
-        "Pulser/Receiver: " + std::to_string(PulserReceiverIndex) + "\n" +
-        InstrumentId.GetDescription();
-    return description;
-  }
+#ifdef __cplusplus
+}
 
-  /**
-   * @brief Converts the Pulser/Receiver details to a string representation.
-   *
-   * This method is an alias for GetDescription().
-   *
-   * @return A string containing the Pulser/Receiver's description.
-   */
-  std::string ToString() { return GetDescription(); }
-};
+// C++ convenience functions
+#include <string>
+#include <sstream>
+
+namespace JSR {
+
+/**
+ * @brief Get description string from PulserReceiverID (C++ only)
+ * @param id The pulser/receiver ID
+ * @return Formatted description string
+ */
+inline std::string GetDescription(const PulserReceiverID& id) {
+    std::ostringstream oss;
+    oss << "Pulser/Receiver: " << id.PulserReceiverIndex << "\n"
+        << GetDescription(id.InstrumentId);
+    return oss.str();
+}
+
+/**
+ * @brief Convert PulserReceiverID to string (C++ only)
+ * @param id The pulser/receiver ID
+ * @return String representation
+ */
+inline std::string ToString(const PulserReceiverID& id) {
+    return GetDescription(id);
+}
+
+} // namespace JSR
+
+#endif // __cplusplus

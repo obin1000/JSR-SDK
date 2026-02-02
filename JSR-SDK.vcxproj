@@ -52,7 +52,10 @@
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.h" />
+    <ClInclude Include="include\JSR-SDK\JSRSDKManager_Types.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.hpp" />
+    <ClInclude Include="include\JSR-SDK\JSRString.h" />
+    <ClInclude Include="include\JSR-SDK\marshals\EventConverters.h" />
     <ClInclude Include="include\JSR-SDK\marshals\MarshalEnums.h" />
     <ClInclude Include="include\JSR-SDK\marshals\MarshalTypes.h" />
     <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h" />

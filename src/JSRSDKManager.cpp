@@ -367,8 +367,8 @@ public:
   }
 
   std::vector<std::string> GetPulserReceiverInfo(PulserReceiverID id) override {
-    return GetPulserReceiverInfo(id.InstrumentId.ModelName,
-                                 id.InstrumentId.SerialNum,
+    return GetPulserReceiverInfo(std::string(id.InstrumentId.ModelName.data),
+                                 std::string(id.InstrumentId.SerialNum.data),
                                  id.PulserReceiverIndex);
   }
 
@@ -449,8 +449,8 @@ public:
   }
 
   void SetCurrentPulserReceiver(PulserReceiverID prID) override {
-    SetCurrentPulserReceiver(prID.InstrumentId.ModelName,
-                             prID.InstrumentId.SerialNum,
+    SetCurrentPulserReceiver(std::string(prID.InstrumentId.ModelName.data),
+                             std::string(prID.InstrumentId.SerialNum.data),
                              prID.PulserReceiverIndex);
   }
 

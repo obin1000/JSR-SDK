@@ -1,49 +1,84 @@
-#pragma once
-#include <string>
-
 /**
- * @class InstrumentID
- * @brief Represents an instrument with identifying details such as model name,
+ * @file InstrumentID.h
+ * @brief C-compatible instrument identification structure
+ * 
+ * Represents an instrument with identifying details such as model name,
  * serial number, port, and plugin name.
  * Mirrors JSRDotNETSDK::IInstrumentIdentity
  */
-class InstrumentID {
-public:
-  /**
-   * @brief The model name of the instrument.
-   */
-  std::string ModelName;
 
-  /**
-   * @brief The serial number of the instrument.
-   */
-  std::string SerialNum;
+#pragma once
 
-  /**
-   * @brief The port associated with the instrument.
-   */
-  std::string Port;
+#include "JSR-SDK/JSRString.h"
 
-  /**
-   * @brief The name of the plugin associated with the instrument.
-   */
-  std::string PluginName;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-  /**
-   * @brief Constructs a detailed description of the instrument.
-   * @return A string containing the model name, serial number, port, and plugin
-   * name.
-   */
-  std::string GetDescription() const {
-    std::string description =
-        "Model: " + ModelName + "\n" + "Serial Number: " + SerialNum + "\n" +
-        "Port: " + Port + "\n" + "Plugin Name: " + PluginName + "\n";
-    return description;
-  }
+/**
+ * @brief Instrument identification structure
+ * 
+ * Contains all identifying information for a hardware instrument.
+ * Safe to use across DLL boundaries.
+ */
+typedef struct {
+    /** @brief The model name of the instrument */
+    JSRString ModelName;
+    
+    /** @brief The serial number of the instrument */
+    JSRString SerialNum;
+    
+    /** @brief The port associated with the instrument (e.g., "COM3", "USB0") */
+    JSRString Port;
+    
+    /** @brief The name of the plugin associated with the instrument */
+    JSRString PluginName;
+} InstrumentID;
 
-  /**
-   * @brief Converts the instrument details to a string representation.
-   * @return A string containing the instrument's description.
-   */
-  std::string ToString() { return GetDescription(); }
-};
+/**
+ * @brief Initialize an InstrumentID to default (empty) values
+ * @param id Pointer to InstrumentID structure
+ */
+static inline void InstrumentID_Init(InstrumentID* id) {
+    if (!id) return;
+    JSRString_Init(&id->ModelName);
+    JSRString_Init(&id->SerialNum);
+    JSRString_Init(&id->Port);
+    JSRString_Init(&id->PluginName);
+}
+
+#ifdef __cplusplus
+}
+
+// C++ convenience functions
+#include <string>
+#include <sstream>
+
+namespace JSR {
+
+/**
+ * @brief Get description string from InstrumentID (C++ only)
+ * @param id The instrument ID
+ * @return Formatted description string
+ */
+inline std::string GetDescription(const InstrumentID& id) {
+    std::ostringstream oss;
+    oss << "Model: " << id.ModelName.data << "\n"
+        << "Serial Number: " << id.SerialNum.data << "\n"
+        << "Port: " << id.Port.data << "\n"
+        << "Plugin Name: " << id.PluginName.data << "\n";
+    return oss.str();
+}
+
+/**
+ * @brief Convert InstrumentID to string (C++ only)
+ * @param id The instrument ID
+ * @return String representation
+ */
+inline std::string ToString(const InstrumentID& id) {
+    return GetDescription(id);
+}
+
+} // namespace JSR
+
+#endif // __cplusplus

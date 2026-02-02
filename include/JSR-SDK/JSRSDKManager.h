@@ -30,30 +30,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifdef __cplusplus
-class StatusChangedEvent;
-class NotifyEvent;
-#else
-typedef struct StatusChangedEvent StatusChangedEvent;
-typedef struct NotifyEvent NotifyEvent;
-#endif
+// Include type definitions (opaque types and callbacks)
+#include "JSRSDKManager_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// ============================================================================
-// Core Types
-// ============================================================================
-
-/** @brief Opaque handle to the SDK manager instance */
-typedef void *JSRSDKManagerHandle;
-
-/** @brief Callback invoked when device status changes */
-typedef void (*JSR_StatusChangeCallback)(const StatusChangedEvent *evt, void *user_data);
-
-/** @brief Callback invoked for notifications from the manager */
-typedef void (*JSR_NotifyCallback)(const NotifyEvent *evt, void *user_data);
 
 // ============================================================================
 // Manager Lifecycle
@@ -415,6 +397,24 @@ __declspec(dllexport) int JSR_GetPulserReceiverInfoItem(JSRSDKManagerHandle mgr,
  */
 __declspec(dllexport) int JSR_SetCurrentPulserReceiverByModel(JSRSDKManagerHandle mgr, const char *model, const char *serial, int idxPR);
 
+/**
+ * @brief Sets the current pulser/receiver by its ID structure
+ * @param mgr Manager handle
+ * @param modelName Instrument model name
+ * @param serialNum Instrument serial number
+ * @param prIndex Pulser/receiver index
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetCurrentPulserReceiverByID(JSRSDKManagerHandle mgr, const char *modelName, const char *serialNum, int prIndex);
+
+/**
+ * @brief Sets the current pulser/receiver using a PulserReceiverID structure
+ * @param mgr Manager handle
+ * @param prID Pointer to PulserReceiverID structure
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetCurrentPulserReceiver(JSRSDKManagerHandle mgr, const PulserReceiverID *prID);
+
 // ============================================================================
 // Pulser Properties
 // ============================================================================
@@ -668,10 +668,6 @@ __declspec(dllexport) int JSR_SetTriggerImpedance(JSRSDKManagerHandle mgr, int i
  */
 __declspec(dllexport) int JSR_GetTriggerImpedance(JSRSDKManagerHandle mgr);
 
-// ============================================================================
-// Receiver Configuration
-// ============================================================================
-
 /**
  * @brief Sets the receiver mode
  * @param mgr Manager handle
@@ -716,10 +712,6 @@ __declspec(dllexport) double JSR_GetGainMin(JSRSDKManagerHandle mgr);
  */
 __declspec(dllexport) double JSR_GetGainMax(JSRSDKManagerHandle mgr);
 
-// ============================================================================
-// Pulse Repetition Frequency Configuration
-// ============================================================================
-
 /**
  * @brief Sets the pulse repetition frequency
  * @param mgr Manager handle
@@ -748,10 +740,6 @@ __declspec(dllexport) double JSR_GetPulseRepetitionFrequencyMin(JSRSDKManagerHan
  * @return Maximum frequency in Hz, or -1.0 on error
  */
 __declspec(dllexport) double JSR_GetPulseRepetitionFrequencyMax(JSRSDKManagerHandle mgr);
-
-// ============================================================================
-// Filter Configuration
-// ============================================================================
 
 /**
  * @brief Sets the low-pass filter index
@@ -796,10 +784,6 @@ __declspec(dllexport) int JSR_GetHighPassFilterIndex(JSRSDKManagerHandle mgr);
  * @return Maximum filter index, or -1 on error
  */
 __declspec(dllexport) int JSR_GetHighPassFilterIndexMax(JSRSDKManagerHandle mgr);
-
-// ============================================================================
-// Damping Configuration
-// ============================================================================
 
 /**
  * @brief Sets the damping index

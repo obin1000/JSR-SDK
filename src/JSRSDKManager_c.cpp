@@ -1,11 +1,13 @@
 #include "JSR-SDK/JSRSDKManager.h"
 #include "JSR-SDK/JSRSDKManager.hpp"
+#include "JSR-SDK/marshals/EventConverters.h"
 
 #include <cstring>
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
 #include <mutex>
+
 
 // ============================================================================
 // Helper Functions
@@ -19,6 +21,10 @@ static int copyStringToBuffer(const std::string &s, char *buf, int bufSize) {
   memcpy(buf, s.c_str(), toCopy);
   buf[toCopy] = '\0';
   return required;
+}
+
+static int copyJSRStringToBuffer(const JSRString &s, char *buf, int bufSize) {
+  return copyStringToBuffer(std::string(s.data), buf, bufSize);
 }
 
 // ============================================================================
@@ -72,6 +78,9 @@ int JSR_SetStatusChangeCallback(JSRSDKManagerHandle mgr, JSR_StatusChangeCallbac
         std::lock_guard<std::mutex> lk(g_cbMutex);
         auto it = g_callbacks.find(mgr);
         if (it == g_callbacks.end() || !it->second.statusCb) return;
+        
+        // Event is already in the correct format (using JSRString)
+        // Just pass it directly to the C callback
         it->second.statusCb(&evt, it->second.statusUser);
       };
       mcpp->replaceStatusChangeEventHandler(wrapper);
@@ -103,6 +112,9 @@ int JSR_SetNotifyCallback(JSRSDKManagerHandle mgr, JSR_NotifyCallback cb, void *
         std::lock_guard<std::mutex> lk(g_cbMutex);
         auto it = g_callbacks.find(mgr);
         if (it == g_callbacks.end() || !it->second.notifyCb) return;
+        
+        // Event is already in the correct format (using JSRString)
+        // Just pass it directly to the C callback
         it->second.notifyCb(&evt, it->second.notifyUser);
       };
       mcpp->replaceNotifyEventHandler(wrapper);
@@ -286,7 +298,7 @@ int JSR_GetInstrumentModelName(JSRSDKManagerHandle mgr, const char *plugin, int 
     auto v = m->GetInstruments(std::string(plugin));
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].ModelName, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].ModelName, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -299,7 +311,7 @@ int JSR_GetInstrumentSerialNum(JSRSDKManagerHandle mgr, const char *plugin, int 
     auto v = m->GetInstruments(std::string(plugin));
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].SerialNum, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].SerialNum, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -312,7 +324,7 @@ int JSR_GetInstrumentPort(JSRSDKManagerHandle mgr, const char *plugin, int index
     auto v = m->GetInstruments(std::string(plugin));
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].Port, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].Port, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -325,7 +337,7 @@ int JSR_GetInstrumentPluginName(JSRSDKManagerHandle mgr, const char *plugin, int
     auto v = m->GetInstruments(std::string(plugin));
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].PluginName, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].PluginName, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -379,7 +391,7 @@ int JSR_GetPulserReceiverInstrumentModelName(JSRSDKManagerHandle mgr, int index,
     auto v = m->GetPulserReceivers();
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].InstrumentId.ModelName, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].InstrumentId.ModelName, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -392,7 +404,7 @@ int JSR_GetPulserReceiverInstrumentSerialNum(JSRSDKManagerHandle mgr, int index,
     auto v = m->GetPulserReceivers();
     if (index < 0 || index >= static_cast<int>(v.size()))
       return -2;
-    return copyStringToBuffer(v[index].InstrumentId.SerialNum, outBuf, bufSize);
+    return copyJSRStringToBuffer(v[index].InstrumentId.SerialNum, outBuf, bufSize);
   } catch(...) {
     return -1;
   }
@@ -768,10 +780,22 @@ int JSR_SetCurrentPulserReceiverByID(JSRSDKManagerHandle mgr, const char *modelN
   try {
     auto m = reinterpret_cast<JSRSDKManager *>(mgr);
     PulserReceiverID prID;
-    prID.InstrumentId.ModelName = std::string(modelName);
-    prID.InstrumentId.SerialNum = std::string(serialNum);
+    PulserReceiverID_Init(&prID);
+    JSRString_Set(&prID.InstrumentId.ModelName, modelName);
+    JSRString_Set(&prID.InstrumentId.SerialNum, serialNum);
     prID.PulserReceiverIndex = prIndex;
     m->SetCurrentPulserReceiver(prID);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetCurrentPulserReceiver(JSRSDKManagerHandle mgr, const PulserReceiverID *prID) {
+  if (!mgr || !prID) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->SetCurrentPulserReceiver(*prID);
     return 0;
   } catch(...) {
     return -1;

@@ -63,7 +63,9 @@ listToVectorMarshall(IEnumerable<managedType> ^ list) {
 static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
                                             managedException) {
   if (managedException == nullptr) {
-    return ExceptionJSRSDK();
+    ExceptionJSRSDK ex;
+    ExceptionJSRSDK_Init(&ex);
+    return ex;
   }
 
   C_ERROR_CODE errorCode = errorCodeFromManaged(managedException->ErrorCode);
@@ -75,31 +77,33 @@ static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
                 managedException->InnerException->Message)
           : "None";
 
-  return ExceptionJSRSDK(errorCode, message, innerMessage);
+  return ExceptionJSRSDK_CreateWithInner(errorCode, message.c_str(), innerMessage.c_str());
 }
 
 // Converting JSR-SDK::InstrumentID <-> JSRDotNETSDK::IInstrumentIdentity^
 static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
                                           instrumentIdentity) {
-  InstrumentID unmanaged{};
+  InstrumentID unmanaged;
+  InstrumentID_Init(&unmanaged);
 
   if (instrumentIdentity == nullptr)
     return unmanaged;
 
   if (!System::String::IsNullOrEmpty(instrumentIdentity->ModelName))
-    unmanaged.ModelName =
-        marshal_as<std::string>(instrumentIdentity->ModelName);
+    JSRString_Set(&unmanaged.ModelName,
+        marshal_as<std::string>(instrumentIdentity->ModelName).c_str());
 
   if (!System::String::IsNullOrEmpty(instrumentIdentity->PluginName))
-    unmanaged.PluginName =
-        marshal_as<std::string>(instrumentIdentity->PluginName);
+    JSRString_Set(&unmanaged.PluginName,
+        marshal_as<std::string>(instrumentIdentity->PluginName).c_str());
 
   if (!System::String::IsNullOrEmpty(instrumentIdentity->Port))
-    unmanaged.Port = marshal_as<std::string>(instrumentIdentity->Port);
+    JSRString_Set(&unmanaged.Port,
+        marshal_as<std::string>(instrumentIdentity->Port).c_str());
 
   if (!System::String::IsNullOrEmpty(instrumentIdentity->SerialNum))
-    unmanaged.SerialNum =
-        marshal_as<std::string>(instrumentIdentity->SerialNum);
+    JSRString_Set(&unmanaged.SerialNum,
+        marshal_as<std::string>(instrumentIdentity->SerialNum).c_str());
 
   return unmanaged;
 }
@@ -109,6 +113,7 @@ static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
 static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
                                                  instrumentIdentity) {
   PulserReceiverID unmanaged;
+  PulserReceiverID_Init(&unmanaged);
   unmanaged.InstrumentId =
       instrumentFromManaged(instrumentIdentity->InstrumentId);
   unmanaged.PulserReceiverIndex = instrumentIdentity->PulserReceiverIndex;
@@ -118,33 +123,51 @@ static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
 // Converting JSR-SDK::JSRLibMetadata <-> JSRDotNETSDK::IJSRDotNETLibMetadata^
 static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
   JSRLibMetadata unmanaged;
+  JSRLibMetadata_Init(&unmanaged);
+  
   if (metadata == nullptr) {
     return unmanaged;
   }
 
   if (!System::String::IsNullOrEmpty(metadata->Name))
-    unmanaged.Name = marshal_as<std::string>(metadata->Name);
+    JSRString_Set(&unmanaged.Name, marshal_as<std::string>(metadata->Name).c_str());
   if (!System::String::IsNullOrEmpty(metadata->GUID))
-    unmanaged.GUID = marshal_as<std::string>(metadata->GUID);
+    JSRString_Set(&unmanaged.GUID, marshal_as<std::string>(metadata->GUID).c_str());
   if (!System::String::IsNullOrEmpty(metadata->FriendlyName))
-    unmanaged.FriendlyName = marshal_as<std::string>(metadata->FriendlyName);
+    JSRString_Set(&unmanaged.FriendlyName, marshal_as<std::string>(metadata->FriendlyName).c_str());
   if (!System::String::IsNullOrEmpty(metadata->Version))
-    unmanaged.Version = marshal_as<std::string>(metadata->Version);
+    JSRString_Set(&unmanaged.Version, marshal_as<std::string>(metadata->Version).c_str());
 
   unmanaged.InterfaceVersion = metadata->InterfaceVersion;
 
-  if (metadata->SupportedModels != nullptr)
-    unmanaged.SupportedModels = listToVectorMarshall < System::String ^,
-    std::string > (metadata->SupportedModels);
+  if (metadata->SupportedModels != nullptr) {
+    int idx = 0;
+    for each (System::String^ model in metadata->SupportedModels) {
+      if (idx >= JSR_METADATA_MAX_MODELS) break;
+      JSRString_Set(&unmanaged.SupportedModels[idx++], 
+                    marshal_as<std::string>(model).c_str());
+    }
+    unmanaged.SupportedModelsCount = idx;
+  }
 
-  if (metadata->OpenOptions != nullptr)
-    unmanaged.OpenOptions = listToVectorMarshall < System::String ^,
-    std::string > (metadata->OpenOptions);
+  if (metadata->OpenOptions != nullptr) {
+    int idx = 0;
+    for each (System::String^ option in metadata->OpenOptions) {
+      if (idx >= JSR_METADATA_MAX_OPTIONS) break;
+      JSRString_Set(&unmanaged.OpenOptions[idx++],
+                    marshal_as<std::string>(option).c_str());
+    }
+    unmanaged.OpenOptionsCount = idx;
+  }
 
-  if (metadata->ConnectionType != nullptr)
-        unmanaged.ConnectionType =
-            listToVectorMarshall<CONNECTION_TYPE, C_CONNECTION_TYPE>(
-                metadata->ConnectionType);
+  if (metadata->ConnectionType != nullptr) {
+    int idx = 0;
+    for each (CONNECTION_TYPE type in metadata->ConnectionType) {
+      if (idx >= JSR_METADATA_MAX_CONNECTIONS) break;
+      unmanaged.ConnectionType[idx++] = connectionTypeFromManaged(type);
+    }
+    unmanaged.ConnectionTypeCount = idx;
+  }
 
   return unmanaged;
 }
@@ -153,37 +176,38 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
 // JSRDotNETSDK::EventArgsStatusChange
 static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
                                                         managedEvent) {
-  StatusChangedEvent unmanagedEvent{};
+  StatusChangedEvent unmanagedEvent;
+  StatusChangedEvent_Init(&unmanagedEvent);
 
   if (managedEvent == nullptr)
     return unmanagedEvent;
 
-  unmanagedEvent.pulserProperty =
-      marshal_as<std::string>(managedEvent->PulserProperty);
+  JSRString_Set(&unmanagedEvent.PulserProperty,
+      marshal_as<std::string>(managedEvent->PulserProperty).c_str());
 
-  unmanagedEvent.pulserState =
+  unmanagedEvent.PulserState =
       pulserReceiverStateFromManaged(managedEvent->PulserState);
 
   if (managedEvent->NewValue != nullptr)
-    unmanagedEvent.newValue =
-        marshal_as<std::string>(managedEvent->NewValue->ToString());
+    JSRString_Set(&unmanagedEvent.NewValue,
+        marshal_as<std::string>(managedEvent->NewValue->ToString()).c_str());
 
-  unmanagedEvent.dataType =
+  unmanagedEvent.DataType =
       pulserPropertyDataTypeFromManaged(managedEvent->DataType);
-  unmanagedEvent.changeType = statusChangeFromManaged(managedEvent->ChangeType);
+  unmanagedEvent.ChangeType = statusChangeFromManaged(managedEvent->ChangeType);
 
   if (managedEvent->PulserReceiverId != nullptr)
-    unmanagedEvent.pulserReceiverId =
+    unmanagedEvent.PulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
   if (!System::String::IsNullOrEmpty(managedEvent->ErrorMessage))
-    unmanagedEvent.errorMessage =
-        marshal_as<std::string>(managedEvent->ErrorMessage);
+    JSRString_Set(&unmanagedEvent.ErrorMessage,
+        marshal_as<std::string>(managedEvent->ErrorMessage).c_str());
 
-  unmanagedEvent.errorCode = errorCodeFromManaged(managedEvent->ErrorCode);
+  unmanagedEvent.ErrorCode = errorCodeFromManaged(managedEvent->ErrorCode);
 
   if (managedEvent->ThrownException != nullptr)
-    unmanagedEvent.thrownException =
+    unmanagedEvent.ThrownException =
         exceptionFromManaged(managedEvent->ThrownException);
 
   return unmanagedEvent;
@@ -193,63 +217,75 @@ static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
 static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
                                           managedEvent) {
   NotifyEvent unmanagedEvent;
+  NotifyEvent_Init(&unmanagedEvent);
+  
   if (managedEvent == nullptr) {
     return unmanagedEvent;
   }
 
   if (!System::String::IsNullOrEmpty(managedEvent->Model))
-    unmanagedEvent.model = marshal_as<std::string>(managedEvent->Model);
+    JSRString_Set(&unmanagedEvent.Model, 
+                  marshal_as<std::string>(managedEvent->Model).c_str());
 
-  unmanagedEvent.state = pulserReceiverStateFromManaged(managedEvent->State);
+  unmanagedEvent.State = pulserReceiverStateFromManaged(managedEvent->State);
 
   if (managedEvent->NewValue != nullptr)
-    unmanagedEvent.newValue =
-        marshal_as<std::string>(managedEvent->NewValue->ToString());
+    JSRString_Set(&unmanagedEvent.NewValue,
+        marshal_as<std::string>(managedEvent->NewValue->ToString()).c_str());
 
   if (!System::String::IsNullOrEmpty(managedEvent->PropertyName))
-    unmanagedEvent.propertyName =
-        marshal_as<std::string>(managedEvent->PropertyName);
+    JSRString_Set(&unmanagedEvent.PropertyName,
+        marshal_as<std::string>(managedEvent->PropertyName).c_str());
 
-  unmanagedEvent.wasSelected = managedEvent->WasSelected;
+  unmanagedEvent.WasSelected = managedEvent->WasSelected ? 1 : 0;
 
   if (!System::String::IsNullOrEmpty(managedEvent->ExceptionTypeInfo))
-    unmanagedEvent.exceptionTypeInfo =
-        marshal_as<std::string>(managedEvent->ExceptionTypeInfo);
+    JSRString_Set(&unmanagedEvent.ExceptionTypeInfo,
+        marshal_as<std::string>(managedEvent->ExceptionTypeInfo).c_str());
 
   if (!System::String::IsNullOrEmpty(managedEvent->ErrorMsg))
-    unmanagedEvent.errorMsg = marshal_as<std::string>(managedEvent->ErrorMsg);
+    JSRString_Set(&unmanagedEvent.ErrorMsg,
+                  marshal_as<std::string>(managedEvent->ErrorMsg).c_str());
 
   if (!System::String::IsNullOrEmpty(managedEvent->ErrorText))
-    unmanagedEvent.errorText = marshal_as<std::string>(managedEvent->ErrorText);
+    JSRString_Set(&unmanagedEvent.ErrorText,
+                  marshal_as<std::string>(managedEvent->ErrorText).c_str());
 
-  unmanagedEvent.maxFrequency = managedEvent->MaxFrequency;
+  unmanagedEvent.MaxFrequency = managedEvent->MaxFrequency;
 
-  if (managedEvent->Info != nullptr)
-    unmanagedEvent.info = listToVectorMarshall < System::String ^,
-    std::string > (managedEvent->Info);
+  if (managedEvent->Info != nullptr) {
+    int idx = 0;
+    for each (System::String^ info in managedEvent->Info) {
+      if (idx >= JSR_NOTIFY_INFO_MAX_COUNT) break;
+      JSRString_Set(&unmanagedEvent.Info[idx++],
+                    marshal_as<std::string>(info).c_str());
+    }
+    unmanagedEvent.InfoCount = idx;
+  }
 
-  unmanagedEvent.prIndex = managedEvent->PRIndex;
+  unmanagedEvent.PrIndex = managedEvent->PRIndex;
 
   if (managedEvent->PulserReceiverId != nullptr)
-    unmanagedEvent.pulserReceiverId =
+    unmanagedEvent.PulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
   if (!System::String::IsNullOrEmpty(managedEvent->Serial))
-    unmanagedEvent.serial = marshal_as<std::string>(managedEvent->Serial);
+    JSRString_Set(&unmanagedEvent.Serial,
+                  marshal_as<std::string>(managedEvent->Serial).c_str());
 
-  unmanagedEvent.discoverState =
+  unmanagedEvent.DiscoverState =
       discoveryStateFlagsFromManaged(managedEvent->DiscoverState);
 
   if (managedEvent->InstrumentId != nullptr)
-    unmanagedEvent.instrumentId =
+    unmanagedEvent.InstrumentId =
         instrumentFromManaged(managedEvent->InstrumentId);
 
   if (!System::String::IsNullOrEmpty(managedEvent->PluginName))
-    unmanagedEvent.pluginName =
-        marshal_as<std::string>(managedEvent->PluginName);
+    JSRString_Set(&unmanagedEvent.PluginName,
+                  marshal_as<std::string>(managedEvent->PluginName).c_str());
 
-  unmanagedEvent.notifyType = notifyTypeFromManaged(managedEvent->NotifyType);
-  unmanagedEvent.dataType =
+  unmanagedEvent.NotifyType = notifyTypeFromManaged(managedEvent->NotifyType);
+  unmanagedEvent.DataType =
       pulserPropertyDataTypeFromManaged(managedEvent->DataType);
 
   return unmanagedEvent;
