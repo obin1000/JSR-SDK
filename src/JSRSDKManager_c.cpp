@@ -47,26 +47,36 @@ static std::unordered_map<JSRSDKManagerHandle, CallbackHolder> g_callbacks;
 // ============================================================================
 
 JSRSDKManagerHandle JSR_CreateManager() {
-  JSRSDKManager *m = CreateJSRSDKManager();
-  return reinterpret_cast<JSRSDKManagerHandle>(m);
+  try {
+    JSRSDKManager *m = CreateJSRSDKManager();
+    return reinterpret_cast<JSRSDKManagerHandle>(m);
+  } catch (...) {
+    return nullptr;
+  }
 }
 
 void JSR_DestroyManager(JSRSDKManagerHandle mgr) {
   if (!mgr) return;
-  
-  // First, remove callbacks to prevent any pending callbacks from firing
-  JSR_RemoveStatusChangeCallback(mgr);
-  JSR_RemoveNotifyCallback(mgr);
+  try {
+    // First, remove callbacks to prevent any pending callbacks from firing
+    JSR_RemoveStatusChangeCallback(mgr);
+    JSR_RemoveNotifyCallback(mgr);
+  } catch (...) {
+    // Ignore exceptions during destruction
+  }
   
   // Clean up callback holder
   {
     std::lock_guard<std::mutex> lk(g_cbMutex);
     g_callbacks.erase(mgr);
   }
-  
-  // Finally, destroy the manager
-  JSRSDKManager *m = reinterpret_cast<JSRSDKManager *>(mgr);
-  DestroyJSRSDKManager(m);
+  try {
+    // Finally, destroy the manager
+    JSRSDKManager *m = reinterpret_cast<JSRSDKManager *>(mgr);
+    DestroyJSRSDKManager(m);
+  } catch (...) {
+    // Ignore exceptions during destruction
+  }
 }
 
 // ============================================================================
