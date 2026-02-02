@@ -43,14 +43,14 @@ extern "C" {
  * @note The data array is always null-terminated
  * @note Maximum usable length is JSR_STRING_MAX_LENGTH - 1 (255 bytes)
  */
-typedef struct {
+typedef struct JSRString {
     char data[JSR_STRING_MAX_LENGTH];
 } JSRString;
 
 /**
  * @brief Large fixed-size string for longer content (e.g., stack traces)
  */
-typedef struct {
+typedef struct JSRStringLarge {
     char data[JSR_STRING_MAX_LENGTH * 4];
 } JSRStringLarge;
 

@@ -26,7 +26,7 @@ extern "C" {
  * Contains all information about a status change event.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct StatusChangedEvent {
     /** @brief Name of the pulser property that changed */
     JSRString PulserProperty;
     

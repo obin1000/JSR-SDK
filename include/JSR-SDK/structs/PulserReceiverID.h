@@ -21,7 +21,7 @@ extern "C" {
  * identify a specific pulser/receiver instance.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct PulserReceiverID {
     /** @brief The instrument associated with this Pulser/Receiver */
     InstrumentID InstrumentId;
     

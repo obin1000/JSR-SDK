@@ -21,7 +21,7 @@ extern "C" {
  * Contains all identifying information for a hardware instrument.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct InstrumentID {
     /** @brief The model name of the instrument */
     JSRString ModelName;
     

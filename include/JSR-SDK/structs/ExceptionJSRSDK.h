@@ -21,7 +21,7 @@ extern "C" {
  * Contains error code and descriptive messages about an exception.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct ExceptionJSRSDK {
     /** @brief Error code identifying the type of error */
     C_ERROR_CODE ErrorCode;
     

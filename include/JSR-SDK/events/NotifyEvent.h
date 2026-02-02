@@ -31,7 +31,7 @@ extern "C" {
  * Contains all information about a notify event.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct NotifyEvent {
     /** @brief Model name of the device */
     JSRString Model;
     

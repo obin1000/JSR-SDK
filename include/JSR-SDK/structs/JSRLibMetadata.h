@@ -37,7 +37,7 @@ extern "C" {
  * Contains comprehensive information about a JSR library plugin.
  * Safe to use across DLL boundaries.
  */
-typedef struct {
+typedef struct JSRLibMetadata {
     /** @brief The name of the library */
     JSRString Name;
     
