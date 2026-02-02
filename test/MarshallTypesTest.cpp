@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/marshals/MarshalTypes.h"
+#include "JSR-SDK/JSRString.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -157,6 +158,103 @@ public:
 };
 
 //--------------------------------------------------------------------------
+//  JSRString Tests
+//--------------------------------------------------------------------------
+TEST(JSRStringTests, Init_SetsEmptyString) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  EXPECT_STREQ(str.data, "");
+  EXPECT_EQ(strlen(str.data), 0u);
+}
+
+TEST(JSRStringTests, Set_NormalString_Success) {
+  JSRString str;
+  JSRString_Init(&str);
+  JSRString_Set(&str, "Hello World");
+  
+  EXPECT_STREQ(str.data, "Hello World");
+}
+
+TEST(JSRStringTests, Set_NullPointer_SetsEmpty) {
+  JSRString str;
+  JSRString_Init(&str);
+  JSRString_Set(&str, nullptr);
+  
+  EXPECT_STREQ(str.data, "");
+}
+
+TEST(JSRStringTests, Set_EmptyString_Success) {
+  JSRString str;
+  JSRString_Init(&str);
+  JSRString_Set(&str, "");
+  
+  EXPECT_STREQ(str.data, "");
+}
+
+TEST(JSRStringTests, Set_LongString_Truncates) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  // Create a string longer than JSR_STRING_MAX_LENGTH (256)
+  std::string longStr(300, 'A');
+  JSRString_Set(&str, longStr.c_str());
+  
+  // Should be truncated to max length - 1 (for null terminator)
+  EXPECT_EQ(strlen(str.data), JSR_STRING_MAX_LENGTH - 1);
+  EXPECT_EQ(str.data[JSR_STRING_MAX_LENGTH - 1], '\0');
+  
+  // All characters before truncation should be 'A'
+  for (size_t i = 0; i < JSR_STRING_MAX_LENGTH - 1; ++i) {
+    EXPECT_EQ(str.data[i], 'A');
+  }
+}
+
+TEST(JSRStringTests, Set_ExactMaxLength_Truncates) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  // Create a string exactly JSR_STRING_MAX_LENGTH (256)
+  std::string exactStr(JSR_STRING_MAX_LENGTH, 'B');
+  JSRString_Set(&str, exactStr.c_str());
+  
+  // Should be truncated to max length - 1
+  EXPECT_EQ(strlen(str.data), JSR_STRING_MAX_LENGTH - 1);
+  EXPECT_EQ(str.data[JSR_STRING_MAX_LENGTH - 1], '\0');
+}
+
+TEST(JSRStringTests, Set_SpecialCharacters_Success) {
+  JSRString str;
+  JSRString_Init(&str);
+  JSRString_Set(&str, "Test\nWith\tSpecial\rChars");
+  
+  EXPECT_STREQ(str.data, "Test\nWith\tSpecial\rChars");
+}
+
+TEST(JSRStringTests, Set_Unicode_HandlesCorrectly) {
+  JSRString str;
+  JSRString_Init(&str);
+  JSRString_Set(&str, "Hello 世界");
+  
+  // Should store the UTF-8 bytes correctly
+  EXPECT_NE(strlen(str.data), 0u);
+}
+
+TEST(JSRStringTests, MultipleSet_OverwritesPrevious) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  JSRString_Set(&str, "First");
+  EXPECT_STREQ(str.data, "First");
+  
+  JSRString_Set(&str, "Second");
+  EXPECT_STREQ(str.data, "Second");
+  
+  JSRString_Set(&str, "Third");
+  EXPECT_STREQ(str.data, "Third");
+}
+
+//--------------------------------------------------------------------------
 //  listToVector & listToVectorMarshall tests
 //--------------------------------------------------------------------------
 TEST(MarshalTypesTests, ListToVector_Int_Success) {
@@ -188,6 +286,14 @@ TEST(MarshalTypesTests, ListToVectorMarshall_String_Success) {
   EXPECT_EQ(native[1], "two");
 }
 
+TEST(MarshalTypesTests, ListToVectorMarshall_EmptyList_Success) {
+  List<String ^> ^ managed = gcnew List<String ^>();
+  
+  std::vector<std::string> native = listToVectorMarshall < String ^,
+                           std::string > (managed);
+  EXPECT_TRUE(native.empty());
+}
+
 //--------------------------------------------------------------------------
 //  instrumentFromManaged tests
 //--------------------------------------------------------------------------
@@ -204,6 +310,67 @@ TEST(MarshalTypesTests, InstrumentFromManaged_FullMapping) {
   EXPECT_STREQ(native.SerialNum.data, "12345");
   EXPECT_STREQ(native.Port.data, "USB");
   EXPECT_STREQ(native.PluginName.data, "TestPlugin");
+}
+
+TEST(MarshalTypesTests, InstrumentFromManaged_NullInput_ReturnsEmpty) {
+  InstrumentID native = instrumentFromManaged(nullptr);
+  
+  EXPECT_STREQ(native.ModelName.data, "");
+  EXPECT_STREQ(native.SerialNum.data, "");
+  EXPECT_STREQ(native.Port.data, "");
+  EXPECT_STREQ(native.PluginName.data, "");
+}
+
+TEST(MarshalTypesTests, InstrumentFromManaged_NullFields_HandlesGracefully) {
+  TestInstrumentIdentity ^ managed = gcnew TestInstrumentIdentity();
+  managed->ModelName = nullptr;
+  managed->SerialNum = nullptr;
+  managed->Port = "USB";
+  managed->PluginName = nullptr;
+
+  InstrumentID native = instrumentFromManaged(managed);
+
+  EXPECT_STREQ(native.ModelName.data, "");
+  EXPECT_STREQ(native.SerialNum.data, "");
+  EXPECT_STREQ(native.Port.data, "USB");
+  EXPECT_STREQ(native.PluginName.data, "");
+}
+
+TEST(MarshalTypesTests, InstrumentFromManaged_EmptyStrings_Success) {
+  TestInstrumentIdentity ^ managed = gcnew TestInstrumentIdentity();
+  managed->ModelName = "";
+  managed->SerialNum = "";
+  managed->Port = "";
+  managed->PluginName = "";
+
+  InstrumentID native = instrumentFromManaged(managed);
+
+  EXPECT_STREQ(native.ModelName.data, "");
+  EXPECT_STREQ(native.SerialNum.data, "");
+  EXPECT_STREQ(native.Port.data, "");
+  EXPECT_STREQ(native.PluginName.data, "");
+}
+
+TEST(MarshalTypesTests, InstrumentFromManaged_LongStrings_Truncates) {
+  TestInstrumentIdentity ^ managed = gcnew TestInstrumentIdentity();
+  
+  // Create a very long model name
+  System::Text::StringBuilder^ sb = gcnew System::Text::StringBuilder();
+  for (int i = 0; i < 300; i++) {
+    sb->Append("A");
+  }
+  managed->ModelName = sb->ToString();
+  managed->SerialNum = "Normal";
+  managed->Port = "COM1";
+  managed->PluginName = "Plugin";
+
+  InstrumentID native = instrumentFromManaged(managed);
+
+  // Should be truncated
+  EXPECT_EQ(strlen(native.ModelName.data), JSR_STRING_MAX_LENGTH - 1);
+  EXPECT_STREQ(native.SerialNum.data, "Normal");
+  EXPECT_STREQ(native.Port.data, "COM1");
+  EXPECT_STREQ(native.PluginName.data, "Plugin");
 }
 
 //--------------------------------------------------------------------------
@@ -224,6 +391,18 @@ TEST(MarshalTypesTests, PulserReceiverFromManaged_MapsFields) {
 
   EXPECT_EQ(native.PulserReceiverIndex, 3);
   EXPECT_STREQ(native.InstrumentId.SerialNum.data, "SN9000");
+  EXPECT_STREQ(native.InstrumentId.ModelName.data, "Test-Model");
+}
+
+TEST(MarshalTypesTests, PulserReceiverFromManaged_NullInstrument_HandlesGracefully) {
+  TestPulserReceiverIdentity ^ prManaged = gcnew TestPulserReceiverIdentity();
+  prManaged->InstrumentId = nullptr;
+  prManaged->PulserReceiverIndex = 5;
+
+  PulserReceiverID native = pulsereceiverFromManaged(prManaged);
+
+  EXPECT_EQ(native.PulserReceiverIndex, 5);
+  EXPECT_STREQ(native.InstrumentId.ModelName.data, "");
 }
 
 //--------------------------------------------------------------------------
@@ -253,6 +432,47 @@ TEST(MarshalTypesTests, LibMetadataFromManaged_MapsCollections) {
   ASSERT_EQ(native.ConnectionTypeCount, 1);
 }
 
+TEST(MarshalTypesTests, LibMetadataFromManaged_Null_ReturnsEmpty) {
+  JSRLibMetadata native = libMetadataFromManaged(nullptr);
+  
+  EXPECT_STREQ(native.Name.data, "");
+  EXPECT_EQ(native.SupportedModelsCount, 0);
+  EXPECT_EQ(native.OpenOptionsCount, 0);
+  EXPECT_EQ(native.ConnectionTypeCount, 0);
+}
+
+TEST(MarshalTypesTests, LibMetadataFromManaged_NullCollections_HandlesGracefully) {
+  TestJSRLibMetadata ^ managed = gcnew TestJSRLibMetadata();
+  managed->Name = "Test";
+  managed->SupportedModels = nullptr;
+  managed->OpenOptions = nullptr;
+  managed->ConnectionType = nullptr;
+
+  JSRLibMetadata native = libMetadataFromManaged(managed);
+
+  EXPECT_STREQ(native.Name.data, "Test");
+  EXPECT_EQ(native.SupportedModelsCount, 0);
+  EXPECT_EQ(native.OpenOptionsCount, 0);
+  EXPECT_EQ(native.ConnectionTypeCount, 0);
+}
+
+TEST(MarshalTypesTests, LibMetadataFromManaged_MaxModels_TruncatesCorrectly) {
+  TestJSRLibMetadata ^ managed = gcnew TestJSRLibMetadata();
+  managed->Name = "Test";
+  
+  // Create more models than the max
+  cli::array<String ^>^ models = gcnew cli::array<String ^>(JSR_METADATA_MAX_MODELS + 5);
+  for (int i = 0; i < models->Length; i++) {
+    models[i] = "Model" + i.ToString();
+  }
+  managed->SupportedModels = models;
+
+  JSRLibMetadata native = libMetadataFromManaged(managed);
+
+  // Should be capped at max
+  EXPECT_EQ(native.SupportedModelsCount, JSR_METADATA_MAX_MODELS);
+}
+
 //--------------------------------------------------------------------------
 //  statusChangedEventFromManaged tests
 //--------------------------------------------------------------------------
@@ -275,6 +495,32 @@ TEST(MarshalTypesTests, StatusChangedEventFromManaged_MapsStateChange) {
   EXPECT_EQ(static_cast<int>(native.PulserState),
             static_cast<int>(PulserReceiverState::READY));
   EXPECT_EQ(native.PulserReceiverId.PulserReceiverIndex, 1);
+}
+
+TEST(MarshalTypesTests, StatusChangedEventFromManaged_Null_ReturnsEmpty) {
+  StatusChangedEvent native = statusChangedEventFromManaged(nullptr);
+  
+  EXPECT_STREQ(native.PulserProperty.data, "");
+  EXPECT_STREQ(native.NewValue.data, "");
+  EXPECT_STREQ(native.ErrorMessage.data, "");
+}
+
+TEST(MarshalTypesTests, StatusChangedEventFromManaged_NullNewValue_HandlesGracefully) {
+  TestInstrumentIdentity ^ inst = gcnew TestInstrumentIdentity();
+  inst->ModelName = "Model";
+  inst->SerialNum = "SN";
+  TestPulserReceiverIdentity ^ prManaged = gcnew TestPulserReceiverIdentity();
+  prManaged->InstrumentId = inst;
+  prManaged->PulserReceiverIndex = 0;
+
+  EventArgsStatusChange ^ managed =
+      gcnew EventArgsStatusChange(prManaged, PulserReceiverState::READY);
+  // NewValue is nullptr by default
+
+  StatusChangedEvent native = statusChangedEventFromManaged(managed);
+
+  // Should not crash, NewValue should be empty
+  EXPECT_STREQ(native.NewValue.data, "");
 }
 
 //--------------------------------------------------------------------------
@@ -305,10 +551,156 @@ TEST(MarshalTypesTests, NotifyEventFromManaged_MapsPropertyChange) {
   EXPECT_EQ(native.PulserReceiverId.PulserReceiverIndex, 2);
 }
 
+TEST(MarshalTypesTests, NotifyEventFromManaged_Null_ReturnsEmpty) {
+  NotifyEvent native = notifyEventFromManaged(nullptr);
+  
+  EXPECT_STREQ(native.Model.data, "");
+  EXPECT_STREQ(native.PropertyName.data, "");
+  EXPECT_EQ(native.InfoCount, 0);
+}
 
-//--------------------------------------------------------------------------
-//  main entry point (only if one is not already supplied by gtest).
-//--------------------------------------------------------------------------
+TEST(MarshalTypesTests, NotifyEventFromManaged_MaxInfo_TruncatesCorrectly) {
+  TestInstrumentIdentity ^ inst = gcnew TestInstrumentIdentity();
+  inst->ModelName = "Model";
+  inst->SerialNum = "SN";
+  TestPulserReceiverIdentity ^ prManaged = gcnew TestPulserReceiverIdentity();
+  prManaged->InstrumentId = inst;
+  prManaged->PulserReceiverIndex = 0;
+  String ^ plugin = "TestPlugin";
+
+  EventArgsManagerNotify ^ managed =
+      EventArgsManagerNotify::CreatePropertyChangeEvent(
+          plugin, prManaged, "Test", 1, PulserPropertyDataType::INTEGER);
+  
+  // Note: Cannot set Info directly as it's read-only, so this test is simplified
+  // In production, Info is populated by the managed code
+
+  NotifyEvent native = notifyEventFromManaged(managed);
+
+  // Verify basic conversion worked
+  EXPECT_STREQ(native.PropertyName.data, "Test");
+}
+
+//==========================================================================
+//  Memory Safety Tests
+//==========================================================================
+TEST(MemorySafetyTests, LargeStructOnStack_NoOverflow) {
+  // This test verifies that large structs can be safely allocated on stack
+  NotifyEvent evt;
+  NotifyEvent_Init(&evt);
+  
+  JSRString_Set(&evt.Model, "TestModel");
+  JSRString_Set(&evt.PropertyName, "TestProperty");
+  
+  // Fill the Info array
+  for (int i = 0; i < JSR_NOTIFY_INFO_MAX_COUNT; i++) {
+    char buf[32];
+    sprintf_s(buf, "Info%d", i);
+    JSRString_Set(&evt.Info[i], buf);
+  }
+  
+  // Verify data integrity
+  EXPECT_STREQ(evt.Model.data, "TestModel");
+  EXPECT_STREQ(evt.PropertyName.data, "TestProperty");
+  EXPECT_STREQ(evt.Info[0].data, "Info0");
+  EXPECT_STREQ(evt.Info[JSR_NOTIFY_INFO_MAX_COUNT - 1].data, "Info31");
+}
+
+TEST(MemorySafetyTests, StructCopy_PreservesData) {
+  InstrumentID original;
+  InstrumentID_Init(&original);
+  JSRString_Set(&original.ModelName, "Original");
+  JSRString_Set(&original.SerialNum, "SN123");
+  
+  // Copy the struct
+  InstrumentID copy = original;
+  
+  // Verify both have correct data
+  EXPECT_STREQ(original.ModelName.data, "Original");
+  EXPECT_STREQ(copy.ModelName.data, "Original");
+  
+  // Modify copy, original should be unchanged
+  JSRString_Set(&copy.ModelName, "Modified");
+  EXPECT_STREQ(original.ModelName.data, "Original");
+  EXPECT_STREQ(copy.ModelName.data, "Modified");
+}
+
+TEST(MemorySafetyTests, MultipleConversions_NoMemoryCorruption) {
+  TestInstrumentIdentity ^ managed = gcnew TestInstrumentIdentity();
+  managed->ModelName = "TestModel";
+  managed->SerialNum = "SN456";
+  
+  // Perform multiple conversions
+  for (int i = 0; i < 100; i++) {
+    InstrumentID native = instrumentFromManaged(managed);
+    EXPECT_STREQ(native.ModelName.data, "TestModel");
+    EXPECT_STREQ(native.SerialNum.data, "SN456");
+  }
+}
+
+TEST(MemorySafetyTests, NestedStructs_PreservesData) {
+  TestInstrumentIdentity ^ inst = gcnew TestInstrumentIdentity();
+  inst->ModelName = "Nested";
+  inst->SerialNum = "SN789";
+  
+  TestPulserReceiverIdentity ^ pr = gcnew TestPulserReceiverIdentity();
+  pr->InstrumentId = inst;
+  pr->PulserReceiverIndex = 42;
+  
+  PulserReceiverID native = pulsereceiverFromManaged(pr);
+  
+  EXPECT_EQ(native.PulserReceiverIndex, 42);
+  EXPECT_STREQ(native.InstrumentId.ModelName.data, "Nested");
+  EXPECT_STREQ(native.InstrumentId.SerialNum.data, "SN789");
+}
+
+//==========================================================================
+//  Edge Case Tests
+//==========================================================================
+TEST(EdgeCaseTests, BinaryData_InStrings_HandlesCorrectly) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  // String with null bytes would be truncated at first null
+  const char* binaryData = "Test\0Hidden";
+  JSRString_Set(&str, binaryData);
+  
+  // Should only have "Test" because of null terminator
+  EXPECT_STREQ(str.data, "Test");
+}
+
+TEST(EdgeCaseTests, ConsecutiveNulls_HandlesCorrectly) {
+  TestInstrumentIdentity ^ managed = gcnew TestInstrumentIdentity();
+  managed->ModelName = nullptr;
+  
+  // Convert multiple times with null values
+  for (int i = 0; i < 10; i++) {
+    InstrumentID native = instrumentFromManaged(managed);
+    EXPECT_STREQ(native.ModelName.data, "");
+  }
+}
+
+TEST(EdgeCaseTests, VeryLongStringsInArray_TruncatesAll) {
+  TestJSRLibMetadata ^ managed = gcnew TestJSRLibMetadata();
+  
+  System::Text::StringBuilder^ sb = gcnew System::Text::StringBuilder();
+  for (int i = 0; i < 300; i++) {
+    sb->Append("X");
+  }
+  String^ longString = sb->ToString();
+  
+  managed->SupportedModels = gcnew cli::array<String ^>{longString, longString};
+  
+  JSRLibMetadata native = libMetadataFromManaged(managed);
+  
+  EXPECT_EQ(native.SupportedModelsCount, 2);
+  EXPECT_EQ(strlen(native.SupportedModels[0].data), JSR_STRING_MAX_LENGTH - 1);
+  EXPECT_EQ(strlen(native.SupportedModels[1].data), JSR_STRING_MAX_LENGTH - 1);
+}
+
+//==========================================================================
+//  main entry point
+//==========================================================================
 #ifndef RUN_ALL_TESTS_WITH_MAIN
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

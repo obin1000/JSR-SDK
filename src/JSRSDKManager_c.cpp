@@ -28,16 +28,18 @@ static int copyJSRStringToBuffer(const JSRString &s, char *buf, int bufSize) {
 }
 
 // ============================================================================
-// Callback Management
+// Callback Management - Thread-Safe, Copy-Based Design
 // ============================================================================
 
 static std::mutex g_cbMutex;
+
 struct CallbackHolder {
   JSR_StatusChangeCallback statusCb = nullptr;
   void *statusUser = nullptr;
   JSR_NotifyCallback notifyCb = nullptr;
   void *notifyUser = nullptr;
 };
+
 static std::unordered_map<JSRSDKManagerHandle, CallbackHolder> g_callbacks;
 
 // ============================================================================
@@ -51,40 +53,78 @@ JSRSDKManagerHandle JSR_CreateManager() {
 
 void JSR_DestroyManager(JSRSDKManagerHandle mgr) {
   if (!mgr) return;
+  
+  // First, remove callbacks to prevent any pending callbacks from firing
+  JSR_RemoveStatusChangeCallback(mgr);
+  JSR_RemoveNotifyCallback(mgr);
+  
+  // Clean up callback holder
   {
     std::lock_guard<std::mutex> lk(g_cbMutex);
     g_callbacks.erase(mgr);
   }
+  
+  // Finally, destroy the manager
   JSRSDKManager *m = reinterpret_cast<JSRSDKManager *>(mgr);
   DestroyJSRSDKManager(m);
 }
 
 // ============================================================================
-// Callbacks
+// Callbacks - FIXED: Copy events to prevent dangling references
 // ============================================================================
 
 int JSR_SetStatusChangeCallback(JSRSDKManagerHandle mgr, JSR_StatusChangeCallback cb, void *user_data) {
   if (!mgr) return -1;
   
-  std::lock_guard<std::mutex> lk(g_cbMutex);
-  auto &h = g_callbacks[mgr];
-  h.statusCb = cb;
-  h.statusUser = user_data;
-
   try {
     auto mcpp = reinterpret_cast<JSRSDKManager *>(mgr);
+    
     if (cb) {
-      StatusChangeCallback wrapper = [mgr](const StatusChangedEvent &evt) {
+      // Store callback info
+      {
         std::lock_guard<std::mutex> lk(g_cbMutex);
-        auto it = g_callbacks.find(mgr);
-        if (it == g_callbacks.end() || !it->second.statusCb) return;
+        auto &h = g_callbacks[mgr];
+        h.statusCb = cb;
+        h.statusUser = user_data;
+      }
+      
+      // Create wrapper that COPIES the event to avoid dangling references
+      StatusChangeCallback wrapper = [mgr](const StatusChangedEvent &evt) {
+        // CRITICAL: Make a COPY of the event on our stack
+        // This prevents dangling references if the original is destroyed
+        StatusChangedEvent evtCopy = evt;
         
-        // Event is already in the correct format (using JSRString)
-        // Just pass it directly to the C callback
-        it->second.statusCb(&evt, it->second.statusUser);
+        // Now safely access the callback
+        JSR_StatusChangeCallback callback = nullptr;
+        void* userData = nullptr;
+        
+        {
+          std::lock_guard<std::mutex> lk(g_cbMutex);
+          auto it = g_callbacks.find(mgr);
+          if (it == g_callbacks.end() || !it->second.statusCb) return;
+          
+          callback = it->second.statusCb;
+          userData = it->second.statusUser;
+        }
+        
+        // Call user callback with pointer to OUR copy
+        // This is safe because evtCopy is on our stack
+        if (callback) {
+          callback(&evtCopy, userData);
+        }
       };
+      
       mcpp->replaceStatusChangeEventHandler(wrapper);
     } else {
+      // Clear callback
+      {
+        std::lock_guard<std::mutex> lk(g_cbMutex);
+        auto it = g_callbacks.find(mgr);
+        if (it != g_callbacks.end()) {
+          it->second.statusCb = nullptr;
+          it->second.statusUser = nullptr;
+        }
+      }
       mcpp->removeStatusChangeEventHandler();
     }
     return 0;
@@ -100,25 +140,57 @@ int JSR_RemoveStatusChangeCallback(JSRSDKManagerHandle mgr) {
 int JSR_SetNotifyCallback(JSRSDKManagerHandle mgr, JSR_NotifyCallback cb, void *user_data) {
   if (!mgr) return -1;
   
-  std::lock_guard<std::mutex> lk(g_cbMutex);
-  auto &h = g_callbacks[mgr];
-  h.notifyCb = cb;
-  h.notifyUser = user_data;
-
   try {
     auto mcpp = reinterpret_cast<JSRSDKManager *>(mgr);
+    
     if (cb) {
-      NotifyCallback wrapper = [mgr](const NotifyEvent &evt) {
+      // Store callback info
+      {
         std::lock_guard<std::mutex> lk(g_cbMutex);
-        auto it = g_callbacks.find(mgr);
-        if (it == g_callbacks.end() || !it->second.notifyCb) return;
+        auto &h = g_callbacks[mgr];
+        h.notifyCb = cb;
+        h.notifyUser = user_data;
+      }
+      
+      // Create wrapper that COPIES the event to avoid dangling references
+      NotifyCallback wrapper = [mgr](const NotifyEvent &evt) {
+        // CRITICAL: Make a COPY of the event (~12KB on stack)
+        // This is safe because:
+        // 1. Stack can handle 12KB easily (default is 1MB+)
+        // 2. Prevents dangling references
+        // 3. No dynamic allocation needed
+        NotifyEvent evtCopy = evt;
         
-        // Event is already in the correct format (using JSRString)
-        // Just pass it directly to the C callback
-        it->second.notifyCb(&evt, it->second.notifyUser);
+        // Now safely access the callback
+        JSR_NotifyCallback callback = nullptr;
+        void* userData = nullptr;
+        
+        {
+          std::lock_guard<std::mutex> lk(g_cbMutex);
+          auto it = g_callbacks.find(mgr);
+          if (it == g_callbacks.end() || !it->second.notifyCb) return;
+          
+          callback = it->second.notifyCb;
+          userData = it->second.notifyUser;
+        }
+        
+        // Call user callback with pointer to OUR copy
+        if (callback) {
+          callback(&evtCopy, userData);
+        }
       };
+      
       mcpp->replaceNotifyEventHandler(wrapper);
     } else {
+      // Clear callback
+      {
+        std::lock_guard<std::mutex> lk(g_cbMutex);
+        auto it = g_callbacks.find(mgr);
+        if (it != g_callbacks.end()) {
+          it->second.notifyCb = nullptr;
+          it->second.notifyUser = nullptr;
+        }
+      }
       mcpp->removeNotifyEventHandler();
     }
     return 0;
