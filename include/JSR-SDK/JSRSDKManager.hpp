@@ -141,10 +141,41 @@ public:
   virtual void loadPluginsFromBinaryDir() = 0;
 
   // === Event handlers used for callbacks ===
+  
+  /**
+   * @brief Replace status change event handler with std::function callback
+   * @param callback Function object to call on status change events
+   * @note For internal C++ use. External callers should use C API.
+   */
   virtual void
   replaceStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
+  
+  /**
+   * @brief Replace status change event handler with C-style function pointer
+   * @param callback Function pointer to call on status change events
+   * @param user_data User context pointer passed to callback
+   * @note This is the preferred method for C API integration
+   */
+  virtual void
+  replaceStatusChangeEventHandler(void (*callback)(const StatusChangedEvent*, void*), void* user_data) = 0;
+  
   virtual void removeStatusChangeEventHandler() = 0;
+  
+  /**
+   * @brief Replace notify event handler with std::function callback
+   * @param callback Function object to call on notify events
+   * @note For internal C++ use. External callers should use C API.
+   */
   virtual void replaceNotifyEventHandler(const NotifyCallback &callback) = 0;
+  
+  /**
+   * @brief Replace notify event handler with C-style function pointer
+   * @param callback Function pointer to call on notify events
+   * @param user_data User context pointer passed to callback
+   * @note This is the preferred method for C API integration
+   */
+  virtual void replaceNotifyEventHandler(void (*callback)(const NotifyEvent*, void*), void* user_data) = 0;
+  
   virtual void removeNotifyEventHandler() = 0;
 
   // === Static functions used to generate IDs ===

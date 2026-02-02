@@ -70,7 +70,7 @@ void JSR_DestroyManager(JSRSDKManagerHandle mgr) {
 }
 
 // ============================================================================
-// Callbacks - FIXED: Copy events to prevent dangling references
+// Callbacks - Using C-style function pointers directly
 // ============================================================================
 
 int JSR_SetStatusChangeCallback(JSRSDKManagerHandle mgr, JSR_StatusChangeCallback cb, void *user_data) {
@@ -88,33 +88,8 @@ int JSR_SetStatusChangeCallback(JSRSDKManagerHandle mgr, JSR_StatusChangeCallbac
         h.statusUser = user_data;
       }
       
-      // Create wrapper that COPIES the event to avoid dangling references
-      StatusChangeCallback wrapper = [mgr](const StatusChangedEvent &evt) {
-        // CRITICAL: Make a COPY of the event on our stack
-        // This prevents dangling references if the original is destroyed
-        StatusChangedEvent evtCopy = evt;
-        
-        // Now safely access the callback
-        JSR_StatusChangeCallback callback = nullptr;
-        void* userData = nullptr;
-        
-        {
-          std::lock_guard<std::mutex> lk(g_cbMutex);
-          auto it = g_callbacks.find(mgr);
-          if (it == g_callbacks.end() || !it->second.statusCb) return;
-          
-          callback = it->second.statusCb;
-          userData = it->second.statusUser;
-        }
-        
-        // Call user callback with pointer to OUR copy
-        // This is safe because evtCopy is on our stack
-        if (callback) {
-          callback(&evtCopy, userData);
-        }
-      };
-      
-      mcpp->replaceStatusChangeEventHandler(wrapper);
+      // Use the new C-style callback method directly - no lambda wrapper needed!
+      mcpp->replaceStatusChangeEventHandler(cb, user_data);
     } else {
       // Clear callback
       {
@@ -152,35 +127,8 @@ int JSR_SetNotifyCallback(JSRSDKManagerHandle mgr, JSR_NotifyCallback cb, void *
         h.notifyUser = user_data;
       }
       
-      // Create wrapper that COPIES the event to avoid dangling references
-      NotifyCallback wrapper = [mgr](const NotifyEvent &evt) {
-        // CRITICAL: Make a COPY of the event (~12KB on stack)
-        // This is safe because:
-        // 1. Stack can handle 12KB easily (default is 1MB+)
-        // 2. Prevents dangling references
-        // 3. No dynamic allocation needed
-        NotifyEvent evtCopy = evt;
-        
-        // Now safely access the callback
-        JSR_NotifyCallback callback = nullptr;
-        void* userData = nullptr;
-        
-        {
-          std::lock_guard<std::mutex> lk(g_cbMutex);
-          auto it = g_callbacks.find(mgr);
-          if (it == g_callbacks.end() || !it->second.notifyCb) return;
-          
-          callback = it->second.notifyCb;
-          userData = it->second.notifyUser;
-        }
-        
-        // Call user callback with pointer to OUR copy
-        if (callback) {
-          callback(&evtCopy, userData);
-        }
-      };
-      
-      mcpp->replaceNotifyEventHandler(wrapper);
+      // Use the new C-style callback method directly - no lambda wrapper needed!
+      mcpp->replaceNotifyEventHandler(cb, user_data);
     } else {
       // Clear callback
       {

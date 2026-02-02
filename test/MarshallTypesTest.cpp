@@ -255,6 +255,141 @@ TEST(JSRStringTests, MultipleSet_OverwritesPrevious) {
 }
 
 //--------------------------------------------------------------------------
+//  JSRString_SetN Security Tests (NEW)
+//--------------------------------------------------------------------------
+TEST(JSRStringSecurityTests, SetN_NullPointer_ReturnsError) {
+  int result = JSRString_SetN(nullptr, "test", 4);
+  EXPECT_EQ(result, -1);
+}
+
+TEST(JSRStringSecurityTests, SetN_NullValue_SetsEmpty) {
+  JSRString str;
+  int result = JSRString_SetN(&str, nullptr, 10);
+  EXPECT_EQ(result, 0);
+  EXPECT_STREQ(str.data, "");
+}
+
+TEST(JSRStringSecurityTests, SetN_NonTerminatedString_Safe) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  // Create non-null-terminated buffer (simulates untrusted input)
+  char buffer[100];
+  memset(buffer, 'X', sizeof(buffer));  // No null terminator!
+  
+  // Should safely copy only maxLen bytes
+  int result = JSRString_SetN(&str, buffer, 50);
+  
+  EXPECT_EQ(result, 0);
+  EXPECT_EQ(strlen(str.data), 50u);
+  
+  // Verify all chars are 'X'
+  for (size_t i = 0; i < 50; i++) {
+    EXPECT_EQ(str.data[i], 'X');
+  }
+  EXPECT_EQ(str.data[50], '\0');  // Should be null-terminated
+}
+
+TEST(JSRStringSecurityTests, SetN_MaxLenExceedsBuffer_Truncates) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  char buffer[300];
+  memset(buffer, 'Y', sizeof(buffer));
+  
+  // Request 300 bytes, but JSRString can only hold 255
+  int result = JSRString_SetN(&str, buffer, 300);
+  
+  EXPECT_EQ(result, 0);
+  EXPECT_EQ(strlen(str.data), JSR_STRING_MAX_LENGTH - 1);
+  EXPECT_EQ(str.data[JSR_STRING_MAX_LENGTH - 1], '\0');
+}
+
+TEST(JSRStringSecurityTests, SetN_NormalTerminatedString_Success) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  const char* test = "Hello World";
+  int result = JSRString_SetN(&str, test, 100);  // maxLen > string length
+  
+  EXPECT_EQ(result, 0);
+  EXPECT_STREQ(str.data, "Hello World");
+}
+
+TEST(JSRStringSecurityTests, SetN_ZeroMaxLen_SetsEmpty) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  int result = JSRString_SetN(&str, "test", 0);
+  
+  EXPECT_EQ(result, 0);
+  EXPECT_STREQ(str.data, "");
+}
+
+TEST(JSRStringSecurityTests, Set_VeryLongInput_DoesNotCrash) {
+  JSRString str;
+  JSRString_Init(&str);
+  
+  // Create a very long string
+  std::vector<char> longBuffer(1000000, 'Z');
+  longBuffer.push_back('\0');
+  
+  // Should handle gracefully without reading all 1MB
+  JSRString_Set(&str, longBuffer.data());
+  
+  // Should be truncated
+  EXPECT_EQ(strlen(str.data), JSR_STRING_MAX_LENGTH - 1);
+}
+
+//--------------------------------------------------------------------------
+//  JSRStringLarge Tests (NEW)
+//--------------------------------------------------------------------------
+TEST(JSRStringLargeTests, Init_SetsEmpty) {
+  JSRStringLarge str;
+  JSRStringLarge_Init(&str);
+  
+  EXPECT_STREQ(str.data, "");
+}
+
+TEST(JSRStringLargeTests, Set_LargeString_Success) {
+  JSRStringLarge str;
+  JSRStringLarge_Init(&str);
+  
+  // Create a 500-byte string
+  std::string large(500, 'L');
+  JSRStringLarge_Set(&str, large.c_str());
+  
+  EXPECT_EQ(strlen(str.data), 500u);
+}
+
+TEST(JSRStringLargeTests, Set_VeryLargeString_Truncates) {
+  JSRStringLarge str;
+  JSRStringLarge_Init(&str);
+  
+  // Create a 2000-byte string (larger than 1024 limit)
+  std::string veryLarge(2000, 'V');
+  JSRStringLarge_Set(&str, veryLarge.c_str());
+  
+  size_t maxLen = sizeof(str.data) - 1;
+  EXPECT_EQ(strlen(str.data), maxLen);
+  EXPECT_EQ(str.data[maxLen], '\0');
+}
+
+TEST(JSRStringLargeTests, Get_ReturnsCorrectPointer) {
+  JSRStringLarge str;
+  JSRStringLarge_Init(&str);
+  JSRStringLarge_Set(&str, "Test Large");
+  
+  const char* result = JSRStringLarge_Get(&str);
+  EXPECT_STREQ(result, "Test Large");
+}
+
+TEST(JSRStringLargeTests, Get_NullPointer_ReturnsEmpty) {
+  const char* result = JSRStringLarge_Get(nullptr);
+  EXPECT_STREQ(result, "");
+}
+
+//--------------------------------------------------------------------------
 //  listToVector & listToVectorMarshall tests
 //--------------------------------------------------------------------------
 TEST(MarshalTypesTests, ListToVector_Int_Success) {
