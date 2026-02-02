@@ -21,7 +21,94 @@
 #include <vector>
 
 /**
+ * @file JSRSDKManager.hpp
+ * @brief C++ interface for JSR SDK Manager
+ * 
+ * @warning ?? CRITICAL: DLL BOUNDARY SAFETY WARNING ??
+ * 
+ * This C++ interface returns STL containers (std::vector, std::string, std::map)
+ * that may cause CRASHES and HEAP CORRUPTION when used across DLL boundaries.
+ * 
+ * @section dll_boundary_problem The Problem
+ * 
+ * When you use this interface from code compiled separately from this DLL:
+ * - std::vector/std::string allocated in this DLL use THIS DLL's heap
+ * - When destructed in YOUR code, they try to free from YOUR heap
+ * - Result: HEAP CORRUPTION, ACCESS VIOLATIONS, CRASHES
+ * 
+ * This happens because:
+ * 1. Each DLL/EXE has its own CRT library instance with separate heaps
+ * 2. Memory allocated in one heap cannot be freed in another
+ * 3. STL containers manage their memory internally across these boundaries
+ * 
+ * @section dll_boundary_symptoms Symptoms
+ * - Crashes when std::vector/std::string go out of scope
+ * - "HEAP[]: Invalid Address specified to RtlValidateHeap" errors
+ * - Random access violations
+ * - Memory corruption that causes crashes later
+ * 
+ * @section dll_boundary_solution ? SAFE SOLUTION: Use the C API
+ * 
+ * Include "JSR-SDK/JSRSDKManager.h" instead for a SAFE interface that:
+ * - Uses simple C types (int, double, char*)
+ * - Never passes STL containers across DLL boundaries
+ * - Provides proper buffer-based string handling
+ * - Guarantees memory safety across DLL boundaries
+ * 
+ * Example of UNSAFE usage (DO NOT USE from external code):
+ * @code{.cpp}
+ * // ? UNSAFE - Will crash!
+ * JSRSDKManager* mgr = CreateJSRSDKManager();
+ * auto names = mgr->GetPluginNames(); // Vector allocated in DLL
+ * // ... use names ...
+ * // CRASH when 'names' destructs - tries to free DLL's memory from your heap!
+ * @endcode
+ * 
+ * Example of SAFE usage (Use this instead):
+ * @code{.c}
+ * // ? SAFE - Use the C API
+ * #include "JSR-SDK/JSRSDKManager.h"
+ * 
+ * JSRSDKManagerHandle mgr = JSR_CreateManager();
+ * int count = JSR_GetPluginNamesCount(mgr);
+ * 
+ * for (int i = 0; i < count; i++) {
+ *     char name[256];
+ *     JSR_GetPluginName(mgr, i, name, sizeof(name));
+ *     // Use name safely - no heap issues!
+ * }
+ * JSR_DestroyManager(mgr);
+ * @endcode
+ * 
+ * @section dll_boundary_when When This Interface IS Safe
+ * 
+ * This C++ interface is ONLY safe when:
+ * - Used internally within this DLL itself
+ * - ALL code is statically linked with the same CRT library
+ * - You have complete control over the build configuration
+ * 
+ * @section dll_boundary_reference Reference
+ * For more details, see:
+ * https://learn.microsoft.com/en-us/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries
+ * 
+ * @section dll_boundary_summary Summary
+ * 
+ * **If you're using this DLL from external code (different EXE/DLL):**
+ * ? Use JSRSDKManager.h (C API) - SAFE ?
+ * 
+ * **If you're modifying code inside this DLL:**
+ * ? This interface is fine - SAFE ?
+ * 
+ * **If you're unsure:**
+ * ? Use JSRSDKManager.h (C API) - SAFE ?
+ */
+
+/**
  * @brief Abstract class representing the interface to unmanaged C++.
+ * 
+ * @warning This class is NOT SAFE for use across DLL boundaries due to STL containers.
+ *          See file documentation above. Use JSRSDKManager.h (C API) instead.
+ * 
  * This class provides a set of virtual functions to interact with the JSR SDK.
  * The C++/CLI implementation is hidden in the implementation, allowing
  * unmanaged C++ to use this header.
@@ -77,8 +164,14 @@ public:
    * is specific to the method used for searching for instruments: e.g. COM port
    * for SERIAL, IP Address for ETHERNET, etc.
    * @param port The port to add.
+   * @warning Returns std::vector - unsafe across DLL boundaries! Use C API instead.
    */
   virtual void AddPortToExclude(std::string plugin, std::string port) = 0;
+  
+  /**
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPortsToExclude() in JSRSDKManager.h for safe alternative
+   */
   virtual std::vector<std::string> GetPortsToExclude(std::string plugin) = 0;
 
   /**
@@ -89,14 +182,27 @@ public:
    * @param port The port to add.
    */
   virtual void AddPortToInclude(std::string plugin, std::string port) = 0;
+  
+  /**
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPortsToInclude() in JSRSDKManager.h for safe alternative
+   */
   virtual std::vector<std::string> GetPortsToInclude(std::string plugin) = 0;
 
   virtual bool AddOpenOption(std::string plugin, std::string openOptionName,
                              std::string openOptionValue) = 0;
 
+  /**
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetOpenOption() in JSRSDKManager.h for safe alternative
+   */
   virtual std::string GetOpenOption(std::string plugin,
                                     std::string openOptionName) = 0;
 
+  /**
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetOpenOptionNames() in JSRSDKManager.h for safe alternative
+   */
   virtual std::vector<std::string> GetOpenOptionNames(std::string plugin) = 0;
 
   virtual bool RemoveOpenOption(std::string plugin,
@@ -134,6 +240,8 @@ public:
   /**
    * @brief Retrieves custom settings available in the manager.
    * @return A vector of strings representing custom settings.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetCustomSettings() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<std::string> GetCustomSettings() = 0;
 
@@ -141,12 +249,16 @@ public:
    * @brief Retrieves a list of instruments for a specific plugin.
    * @param pluginName The name of the plugin.
    * @return A vector of InstrumentID objects representing the instruments.
+   * @warning Returns std::vector<InstrumentID> - UNSAFE across DLL boundaries!
+   * @see JSR_GetInstruments*() functions in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<InstrumentID> GetInstruments(std::string pluginName) = 0;
 
   /**
    * @brief Retrieves the names of all managed plugins.
    * @return A vector of strings representing the names of managed plugins.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetManagedPluginNames() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<std::string> GetManagedPluginNames() = 0;
 
@@ -155,6 +267,8 @@ public:
    * @param strPluginName The name of the plugin.
    * @return A map where the key is the option name and the value is a vector of
    * option values.
+   * @warning Returns std::map with std::vector - UNSAFE across DLL boundaries!
+   * Use C API instead.
    */
   virtual std::map<std::string, std::vector<std::string>>
   GetPluginLibOpenOptions(std::string strPluginName) = 0;
@@ -170,9 +284,12 @@ public:
   GetPluginLibraryMetadata(std::string strPluginName) = 0;
 
   // virtual std::string GetPluginNameFromLibraryInstance(IJSRDotNET lib) = 0;
+  
   /**
    * @brief Retrieves names of the loaded plugins.
    * @return A vector of strings representing the names of the loaded plugins.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPluginNames() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<std::string> GetPluginNames() = 0;
 
@@ -198,6 +315,7 @@ public:
    * @param settingName The name of the pulser property.
    * @param useShort Whether to use the short form of the units.
    * @return A string representing the units of the property.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string GetPulserPropertyUnitsAsString(std::string settingName,
                                                      bool useShort = false) = 0;
@@ -218,6 +336,8 @@ public:
    * @param idxPR The index of the pulser receiver.
    * @return A vector of strings containing information about the pulser
    * receiver.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPulserReceiverInfo*() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<std::string> GetPulserReceiverInfo(std::string model,
                                                          std::string serialNum,
@@ -228,6 +348,8 @@ public:
    * @param id The PulserReceiverID of the pulser receiver.
    * @return A vector of strings containing information about the pulser
    * receiver.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPulserReceiverInfo*() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<std::string>
   GetPulserReceiverInfo(PulserReceiverID id) = 0;
@@ -236,6 +358,8 @@ public:
    * @brief Retrieves a list of all Pulser/Receiver IDs detected by the SDK.
    * @return A vector of PulserReceiverID objects representing the
    * Pulser/Receivers.
+   * @warning Returns std::vector<PulserReceiverID> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPulserReceivers*() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<PulserReceiverID> GetPulserReceivers() = 0;
 
@@ -329,6 +453,9 @@ public:
   // virtual void setDiscoveryEnable(object sender, bool bEnable);
 
   // === Getters and setters for variables in the manager ===
+  // NOTE: All getter functions that return std::string or std::vector are UNSAFE
+  // across DLL boundaries. Use the C API (JSRSDKManager.h) for safe access.
+  
   /**
    * @brief Checks if the pulse repetition frequency index is supported.
    * @return True if the pulse repetition frequency index is supported, false
@@ -369,6 +496,8 @@ public:
   /**
    * @brief Retrieves the available pulse repetition frequency values.
    * @return A vector of available pulse repetition frequency values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPulseRepetitionFrequencyValues() in JSRSDKManager.h
    */
   virtual std::vector<double> getPulseRepetitionFrequencyValues() = 0;
 
@@ -435,6 +564,7 @@ public:
   /**
    * @brief Retrieves the available high-pass filter values.
    * @return A vector of available high-pass filter values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getHighPassFilterValues() = 0;
 
@@ -507,6 +637,7 @@ public:
   /**
    * @brief Retrieves the available gain values.
    * @return A vector of available gain values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getGainValues() = 0;
 
@@ -531,6 +662,7 @@ public:
   /**
    * @brief Retrieves the available low-pass filter values.
    * @return A vector of available low-pass filter values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getLowPassFilterValues() = 0;
 
@@ -567,12 +699,17 @@ public:
 
   virtual bool getHVMeasurementSupported() = 0;
 
+  /**
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   */
   virtual std::string getUnitModelName() = 0;
   virtual void setUnitModelName(std::string name) = 0;
 
   /**
    * @brief Retrieves the unit serial number.
    * @return A string representing the unit serial number.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetUnitSerialNum() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getUnitSerialNum() = 0;
 
@@ -622,6 +759,7 @@ public:
    * @brief Retrieves the names of available pulser trigger source values.
    * @return A vector of strings representing the names of pulser trigger source
    * values.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<std::string> getPulserTriggerSourceValueNames() = 0;
 
@@ -676,6 +814,7 @@ public:
   /**
    * @brief Retrieves the names of available pulse energy values.
    * @return A vector of strings representing the names of pulse energy values.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<std::string> getPulseEnergyValueNames() = 0;
 
@@ -706,6 +845,7 @@ public:
   /**
    * @brief Retrieves the available damping values.
    * @return A vector of doubles representing the available damping values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getDampingValues() = 0;
 
@@ -737,6 +877,7 @@ public:
    * @brief Retrieves the available high voltage supply values.
    * @return A vector of doubles representing the available high voltage supply
    * values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getHVSupplyValues() = 0;
 
@@ -773,6 +914,8 @@ public:
   /**
    * @brief Retrieves the pulser serial number.
    * @return A string representing the pulser serial number.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetPulserSerialNum() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getPulserSerialNum() = 0;
 
@@ -798,6 +941,7 @@ public:
   /**
    * @brief Retrieves the receiver hardware revision.
    * @return A string representing the receiver hardware revision.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getReceiverHWRev() = 0;
 
@@ -816,6 +960,7 @@ public:
   /**
    * @brief Retrieves the pulser hardware revision.
    * @return A string representing the pulser hardware revision.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getPulserHWRev() = 0;
 
@@ -835,6 +980,7 @@ public:
   /**
    * @brief Retrieves the receiver firmware version.
    * @return A string representing the receiver firmware version.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getReceiverFirmwareVer() = 0;
 
@@ -847,6 +993,7 @@ public:
   /**
    * @brief Retrieves the pulser firmware version.
    * @return A string representing the pulser firmware version.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getPulserFirmwareVer() = 0;
 
@@ -903,6 +1050,7 @@ public:
   /**
    * @brief Retrieves general information about the system.
    * @return A vector of strings containing general information.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<std::string> getInfo() = 0;
 
@@ -969,6 +1117,8 @@ public:
   /**
    * @brief Retrieves the receiver serial number.
    * @return A string representing the receiver serial number.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetReceiverSerialNum() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getReceiverSerialNum() = 0;
 
@@ -1011,6 +1161,7 @@ public:
   /**
    * @brief Retrieves the available LED blink mode values.
    * @return A vector of strings representing the LED blink mode values.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<std::string> getLEDBlinkModeValues() = 0;
 
@@ -1053,6 +1204,7 @@ public:
   /**
    * @brief Retrieves the context message of the last exception.
    * @return A string containing the context message of the last exception.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getLastExceptionContextMessage() = 0;
 
@@ -1060,6 +1212,7 @@ public:
    * @brief Retrieves the last exception message or null if no exception
    * occurred.
    * @return A string containing the last exception message or null.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
    */
   virtual std::string getLastExceptionOrNull() = 0;
   // virtual void setLastExceptionOrNull(Exception exception) = 0;
@@ -1067,6 +1220,8 @@ public:
   /**
    * @brief Retrieves the plugin path.
    * @return A string representing the plugin path.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetPluginPath() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getPluginPath() = 0;
 
@@ -1079,6 +1234,8 @@ public:
   /**
    * @brief Retrieves the pulser model name.
    * @return A string representing the pulser model name.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetPulserModelName() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getPulserModelName() = 0;
 
@@ -1109,6 +1266,8 @@ public:
   /**
    * @brief Retrieves the maximum PRFs for the pulser.
    * @return A vector of doubles representing the maximum PRFs.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
+   * @see JSR_GetPulserMaxPRFs() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<double> getPulserMaxPRFs() = 0;
 
@@ -1123,12 +1282,14 @@ public:
    * @brief Retrieves the pulser energy capacitor values.
    * @return A vector of doubles representing the pulser energy capacitor
    * values.
+   * @warning Returns std::vector<double> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<double> getPulserEnergyCapacitorValues() = 0;
 
   /**
    * @brief Retrieves the receiver supply voltages.
    * @return A vector of strings representing the receiver supply voltages.
+   * @warning Returns std::vector<std::string> - UNSAFE across DLL boundaries!
    */
   virtual std::vector<std::string> getReceiverSupplyVoltages() = 0;
 
@@ -1141,6 +1302,8 @@ public:
   /**
    * @brief Retrieves the receiver OEM data.
    * @return A vector of unsigned char representing the receiver OEM data.
+   * @warning Returns std::vector<unsigned char> - UNSAFE across DLL boundaries!
+   * @see JSR_CopyReceiverOEMData() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<unsigned char> getReceiverOEMData() = 0;
 
@@ -1154,6 +1317,8 @@ public:
   /**
    * @brief Retrieves the pulser OEM data.
    * @return A vector of unsigned char representing the pulser OEM data.
+   * @warning Returns std::vector<unsigned char> - UNSAFE across DLL boundaries!
+   * @see JSR_CopyPulserOEMData() in JSRSDKManager.h for safe alternative
    */
   virtual std::vector<unsigned char> getPulserOEMData() = 0;
 
@@ -1173,6 +1338,8 @@ public:
   /**
    * @brief Retrieves the receiver model name.
    * @return A string representing the receiver model name.
+   * @warning Returns std::string - may be unsafe across DLL boundaries!
+   * @see JSR_GetReceiverModelName() in JSRSDKManager.h for safe alternative
    */
   virtual std::string getReceiverModelName() = 0;
 
