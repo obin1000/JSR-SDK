@@ -468,10 +468,6 @@ __declspec(dllexport) int JSR_GetPulseRepetitionFrequencyValuesCount(JSRSDKManag
  */
 __declspec(dllexport) double JSR_GetPulseRepetitionFrequencyValue(JSRSDKManagerHandle mgr, int index);
 
-// ============================================================================
-// OEM Data (Binary)
-// ============================================================================
-
 /**
  * @brief Gets the size of receiver OEM data
  * @param mgr Manager handle
@@ -503,10 +499,6 @@ __declspec(dllexport) int JSR_GetPulserOEMDataSize(JSRSDKManagerHandle mgr);
  * @return Bytes copied, or total size if dest is NULL, or -1 on error
  */
 __declspec(dllexport) int JSR_CopyPulserOEMData(JSRSDKManagerHandle mgr, unsigned char *dest, int destSize);
-
-// ============================================================================
-// Device Information
-// ============================================================================
 
 /**
  * @brief Gets the unit model name
@@ -587,6 +579,249 @@ __declspec(dllexport) int JSR_Shutdown(JSRSDKManagerHandle mgr);
  * @return State value (C_MANAGER_STATE enum), or -1 on error
  */
 __declspec(dllexport) int JSR_GetManagerState(JSRSDKManagerHandle mgr);
+
+// ============================================================================
+// Device Control & Configuration
+// ============================================================================
+
+/**
+ * @brief Loads plugins from the same directory as the executable
+ * @param mgr Manager handle
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_LoadPluginsFromBinaryDir(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Adds a port to the exclusion list for a plugin
+ * @param mgr Manager handle
+ * @param plugin Plugin name
+ * @param port Port identifier to exclude (e.g., "COM3")
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_AddPortToExclude(JSRSDKManagerHandle mgr, const char *plugin, const char *port);
+
+/**
+ * @brief Adds a port to the inclusion list for a plugin
+ * @param mgr Manager handle
+ * @param plugin Plugin name
+ * @param port Port identifier to include (e.g., "COM3")
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_AddPortToInclude(JSRSDKManagerHandle mgr, const char *plugin, const char *port);
+
+/**
+ * @brief Sets the current pulser/receiver by its ID structure
+ * @param mgr Manager handle
+ * @param modelName Instrument model name
+ * @param serialNum Instrument serial number
+ * @param prIndex Pulser/receiver index
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetCurrentPulserReceiverByID(JSRSDKManagerHandle mgr, const char *modelName, const char *serialNum, int prIndex);
+
+// ============================================================================
+// Trigger Configuration
+// ============================================================================
+
+/**
+ * @brief Enables or disables the trigger
+ * @param mgr Manager handle
+ * @param enable 1 to enable, 0 to disable
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetTriggerEnable(JSRSDKManagerHandle mgr, int enable);
+
+/**
+ * @brief Gets the trigger enable state
+ * @param mgr Manager handle
+ * @return 1 if enabled, 0 if disabled, -1 on error
+ */
+__declspec(dllexport) int JSR_GetTriggerEnable(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Sets the trigger source
+ * @param mgr Manager handle
+ * @param source Trigger source (C_TRIGGER_SOURCE enum value)
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetTriggerSource(JSRSDKManagerHandle mgr, int source);
+
+/**
+ * @brief Gets the trigger source
+ * @param mgr Manager handle
+ * @return Trigger source value (C_TRIGGER_SOURCE enum), or -1 on error
+ */
+__declspec(dllexport) int JSR_GetTriggerSource(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Sets the trigger impedance
+ * @param mgr Manager handle
+ * @param impedance Trigger impedance (C_TRIGGER_IMPEDANCE enum value)
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetTriggerImpedance(JSRSDKManagerHandle mgr, int impedance);
+
+/**
+ * @brief Gets the trigger impedance
+ * @param mgr Manager handle
+ * @return Trigger impedance value (C_TRIGGER_IMPEDANCE enum), or -1 on error
+ */
+__declspec(dllexport) int JSR_GetTriggerImpedance(JSRSDKManagerHandle mgr);
+
+// ============================================================================
+// Receiver Configuration
+// ============================================================================
+
+/**
+ * @brief Sets the receiver mode
+ * @param mgr Manager handle
+ * @param mode Receiver mode (C_RECEIVER_MODE enum value)
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetReceiverMode(JSRSDKManagerHandle mgr, int mode);
+
+/**
+ * @brief Gets the receiver mode
+ * @param mgr Manager handle
+ * @return Receiver mode value (C_RECEIVER_MODE enum), or -1 on error
+ */
+__declspec(dllexport) int JSR_GetReceiverMode(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Sets the gain value
+ * @param mgr Manager handle
+ * @param gain Gain value in dB
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetGain(JSRSDKManagerHandle mgr, double gain);
+
+/**
+ * @brief Gets the gain value
+ * @param mgr Manager handle
+ * @return Gain value in dB, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetGain(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the minimum gain value
+ * @param mgr Manager handle
+ * @return Minimum gain value in dB, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetGainMin(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the maximum gain value
+ * @param mgr Manager handle
+ * @return Maximum gain value in dB, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetGainMax(JSRSDKManagerHandle mgr);
+
+// ============================================================================
+// Pulse Repetition Frequency Configuration
+// ============================================================================
+
+/**
+ * @brief Sets the pulse repetition frequency
+ * @param mgr Manager handle
+ * @param frequency Frequency value in Hz
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetPulseRepetitionFrequency(JSRSDKManagerHandle mgr, double frequency);
+
+/**
+ * @brief Gets the pulse repetition frequency
+ * @param mgr Manager handle
+ * @return Frequency value in Hz, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetPulseRepetitionFrequency(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the minimum pulse repetition frequency
+ * @param mgr Manager handle
+ * @return Minimum frequency in Hz, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetPulseRepetitionFrequencyMin(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the maximum pulse repetition frequency
+ * @param mgr Manager handle
+ * @return Maximum frequency in Hz, or -1.0 on error
+ */
+__declspec(dllexport) double JSR_GetPulseRepetitionFrequencyMax(JSRSDKManagerHandle mgr);
+
+// ============================================================================
+// Filter Configuration
+// ============================================================================
+
+/**
+ * @brief Sets the low-pass filter index
+ * @param mgr Manager handle
+ * @param index Filter index
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetLowPassFilterIndex(JSRSDKManagerHandle mgr, int index);
+
+/**
+ * @brief Gets the low-pass filter index
+ * @param mgr Manager handle
+ * @return Filter index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetLowPassFilterIndex(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the maximum low-pass filter index
+ * @param mgr Manager handle
+ * @return Maximum filter index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetLowPassFilterIndexMax(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Sets the high-pass filter index
+ * @param mgr Manager handle
+ * @param index Filter index
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetHighPassFilterIndex(JSRSDKManagerHandle mgr, int index);
+
+/**
+ * @brief Gets the high-pass filter index
+ * @param mgr Manager handle
+ * @return Filter index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetHighPassFilterIndex(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the maximum high-pass filter index
+ * @param mgr Manager handle
+ * @return Maximum filter index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetHighPassFilterIndexMax(JSRSDKManagerHandle mgr);
+
+// ============================================================================
+// Damping Configuration
+// ============================================================================
+
+/**
+ * @brief Sets the damping index
+ * @param mgr Manager handle
+ * @param index Damping index
+ * @return 0 on success, -1 on error
+ */
+__declspec(dllexport) int JSR_SetDampingIndex(JSRSDKManagerHandle mgr, int index);
+
+/**
+ * @brief Gets the damping index
+ * @param mgr Manager handle
+ * @return Damping index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetDampingIndex(JSRSDKManagerHandle mgr);
+
+/**
+ * @brief Gets the maximum damping index
+ * @param mgr Manager handle
+ * @return Maximum damping index, or -1 on error
+ */
+__declspec(dllexport) int JSR_GetDampingIndexMax(JSRSDKManagerHandle mgr);
 
 #ifdef __cplusplus
 }

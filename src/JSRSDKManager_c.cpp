@@ -726,3 +726,334 @@ int JSR_GetManagerState(JSRSDKManagerHandle mgr) {
   }
 }
 
+// ============================================================================
+// Device Control & Configuration
+// ============================================================================
+
+int JSR_LoadPluginsFromBinaryDir(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->loadPluginsFromBinaryDir();
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_AddPortToExclude(JSRSDKManagerHandle mgr, const char *plugin, const char *port) {
+  if (!mgr || !plugin || !port) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->AddPortToExclude(std::string(plugin), std::string(port));
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_AddPortToInclude(JSRSDKManagerHandle mgr, const char *plugin, const char *port) {
+  if (!mgr || !plugin || !port) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->AddPortToInclude(std::string(plugin), std::string(port));
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetCurrentPulserReceiverByID(JSRSDKManagerHandle mgr, const char *modelName, const char *serialNum, int prIndex) {
+  if (!mgr || !modelName || !serialNum) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    PulserReceiverID prID;
+    prID.InstrumentId.ModelName = std::string(modelName);
+    prID.InstrumentId.SerialNum = std::string(serialNum);
+    prID.PulserReceiverIndex = prIndex;
+    m->SetCurrentPulserReceiver(prID);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+// ============================================================================
+// Trigger Configuration
+// ============================================================================
+
+int JSR_SetTriggerEnable(JSRSDKManagerHandle mgr, int enable) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setTriggerEnable(enable != 0);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetTriggerEnable(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getTriggerEnable() ? 1 : 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetTriggerSource(JSRSDKManagerHandle mgr, int source) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setTriggerSource(static_cast<C_TRIGGER_SOURCE>(source));
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetTriggerSource(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return static_cast<int>(m->getTriggerSource());
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetTriggerImpedance(JSRSDKManagerHandle mgr, int impedance) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setTriggerImpedance(static_cast<C_TRIGGER_IMPEDANCE>(impedance));
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetTriggerImpedance(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return static_cast<int>(m->getTriggerImpedance());
+  } catch(...) {
+    return -1;
+  }
+}
+
+// ============================================================================
+// Receiver Configuration
+// ============================================================================
+
+int JSR_SetReceiverMode(JSRSDKManagerHandle mgr, int mode) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setReceiverMode(static_cast<C_RECEIVER_MODE>(mode));
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetReceiverMode(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return static_cast<int>(m->getReceiverMode());
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetGain(JSRSDKManagerHandle mgr, double gain) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setGain(gain);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+double JSR_GetGain(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getGain();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+double JSR_GetGainMin(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getGainMin();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+double JSR_GetGainMax(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getGainMax();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+// ============================================================================
+// Pulse Repetition Frequency Configuration
+// ============================================================================
+
+int JSR_SetPulseRepetitionFrequency(JSRSDKManagerHandle mgr, double frequency) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setPulseRepetitionFrequency(frequency);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+double JSR_GetPulseRepetitionFrequency(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getPulseRepetitionFrequency();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+double JSR_GetPulseRepetitionFrequencyMin(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getPulseRepetitionFrequencyMin();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+double JSR_GetPulseRepetitionFrequencyMax(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1.0;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getPulseRepetitionFrequencyMax();
+  } catch(...) {
+    return -1.0;
+  }
+}
+
+// ============================================================================
+// Filter Configuration
+// ============================================================================
+
+int JSR_SetLowPassFilterIndex(JSRSDKManagerHandle mgr, int index) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setLowPassFilterIndex(index);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetLowPassFilterIndex(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getLowPassFilterIndex();
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetLowPassFilterIndexMax(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getLowPassFilterIndexMax();
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_SetHighPassFilterIndex(JSRSDKManagerHandle mgr, int index) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setHighPassFilterIndex(index);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetHighPassFilterIndex(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getHighPassFilterIndex();
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetHighPassFilterIndexMax(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getHighPassFilterIndexMax();
+  } catch(...) {
+    return -1;
+  }
+}
+
+// ============================================================================
+// Damping Configuration
+// ============================================================================
+
+int JSR_SetDampingIndex(JSRSDKManagerHandle mgr, int index) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    m->setDampingIndex(index);
+    return 0;
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetDampingIndex(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getDampingIndex();
+  } catch(...) {
+    return -1;
+  }
+}
+
+int JSR_GetDampingIndexMax(JSRSDKManagerHandle mgr) {
+  if (!mgr) return -1;
+  try {
+    auto m = reinterpret_cast<JSRSDKManager *>(mgr);
+    return m->getDampingIndexMax();
+  } catch(...) {
+    return -1;
+  }
+}
+
