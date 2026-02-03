@@ -23,6 +23,8 @@ public:
    */
   int PulserReceiverIndex;
 
+  PulserReceiverID() : PulserReceiverIndex(0) {}
+
   /**
    * @brief Constructs a detailed description of the Pulser/Receiver.
    *

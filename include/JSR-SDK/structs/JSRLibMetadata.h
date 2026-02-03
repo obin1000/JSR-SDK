@@ -1,9 +1,8 @@
 #pragma once
 
 #include "JSR-SDK/enums/C_CONNECTION_TYPE.h"
-
-#include <string>
-#include <vector>
+#include "JSR-SDK/boundary/CString.h"
+#include "JSR-SDK/boundary/CVector.h"
 
 /**
  * @class JSRLibMetadata
@@ -18,32 +17,32 @@ public:
   /**
    * @brief The name of the library.
    */
-  std::string Name;
+  CString Name;
 
   /**
    * @brief The globally unique identifier (GUID) of the library.
    */
-  std::string GUID;
+  CString GUID;
 
   /**
    * @brief A user-friendly name for the library.
    */
-  std::string FriendlyName;
+  CString FriendlyName;
 
   /**
    * @brief A list of supported connection types for the library.
    */
-  std::vector<C_CONNECTION_TYPE> ConnectionType;
+  CVector<C_CONNECTION_TYPE> ConnectionType;
 
   /**
    * @brief A list of models supported by the library.
    */
-  std::vector<std::string> SupportedModels;
+  CVector<CString> SupportedModels;
 
   /**
    * @brief A list of options available when opening the library.
    */
-  std::vector<std::string> OpenOptions;
+  CVector<CString> OpenOptions;
 
   /**
    * @brief The interface version of the library.
@@ -53,5 +52,84 @@ public:
   /**
    * @brief The version of the library.
    */
-  std::string Version;
+  CString Version;
+
+  JSRLibMetadata() : InterfaceVersion(0) {}
+
+  /**
+   * @brief Destructor to free allocated memory.
+   */
+  ~JSRLibMetadata() {
+    Name.free_cstring();
+    GUID.free_cstring();
+    FriendlyName.free_cstring();
+    Version.free_cstring();
+    ConnectionType.free_cvector();
+    
+    // Free each string in the vectors
+    for (size_t i = 0; i < SupportedModels.size; ++i) {
+      SupportedModels.data[i].free_cstring();
+    }
+    SupportedModels.free_cvector();
+    
+    for (size_t i = 0; i < OpenOptions.size; ++i) {
+      OpenOptions.data[i].free_cstring();
+    }
+    OpenOptions.free_cvector();
+  }
+
+  JSRLibMetadata(const JSRLibMetadata &other) = delete;
+  JSRLibMetadata &operator=(const JSRLibMetadata &other) = delete;
+
+  JSRLibMetadata(JSRLibMetadata &&other) noexcept
+      : Name(other.Name), GUID(other.GUID), FriendlyName(other.FriendlyName),
+        ConnectionType(other.ConnectionType),
+        SupportedModels(other.SupportedModels), OpenOptions(other.OpenOptions),
+        InterfaceVersion(other.InterfaceVersion), Version(other.Version) {
+    other.Name = CString();
+    other.GUID = CString();
+    other.FriendlyName = CString();
+    other.ConnectionType = CVector<C_CONNECTION_TYPE>();
+    other.SupportedModels = CVector<CString>();
+    other.OpenOptions = CVector<CString>();
+    other.Version = CString();
+  }
+
+  JSRLibMetadata &operator=(JSRLibMetadata &&other) noexcept {
+    if (this != &other) {
+      Name.free_cstring();
+      GUID.free_cstring();
+      FriendlyName.free_cstring();
+      Version.free_cstring();
+      ConnectionType.free_cvector();
+      
+      for (size_t i = 0; i < SupportedModels.size; ++i) {
+        SupportedModels.data[i].free_cstring();
+      }
+      SupportedModels.free_cvector();
+      
+      for (size_t i = 0; i < OpenOptions.size; ++i) {
+        OpenOptions.data[i].free_cstring();
+      }
+      OpenOptions.free_cvector();
+
+      Name = other.Name;
+      GUID = other.GUID;
+      FriendlyName = other.FriendlyName;
+      ConnectionType = other.ConnectionType;
+      SupportedModels = other.SupportedModels;
+      OpenOptions = other.OpenOptions;
+      InterfaceVersion = other.InterfaceVersion;
+      Version = other.Version;
+
+      other.Name = CString();
+      other.GUID = CString();
+      other.FriendlyName = CString();
+      other.ConnectionType = CVector<C_CONNECTION_TYPE>();
+      other.SupportedModels = CVector<CString>();
+      other.OpenOptions = CVector<CString>();
+      other.Version = CString();
+    }
+    return *this;
+  }
 };

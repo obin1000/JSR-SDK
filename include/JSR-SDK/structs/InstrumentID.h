@@ -1,4 +1,5 @@
 #pragma once
+#include "JSR-SDK/boundary/CString.h"
 #include <string>
 
 /**
@@ -12,22 +13,24 @@ public:
   /**
    * @brief The model name of the instrument.
    */
-  std::string ModelName;
+  CString ModelName;
 
   /**
    * @brief The serial number of the instrument.
    */
-  std::string SerialNum;
+  CString SerialNum;
 
   /**
    * @brief The port associated with the instrument.
    */
-  std::string Port;
+  CString Port;
 
   /**
    * @brief The name of the plugin associated with the instrument.
    */
-  std::string PluginName;
+  CString PluginName;
+
+  InstrumentID() = default;
 
   /**
    * @brief Constructs a detailed description of the instrument.
@@ -35,9 +38,11 @@ public:
    * name.
    */
   std::string GetDescription() const {
-    std::string description =
-        "Model: " + ModelName + "\n" + "Serial Number: " + SerialNum + "\n" +
-        "Port: " + Port + "\n" + "Plugin Name: " + PluginName + "\n";
+    std::string description = "Model: " + ModelName.to_std_string() + "\n" +
+                              "Serial Number: " + SerialNum.to_std_string() +
+                              "\n" + "Port: " + Port.to_std_string() + "\n" +
+                              "Plugin Name: " + PluginName.to_std_string() +
+                              "\n";
     return description;
   }
 
@@ -46,4 +51,65 @@ public:
    * @return A string containing the instrument's description.
    */
   std::string ToString() { return GetDescription(); }
+
+  /**
+   * @brief Destructor to free allocated CString memory.
+   */
+  ~InstrumentID() {
+    ModelName.free_cstring();
+    SerialNum.free_cstring();
+    Port.free_cstring();
+    PluginName.free_cstring();
+  }
+
+  InstrumentID(const InstrumentID &other) {
+    ModelName = CString::from_std_string(other.ModelName.to_std_string());
+    SerialNum = CString::from_std_string(other.SerialNum.to_std_string());
+    Port = CString::from_std_string(other.Port.to_std_string());
+    PluginName = CString::from_std_string(other.PluginName.to_std_string());
+  }
+
+  InstrumentID &operator=(const InstrumentID &other) {
+    if (this != &other) {
+      ModelName.free_cstring();
+      SerialNum.free_cstring();
+      Port.free_cstring();
+      PluginName.free_cstring();
+
+      ModelName = CString::from_std_string(other.ModelName.to_std_string());
+      SerialNum = CString::from_std_string(other.SerialNum.to_std_string());
+      Port = CString::from_std_string(other.Port.to_std_string());
+      PluginName = CString::from_std_string(other.PluginName.to_std_string());
+    }
+    return *this;
+  }
+
+  InstrumentID(InstrumentID &&other) noexcept
+      : ModelName(other.ModelName), SerialNum(other.SerialNum),
+        Port(other.Port), PluginName(other.PluginName) {
+    other.ModelName = CString();
+    other.SerialNum = CString();
+    other.Port = CString();
+    other.PluginName = CString();
+  }
+
+  InstrumentID &operator=(InstrumentID &&other) noexcept {
+    if (this != &other) {
+      ModelName.free_cstring();
+      SerialNum.free_cstring();
+      Port.free_cstring();
+      PluginName.free_cstring();
+
+      ModelName = other.ModelName;
+      SerialNum = other.SerialNum;
+      Port = other.Port;
+      PluginName = other.PluginName;
+
+      other.ModelName = CString();
+      other.SerialNum = CString();
+      other.Port = CString();
+      other.PluginName = CString();
+    }
+    return *this;
+  }
 };

@@ -7,6 +7,8 @@
 #include "JSR-SDK/structs/PulserReceiverID.h"
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"
+#include "JSR-SDK/boundary/CString.h"
+#include "JSR-SDK/boundary/CVector.h"
 
 #include <msclr/marshal_cppstd.h>
 
@@ -24,6 +26,58 @@ using namespace msclr::interop;
  **/
 
 /**
+ * @brief Converts a managed List (C#) to a CVector (C++) without any
+ *conversions.
+ **/
+template <typename managedType, typename unmanagedType>
+static CVector<unmanagedType> listToCVector(IEnumerable<managedType> ^list) {
+  if (list == nullptr)
+    return CVector<unmanagedType>();
+
+  // Count elements first
+  int count = 0;
+  for each (managedType s in list)
+    count++;
+
+  if (count == 0)
+    return CVector<unmanagedType>();
+
+  unmanagedType *buffer = new unmanagedType[count];
+  int index = 0;
+  for each (managedType s in list)
+    buffer[index++] = s;
+
+  return CVector<unmanagedType>(buffer, count, count);
+}
+
+/**
+ * @brief Converts a managed List (C#) to a CVector of CStrings.
+ **/
+template <typename managedType>
+static CVector<CString>
+listToCVectorString(IEnumerable<managedType> ^ list) {
+  if (list == nullptr)
+    return CVector<CString>();
+
+  // Count elements first
+  int count = 0;
+  for each (managedType s in list)
+    count++;
+
+  if (count == 0)
+    return CVector<CString>();
+
+  CString *buffer = new CString[count];
+  int index = 0;
+  for each (managedType s in list) {
+    std::string str = marshal_as<std::string>(s);
+    buffer[index++] = CString::from_std_string(str);
+  }
+
+  return CVector<CString>(buffer, count, count);
+}
+
+/**
  * @brief Converts a managed List (C#) to a std::vector (C++) without any
  *conversions.
  **/
@@ -34,7 +88,6 @@ static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
   if (list == nullptr)
     return vec;
 
-  // vec.reserve(list->Count);
   for each (managedType s in list)
     vec.push_back(s);
 
@@ -52,7 +105,6 @@ listToVectorMarshall(IEnumerable<managedType> ^ list) {
   if (list == nullptr)
     return vec;
 
-  // vec.reserve(list->Count);
   for each (managedType s in list)
     vec.push_back(marshal_as<unmanagedType>(s));
 
@@ -86,20 +138,25 @@ static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
   if (instrumentIdentity == nullptr)
     return unmanaged;
 
-  if (!System::String::IsNullOrEmpty(instrumentIdentity->ModelName))
-    unmanaged.ModelName =
-        marshal_as<std::string>(instrumentIdentity->ModelName);
+  if (!System::String::IsNullOrEmpty(instrumentIdentity->ModelName)) {
+    std::string str = marshal_as<std::string>(instrumentIdentity->ModelName);
+    unmanaged.ModelName = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(instrumentIdentity->PluginName))
-    unmanaged.PluginName =
-        marshal_as<std::string>(instrumentIdentity->PluginName);
+  if (!System::String::IsNullOrEmpty(instrumentIdentity->PluginName)) {
+    std::string str = marshal_as<std::string>(instrumentIdentity->PluginName);
+    unmanaged.PluginName = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(instrumentIdentity->Port))
-    unmanaged.Port = marshal_as<std::string>(instrumentIdentity->Port);
+  if (!System::String::IsNullOrEmpty(instrumentIdentity->Port)) {
+    std::string str = marshal_as<std::string>(instrumentIdentity->Port);
+    unmanaged.Port = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(instrumentIdentity->SerialNum))
-    unmanaged.SerialNum =
-        marshal_as<std::string>(instrumentIdentity->SerialNum);
+  if (!System::String::IsNullOrEmpty(instrumentIdentity->SerialNum)) {
+    std::string str = marshal_as<std::string>(instrumentIdentity->SerialNum);
+    unmanaged.SerialNum = CString::from_std_string(str);
+  }
 
   return unmanaged;
 }
@@ -122,29 +179,49 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
     return unmanaged;
   }
 
-  if (!System::String::IsNullOrEmpty(metadata->Name))
-    unmanaged.Name = marshal_as<std::string>(metadata->Name);
-  if (!System::String::IsNullOrEmpty(metadata->GUID))
-    unmanaged.GUID = marshal_as<std::string>(metadata->GUID);
-  if (!System::String::IsNullOrEmpty(metadata->FriendlyName))
-    unmanaged.FriendlyName = marshal_as<std::string>(metadata->FriendlyName);
-  if (!System::String::IsNullOrEmpty(metadata->Version))
-    unmanaged.Version = marshal_as<std::string>(metadata->Version);
+  if (!System::String::IsNullOrEmpty(metadata->Name)) {
+    std::string str = marshal_as<std::string>(metadata->Name);
+    unmanaged.Name = CString::from_std_string(str);
+  }
+
+  if (!System::String::IsNullOrEmpty(metadata->GUID)) {
+    std::string str = marshal_as<std::string>(metadata->GUID);
+    unmanaged.GUID = CString::from_std_string(str);
+  }
+
+  if (!System::String::IsNullOrEmpty(metadata->FriendlyName)) {
+    std::string str = marshal_as<std::string>(metadata->FriendlyName);
+    unmanaged.FriendlyName = CString::from_std_string(str);
+  }
+
+  if (!System::String::IsNullOrEmpty(metadata->Version)) {
+    std::string str = marshal_as<std::string>(metadata->Version);
+    unmanaged.Version = CString::from_std_string(str);
+  }
 
   unmanaged.InterfaceVersion = metadata->InterfaceVersion;
 
   if (metadata->SupportedModels != nullptr)
-    unmanaged.SupportedModels = listToVectorMarshall < System::String ^,
-    std::string > (metadata->SupportedModels);
+    unmanaged.SupportedModels = listToCVectorString<System::String^>(metadata->SupportedModels);
 
   if (metadata->OpenOptions != nullptr)
-    unmanaged.OpenOptions = listToVectorMarshall < System::String ^,
-    std::string > (metadata->OpenOptions);
+    unmanaged.OpenOptions = listToCVectorString<System::String^>(metadata->OpenOptions);
 
-  if (metadata->ConnectionType != nullptr)
-        unmanaged.ConnectionType =
-            listToVectorMarshall<CONNECTION_TYPE, C_CONNECTION_TYPE>(
-                metadata->ConnectionType);
+  if (metadata->ConnectionType != nullptr) {
+    // Count elements first
+    int count = 0;
+    for each (CONNECTION_TYPE ct in metadata->ConnectionType)
+      count++;
+
+    if (count > 0) {
+      C_CONNECTION_TYPE *buffer = new C_CONNECTION_TYPE[count];
+      int index = 0;
+      for each (CONNECTION_TYPE ct in metadata->ConnectionType)
+        buffer[index++] = connectionTypeFromManaged(ct);
+
+      unmanaged.ConnectionType = CVector<C_CONNECTION_TYPE>(buffer, count, count);
+    }
+  }
 
   return unmanaged;
 }
@@ -158,15 +235,18 @@ static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
   if (managedEvent == nullptr)
     return unmanagedEvent;
 
-  unmanagedEvent.pulserProperty =
-      marshal_as<std::string>(managedEvent->PulserProperty);
+  if (!System::String::IsNullOrEmpty(managedEvent->PulserProperty)) {
+    std::string str = marshal_as<std::string>(managedEvent->PulserProperty);
+    unmanagedEvent.pulserProperty = CString::from_std_string(str);
+  }
 
   unmanagedEvent.pulserState =
       pulserReceiverStateFromManaged(managedEvent->PulserState);
 
-  if (managedEvent->NewValue != nullptr)
-    unmanagedEvent.newValue =
-        marshal_as<std::string>(managedEvent->NewValue->ToString());
+  if (managedEvent->NewValue != nullptr) {
+    std::string str = marshal_as<std::string>(managedEvent->NewValue->ToString());
+    unmanagedEvent.newValue = CString::from_std_string(str);
+  }
 
   unmanagedEvent.dataType =
       pulserPropertyDataTypeFromManaged(managedEvent->DataType);
@@ -176,9 +256,10 @@ static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
     unmanagedEvent.pulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
-  if (!System::String::IsNullOrEmpty(managedEvent->ErrorMessage))
-    unmanagedEvent.errorMessage =
-        marshal_as<std::string>(managedEvent->ErrorMessage);
+  if (!System::String::IsNullOrEmpty(managedEvent->ErrorMessage)) {
+    std::string str = marshal_as<std::string>(managedEvent->ErrorMessage);
+    unmanagedEvent.errorMessage = CString::from_std_string(str);
+  }
 
   unmanagedEvent.errorCode = errorCodeFromManaged(managedEvent->ErrorCode);
 
@@ -197,36 +278,44 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     return unmanagedEvent;
   }
 
-  if (!System::String::IsNullOrEmpty(managedEvent->Model))
-    unmanagedEvent.model = marshal_as<std::string>(managedEvent->Model);
+  if (!System::String::IsNullOrEmpty(managedEvent->Model)) {
+    std::string str = marshal_as<std::string>(managedEvent->Model);
+    unmanagedEvent.model = CString::from_std_string(str);
+  }
 
   unmanagedEvent.state = pulserReceiverStateFromManaged(managedEvent->State);
 
-  if (managedEvent->NewValue != nullptr)
-    unmanagedEvent.newValue =
-        marshal_as<std::string>(managedEvent->NewValue->ToString());
+  if (managedEvent->NewValue != nullptr) {
+    std::string str = marshal_as<std::string>(managedEvent->NewValue->ToString());
+    unmanagedEvent.newValue = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(managedEvent->PropertyName))
-    unmanagedEvent.propertyName =
-        marshal_as<std::string>(managedEvent->PropertyName);
+  if (!System::String::IsNullOrEmpty(managedEvent->PropertyName)) {
+    std::string str = marshal_as<std::string>(managedEvent->PropertyName);
+    unmanagedEvent.propertyName = CString::from_std_string(str);
+  }
 
   unmanagedEvent.wasSelected = managedEvent->WasSelected;
 
-  if (!System::String::IsNullOrEmpty(managedEvent->ExceptionTypeInfo))
-    unmanagedEvent.exceptionTypeInfo =
-        marshal_as<std::string>(managedEvent->ExceptionTypeInfo);
+  if (!System::String::IsNullOrEmpty(managedEvent->ExceptionTypeInfo)) {
+    std::string str = marshal_as<std::string>(managedEvent->ExceptionTypeInfo);
+    unmanagedEvent.exceptionTypeInfo = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(managedEvent->ErrorMsg))
-    unmanagedEvent.errorMsg = marshal_as<std::string>(managedEvent->ErrorMsg);
+  if (!System::String::IsNullOrEmpty(managedEvent->ErrorMsg)) {
+    std::string str = marshal_as<std::string>(managedEvent->ErrorMsg);
+    unmanagedEvent.errorMsg = CString::from_std_string(str);
+  }
 
-  if (!System::String::IsNullOrEmpty(managedEvent->ErrorText))
-    unmanagedEvent.errorText = marshal_as<std::string>(managedEvent->ErrorText);
+  if (!System::String::IsNullOrEmpty(managedEvent->ErrorText)) {
+    std::string str = marshal_as<std::string>(managedEvent->ErrorText);
+    unmanagedEvent.errorText = CString::from_std_string(str);
+  }
 
   unmanagedEvent.maxFrequency = managedEvent->MaxFrequency;
 
   if (managedEvent->Info != nullptr)
-    unmanagedEvent.info = listToVectorMarshall < System::String ^,
-    std::string > (managedEvent->Info);
+    unmanagedEvent.info = listToCVectorString<System::String^>(managedEvent->Info);
 
   unmanagedEvent.prIndex = managedEvent->PRIndex;
 
@@ -234,8 +323,10 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     unmanagedEvent.pulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
-  if (!System::String::IsNullOrEmpty(managedEvent->Serial))
-    unmanagedEvent.serial = marshal_as<std::string>(managedEvent->Serial);
+  if (!System::String::IsNullOrEmpty(managedEvent->Serial)) {
+    std::string str = marshal_as<std::string>(managedEvent->Serial);
+    unmanagedEvent.serial = CString::from_std_string(str);
+  }
 
   unmanagedEvent.discoverState =
       discoveryStateFlagsFromManaged(managedEvent->DiscoverState);
@@ -244,9 +335,10 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     unmanagedEvent.instrumentId =
         instrumentFromManaged(managedEvent->InstrumentId);
 
-  if (!System::String::IsNullOrEmpty(managedEvent->PluginName))
-    unmanagedEvent.pluginName =
-        marshal_as<std::string>(managedEvent->PluginName);
+  if (!System::String::IsNullOrEmpty(managedEvent->PluginName)) {
+    std::string str = marshal_as<std::string>(managedEvent->PluginName);
+    unmanagedEvent.pluginName = CString::from_std_string(str);
+  }
 
   unmanagedEvent.notifyType = notifyTypeFromManaged(managedEvent->NotifyType);
   unmanagedEvent.dataType =
