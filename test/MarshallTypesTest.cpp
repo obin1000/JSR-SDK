@@ -200,10 +200,10 @@ TEST(MarshalTypesTests, InstrumentFromManaged_FullMapping) {
 
   InstrumentID native = instrumentFromManaged(managed);
 
-  EXPECT_EQ(native.ModelName.to_std_string(), "JSR-PRM");
-  EXPECT_EQ(native.SerialNum.to_std_string(), "12345");
-  EXPECT_EQ(native.Port.to_std_string(), "USB");
-  EXPECT_EQ(native.PluginName.to_std_string(), "TestPlugin");
+  EXPECT_STREQ(native.ModelName, "JSR-PRM");
+  EXPECT_STREQ(native.SerialNum, "12345");
+  EXPECT_STREQ(native.Port, "USB");
+  EXPECT_STREQ(native.PluginName, "TestPlugin");
 }
 
 //--------------------------------------------------------------------------
@@ -223,7 +223,7 @@ TEST(MarshalTypesTests, PulserReceiverFromManaged_MapsFields) {
   PulserReceiverID native = pulsereceiverFromManaged(prManaged);
 
   EXPECT_EQ(native.PulserReceiverIndex, 3);
-  EXPECT_EQ(native.InstrumentId.SerialNum.to_std_string(), "SN9000");
+  EXPECT_STREQ(native.InstrumentId.SerialNum, "SN9000");
 }
 
 //--------------------------------------------------------------------------
@@ -243,14 +243,14 @@ TEST(MarshalTypesTests, LibMetadataFromManaged_MapsCollections) {
 
   JSRLibMetadata native = libMetadataFromManaged(managed);
 
-  EXPECT_EQ(native.Name.to_std_string(), "JSRLib");
-  EXPECT_EQ(native.GUID.to_std_string(), "01234567-89AB-CDEF-0123-456789ABCDEF");
-  EXPECT_EQ(native.FriendlyName.to_std_string(), "JSR Test Library");
-  EXPECT_EQ(native.Version.to_std_string(), "2.1.0");
+  EXPECT_STREQ(native.Name, "JSRLib");
+  EXPECT_STREQ(native.GUID, "01234567-89AB-CDEF-0123-456789ABCDEF");
+  EXPECT_STREQ(native.FriendlyName, "JSR Test Library");
+  EXPECT_STREQ(native.Version, "2.1.0");
   EXPECT_EQ(native.InterfaceVersion, 42);
-  ASSERT_EQ(native.SupportedModels.size, 2u);
-  EXPECT_EQ(native.SupportedModels[1].to_std_string(), "M2");
-  ASSERT_EQ(native.ConnectionType.size, 1u);
+  ASSERT_EQ(native.SupportedModelsCount, 2);
+  EXPECT_STREQ(native.SupportedModels[1], "M2");
+  ASSERT_EQ(native.ConnectionTypeCount, 1);
 }
 
 //--------------------------------------------------------------------------
@@ -298,8 +298,8 @@ TEST(MarshalTypesTests, NotifyEventFromManaged_MapsPropertyChange) {
   NotifyEvent native = notifyEventFromManaged(managed);
 
   // Assert
-  EXPECT_EQ(native.propertyName.to_std_string(), "Gain");
-  EXPECT_EQ(native.newValue.to_std_string(), "12");
+  EXPECT_STREQ(native.propertyName, "Gain");
+  EXPECT_STREQ(native.newValue, "12");
   EXPECT_EQ(static_cast<int>(native.notifyType),
             static_cast<int>(NOTIFY_TYPE::PROPERTY_CHANGE));
   EXPECT_EQ(native.pulserReceiverId.PulserReceiverIndex, 2);

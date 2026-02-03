@@ -1,74 +1,52 @@
 #pragma once
 
 #include "JSR-SDK/enums/C_ERROR_CODE.h"
-#include "JSR-SDK/boundary/CString.h"
-
 #include <string>
+#include <cstring>
 
 class ExceptionJSRSDK {
 private:
+  static constexpr size_t MAX_STRING_LENGTH = 512;
+
   C_ERROR_CODE errorCode;
-  CString msg;
-  CString innerMSG;
+  char msg[MAX_STRING_LENGTH];
+  char innerMSG[MAX_STRING_LENGTH];
+
+  static void safeCopy(char *dest, const char *src, size_t destSize) {
+    if (dest == nullptr || destSize == 0)
+      return;
+
+    size_t len = std::strlen(src);
+    if (len >= destSize) {
+      len = destSize - 1;
+    }
+
+    if (len > 0) {
+      std::memcpy(dest, src, len);
+    }
+    dest[len] = '\0';
+  }
 
 public:
-  ExceptionJSRSDK() : errorCode(C_ERROR_CODE{}), msg(), innerMSG() {}
+  ExceptionJSRSDK() : errorCode(C_ERROR_CODE{}) {
+    msg[0] = '\0';
+    innerMSG[0] = '\0';
+  }
 
   ExceptionJSRSDK(C_ERROR_CODE errorCode, const std::string &message) {
     this->errorCode = errorCode;
-    this->msg = CString::from_std_string(message);
-    this->innerMSG = CString::from_std_string("None");
+    safeCopy(msg, message.c_str(), MAX_STRING_LENGTH);
+    safeCopy(innerMSG, "None", MAX_STRING_LENGTH);
   }
 
   ExceptionJSRSDK(C_ERROR_CODE errorCode, const std::string &message,
                   const std::string &innerMessage) {
     this->errorCode = errorCode;
-    this->msg = CString::from_std_string(message);
-    this->innerMSG = CString::from_std_string(innerMessage);
+    safeCopy(msg, message.c_str(), MAX_STRING_LENGTH);
+    safeCopy(innerMSG, innerMessage.c_str(), MAX_STRING_LENGTH);
   }
 
-  ~ExceptionJSRSDK() {
-    msg.free_cstring();
-    innerMSG.free_cstring();
-  }
-
-  ExceptionJSRSDK(const ExceptionJSRSDK &other) {
-    errorCode = other.errorCode;
-    msg = CString::from_std_string(other.msg.to_std_string());
-    innerMSG = CString::from_std_string(other.innerMSG.to_std_string());
-  }
-
-  ExceptionJSRSDK &operator=(const ExceptionJSRSDK &other) {
-    if (this != &other) {
-      msg.free_cstring();
-      innerMSG.free_cstring();
-      errorCode = other.errorCode;
-      msg = CString::from_std_string(other.msg.to_std_string());
-      innerMSG = CString::from_std_string(other.innerMSG.to_std_string());
-    }
-    return *this;
-  }
-
-  ExceptionJSRSDK(ExceptionJSRSDK &&other) noexcept
-      : errorCode(other.errorCode), msg(other.msg), innerMSG(other.innerMSG) {
-    other.msg = CString();
-    other.innerMSG = CString();
-  }
-
-  ExceptionJSRSDK &operator=(ExceptionJSRSDK &&other) noexcept {
-    if (this != &other) {
-      msg.free_cstring();
-      innerMSG.free_cstring();
-      errorCode = other.errorCode;
-      msg = other.msg;
-      innerMSG = other.innerMSG;
-      other.msg = CString();
-      other.innerMSG = CString();
-    }
-    return *this;
-  }
-
-  C_ERROR_CODE getErrorCode() { return errorCode; }
-  std::string getMessage() { return msg.to_std_string(); }
-  std::string getInnerMessage() { return innerMSG.to_std_string(); }
+  C_ERROR_CODE getErrorCode() const { return errorCode; }
+  std::string getMessage() const { return std::string(msg); }
+  std::string getInnerMessage() const { return std::string(innerMSG); }
 };

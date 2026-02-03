@@ -1,5 +1,5 @@
-﻿#include "JSR-SDK/JSRSDKManager.h"
-#include "JSR-SDK/JSRSDKWrapper.h"
+﻿#include "JSR-SDK/JSRSDKManager.hpp"
+#include "JSR-SDK/JSRSDKWrapper.hpp"
 #include "JSR-SDK/marshals/MarshalTypes.h"
 
 #include <msclr/marshal.h>
@@ -38,8 +38,7 @@ public:
   }
 
   // === Custom functions added ===
-  void loadPluginsFromBinaryDir() {
-    // Retrieve the directory of the current executable
+  void loadPluginsFromBinaryDir() override {
     String ^ binaryDir = "";
     try {
       String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
@@ -48,7 +47,6 @@ public:
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("Failed finding the binary directory: " + msg);
     }
-    // Load plugins from the binary directory
     try {
       m_manager->dotNETManager->LoadPlugins(binaryDir);
     } catch (System::Exception ^ exception) {
@@ -59,7 +57,6 @@ public:
   }
 
   // === Event handlers used for callbacks ===
-  // --- Status-change ----
   void
   replaceStatusChangeEventHandler(const StatusChangeCallback &cb) override {
     removeStatusChangeEventHandler();
@@ -74,7 +71,6 @@ public:
     }
   }
 
-  // --- Notify ----
   void replaceNotifyEventHandler(const NotifyCallback &cb) override {
     removeNotifyEventHandler();
     m_notifyHolder = std::make_unique<NotifyCallback>(cb);
@@ -89,11 +85,9 @@ public:
   }
 
   // === InstrumentOpenCriteria  ===
-
   void AddPortToExclude(const char *plugin, const char *port) override {
     try {
-      m_manager->dotNETManager
-          ->GetPluginOpenOptions(gcnew String(plugin))
+      m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
           ->AddPortToExclude(gcnew String(port));
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -101,12 +95,13 @@ public:
     }
   }
 
-  CVector<CString> GetPortsToExclude(const char *plugin) override {
+  size_t GetPortsToExclude(const char *plugin, char **buffer,
+                           size_t bufferCount, size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager
-              ->GetPluginOpenOptions(gcnew String(plugin))
-              ->PortsToExclude);
+      return copyStringList(
+          m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
+              ->PortsToExclude,
+          buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
@@ -115,8 +110,7 @@ public:
 
   void AddPortToInclude(const char *plugin, const char *port) override {
     try {
-      m_manager->dotNETManager
-          ->GetPluginOpenOptions(gcnew String(plugin))
+      m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
           ->AddPortToInclude(gcnew String(port));
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
@@ -124,12 +118,13 @@ public:
     }
   }
 
-  CVector<CString> GetPortsToInclude(const char *plugin) override {
+  size_t GetPortsToInclude(const char *plugin, char **buffer,
+                           size_t bufferCount, size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager
-              ->GetPluginOpenOptions(gcnew String(plugin))
-              ->PortsToInclude);
+      return copyStringList(
+          m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
+              ->PortsToInclude,
+          buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
@@ -149,26 +144,26 @@ public:
     }
   }
 
-  CString GetOpenOption(const char *plugin,
-                        const char *openOptionName) override {
+  size_t GetOpenOption(const char *plugin, const char *openOptionName,
+                       char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(
-          m_manager->dotNETManager
-              ->GetPluginOpenOptions(gcnew String(plugin))
-              ->GetOpenOption(gcnew String(openOptionName)));
-      return CString::from_std_string(result);
+      System::String ^ result =
+          m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
+              ->GetOpenOption(gcnew String(openOptionName));
+      return copyManagedStringToBuffer(result, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> GetOpenOptionNames(const char *plugin) override {
+  size_t GetOpenOptionNames(const char *plugin, char **buffer,
+                            size_t bufferCount, size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager
-              ->GetPluginOpenOptions(gcnew String(plugin))
-              ->GetOpenOptionNames());
+      return copyStringList(
+          m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
+              ->GetOpenOptionNames(),
+          buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
@@ -200,9 +195,9 @@ public:
   void AddPluginOpenOption(const char *strPluginName, const char *optionName,
                            const char *optionValue) override {
     try {
-      m_manager->dotNETManager->AddPluginOpenOption(
-          gcnew String(strPluginName), gcnew String(optionName),
-          gcnew String(optionValue));
+      m_manager->dotNETManager->AddPluginOpenOption(gcnew String(strPluginName),
+                                                    gcnew String(optionName),
+                                                    gcnew String(optionValue));
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -227,62 +222,74 @@ public:
     }
   }
 
-  CVector<CString> GetCustomSettings() override {
+  size_t GetCustomSettings(char **buffer, size_t bufferCount,
+                           size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->GetCustomSettings());
+      return copyStringList(m_manager->dotNETManager->GetCustomSettings(),
+                            buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<InstrumentID> GetInstruments(const char *pluginName) override {
+  size_t GetInstruments(const char *pluginName, InstrumentID *buffer,
+                        size_t bufferCount) override {
     try {
-      auto instruments = m_manager->dotNETManager->GetInstruments(
-          gcnew String(pluginName));
+      auto instruments =
+          m_manager->dotNETManager->GetInstruments(gcnew String(pluginName));
 
-      int count = instruments->Length;
-      if (count == 0)
-        return CVector<InstrumentID>();
+      size_t count = static_cast<size_t>(instruments->Length);
 
-      InstrumentID *buffer = new InstrumentID[count];
-      int index = 0;
-      for each (IInstrumentIdentity ^ instrument in instruments) {
-        buffer[index++] = instrumentFromManaged(instrument);
+      if (buffer == nullptr || bufferCount == 0) {
+        return count;
       }
-      return CVector<InstrumentID>(buffer, count, count);
+
+      size_t copyCount = (count < bufferCount) ? count : bufferCount;
+      for (size_t i = 0; i < copyCount; ++i) {
+        buffer[i] = instrumentFromManaged(instruments[static_cast<int>(i)]);
+      }
+
+      return count;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> GetManagedPluginNames() override {
+  size_t GetManagedPluginNames(char **buffer, size_t bufferCount,
+                               size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->GetManagedPluginNames());
+      return copyStringList(m_manager->dotNETManager->GetManagedPluginNames(),
+                            buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  JSRLibMetadata GetPluginLibraryMetadata(const char *strPluginName) override {
+  bool GetPluginLibraryMetadata(const char *strPluginName,
+                                JSRLibMetadata *metadata) override {
     try {
-      auto metadata = m_manager->dotNETManager->GetPluginLibraryMetadata(
+      if (metadata == nullptr) {
+        return false;
+      }
+
+      auto managedMetadata = m_manager->dotNETManager->GetPluginLibraryMetadata(
           gcnew String(strPluginName));
-      return libMetadataFromManaged(metadata);
+      *metadata = libMetadataFromManaged(managedMetadata);
+      return true;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> GetPluginNames() override {
+  size_t GetPluginNames(char **buffer, size_t bufferCount,
+                        size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->GetPluginNames());
+      return copyStringList(m_manager->dotNETManager->GetPluginNames(), buffer,
+                            bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -310,53 +317,59 @@ public:
     }
   }
 
-  CString GetPulserPropertyUnitsAsString(const char *settingName,
-                                         bool useShort = false) override {
+  size_t GetPulserPropertyUnitsAsString(const char *settingName, bool useShort,
+                                        char *buffer,
+                                        size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(
+      System::String ^ result =
           m_manager->dotNETManager->GetPulserPropertyUnitsAsString(
-              gcnew String(settingName), useShort));
-      return CString::from_std_string(result);
+              gcnew String(settingName), useShort);
+      return copyManagedStringToBuffer(result, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> GetPulserReceiverInfo(const char *model,
-                                         const char *serialNum, int idxPR) override {
+  size_t GetPulserReceiverInfo(const char *model, const char *serialNum,
+                               int idxPR, char **buffer, size_t bufferCount,
+                               size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
+      return copyStringList(
           m_manager->dotNETManager->GetPulserReceiverInfo(
-              gcnew String(model), gcnew String(serialNum), idxPR));
+              gcnew String(model), gcnew String(serialNum), idxPR),
+          buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> GetPulserReceiverInfo(PulserReceiverID id) override {
-    std::string model = id.InstrumentId.ModelName.to_std_string();
-    std::string serial = id.InstrumentId.SerialNum.to_std_string();
-    return GetPulserReceiverInfo(model.c_str(), serial.c_str(),
-                                 id.PulserReceiverIndex);
+  size_t GetPulserReceiverInfo(PulserReceiverID id, char **buffer,
+                               size_t bufferCount,
+                               size_t stringLength) override {
+    return GetPulserReceiverInfo(
+        id.InstrumentId.ModelName, id.InstrumentId.SerialNum,
+        id.PulserReceiverIndex, buffer, bufferCount, stringLength);
   }
 
-  CVector<PulserReceiverID> GetPulserReceivers() override {
+  size_t GetPulserReceivers(PulserReceiverID *buffer,
+                            size_t bufferCount) override {
     try {
       auto managedReceivers =
           m_manager->dotNETManager->GetPulserReceivers(nullptr);
+      size_t count = static_cast<size_t>(managedReceivers->Length);
 
-      int count = managedReceivers->Length;
-      if (count == 0)
-        return CVector<PulserReceiverID>();
-
-      PulserReceiverID *buffer = new PulserReceiverID[count];
-      int index = 0;
-      for each (IPulserReceiverIdentity ^ receiver in managedReceivers) {
-        buffer[index++] = pulsereceiverFromManaged(receiver);
+      if (buffer == nullptr || bufferCount == 0) {
+        return count;
       }
-      return CVector<PulserReceiverID>(buffer, count, count);
+
+      size_t copyCount = (count < bufferCount) ? count : bufferCount;
+      for (size_t i = 0; i < copyCount; ++i) {
+        buffer[i] = pulsereceiverFromManaged(managedReceivers[static_cast<int>(i)]);
+      }
+
+      return count;
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -420,9 +433,8 @@ public:
   }
 
   void SetCurrentPulserReceiver(PulserReceiverID prID) override {
-    std::string model = prID.InstrumentId.ModelName.to_std_string();
-    std::string serial = prID.InstrumentId.SerialNum.to_std_string();
-    SetCurrentPulserReceiver(model.c_str(), serial.c_str(),
+    SetCurrentPulserReceiver(prID.InstrumentId.ModelName,
+                             prID.InstrumentId.SerialNum,
                              prID.PulserReceiverIndex);
   }
 
@@ -438,16 +450,8 @@ public:
   }
 
   void SetDiscoveryEnable(bool bEnable) override {
-    JSRDotNETSDK::JSRDotNETManager ^ manager;
     try {
-      manager = m_manager->dotNETManager;
-    } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK manager produced Exception: " +
-                               msg);
-    }
-    try {
-      manager->SetDiscoveryEnable(bEnable);
+      m_manager->dotNETManager->SetDiscoveryEnable(bEnable);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK enable produced Exception: " +
@@ -457,8 +461,8 @@ public:
 
   void SetPulserPropertyValue(const char *strProp, const char *value) override {
     try {
-      m_manager->dotNETManager->SetPulserPropertyValue(
-          gcnew String(strProp), gcnew String(value));
+      m_manager->dotNETManager->SetPulserPropertyValue(gcnew String(strProp),
+                                                       gcnew String(value));
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -542,15 +546,18 @@ public:
     }
   }
 
-  CVector<double> getPulseRepetitionFrequencyValues() override {
+  size_t getPulseRepetitionFrequencyValues(double *buffer,
+                                           size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->PulseRepetitionFrequencyValues);
+      return copyDoubleArray(
+          m_manager->dotNETManager->PulseRepetitionFrequencyValues, buffer,
+          bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
+
   int getPulseRepetitionFrequencyIndexMax() override {
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyIndexMax;
@@ -559,6 +566,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
+
   int getPulseRepetitionFrequencyIndex() override {
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyIndex;
@@ -567,6 +575,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
+
   void setPulseRepetitionFrequencyIndex(int index) override {
     try {
       m_manager->dotNETManager->PulseRepetitionFrequencyIndex = index;
@@ -584,6 +593,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
+
   double getPulseRepetitionFrequencyMax() override {
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyMax;
@@ -601,6 +611,7 @@ public:
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
+
   void setPulseRepetitionFrequency(double frequency) override {
     try {
       m_manager->dotNETManager->PulseRepetitionFrequency = frequency;
@@ -639,10 +650,10 @@ public:
     }
   }
 
-  CVector<double> getHighPassFilterValues() override {
+  size_t getHighPassFilterValues(double *buffer, size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->HighPassFilterValues);
+      return copyDoubleArray(m_manager->dotNETManager->HighPassFilterValues,
+                             buffer, bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -748,9 +759,10 @@ public:
     }
   }
 
-  CVector<double> getGainValues() override {
+  size_t getGainValues(double *buffer, size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(m_manager->dotNETManager->GainValues);
+      return copyDoubleArray(m_manager->dotNETManager->GainValues, buffer,
+                             bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -784,10 +796,10 @@ public:
     }
   }
 
-  CVector<double> getLowPassFilterValues() override {
+  size_t getLowPassFilterValues(double *buffer, size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->LowPassFilterValues);
+      return copyDoubleArray(m_manager->dotNETManager->LowPassFilterValues,
+                             buffer, bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -848,40 +860,38 @@ public:
     }
   }
 
-  CString getUnitModelName() override {
+  size_t getUnitModelName(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->UnitModelName);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(m_manager->dotNETManager->UnitModelName,
+                                       buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setUnitModelName(CString name) override {
+  void setUnitModelName(const char *name) override {
     try {
-      std::string str = name.to_std_string();
-      m_manager->dotNETManager->UnitModelName = marshal_as<String ^>(str);
+      m_manager->dotNETManager->UnitModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CString getUnitSerialNum() override {
+  size_t getUnitSerialNum(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->UnitSerialNum);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(m_manager->dotNETManager->UnitSerialNum,
+                                       buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setUnitSerialNum(CString serialNum) override {
+  void setUnitSerialNum(const char *serialNum) override {
     try {
-      std::string str = serialNum.to_std_string();
-      m_manager->dotNETManager->UnitSerialNum = marshal_as<String ^>(str);
+      m_manager->dotNETManager->UnitSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -942,10 +952,12 @@ public:
     }
   }
 
-  CVector<CString> getPulserTriggerSourceValueNames() override {
+  size_t getPulserTriggerSourceValueNames(char **buffer, size_t bufferCount,
+                                          size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->PulserTriggerSourceValueNames);
+      return copyStringList(
+          m_manager->dotNETManager->PulserTriggerSourceValueNames, buffer,
+          bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1024,10 +1036,11 @@ public:
     }
   }
 
-  CVector<CString> getPulseEnergyValueNames() override {
+  size_t getPulseEnergyValueNames(char **buffer, size_t bufferCount,
+                                  size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->PulseEnergyValueNames);
+      return copyStringList(m_manager->dotNETManager->PulseEnergyValueNames,
+                            buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1070,10 +1083,10 @@ public:
     }
   }
 
-  CVector<double> getDampingValues() override {
+  size_t getDampingValues(double *buffer, size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->DampingValues);
+      return copyDoubleArray(m_manager->dotNETManager->DampingValues, buffer,
+                             bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1116,10 +1129,10 @@ public:
     }
   }
 
-  CVector<double> getHVSupplyValues() override {
+  size_t getHVSupplyValues(double *buffer, size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->HVSupplyValues);
+      return copyDoubleArray(m_manager->dotNETManager->HVSupplyValues, buffer,
+                             bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1171,20 +1184,19 @@ public:
     }
   }
 
-  CString getPulserSerialNum() override {
+  size_t getPulserSerialNum(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->PulserSerialNum);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->PulserSerialNum, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setPulserSerialNum(CString serialNum) override {
+  void setPulserSerialNum(const char *serialNum) override {
     try {
-      std::string str = serialNum.to_std_string();
-      m_manager->dotNETManager->PulserSerialNum = marshal_as<String ^>(str);
+      m_manager->dotNETManager->PulserSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1209,20 +1221,19 @@ public:
     }
   }
 
-  CString getReceiverHWRev() override {
+  size_t getReceiverHWRev(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->ReceiverHWRev);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(m_manager->dotNETManager->ReceiverHWRev,
+                                       buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setReceiverHWRev(CString hwRev) override {
+  void setReceiverHWRev(const char *hwRev) override {
     try {
-      std::string str = hwRev.to_std_string();
-      m_manager->dotNETManager->ReceiverHWRev = marshal_as<String ^>(str);
+      m_manager->dotNETManager->ReceiverHWRev = gcnew String(hwRev);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1238,20 +1249,19 @@ public:
     }
   }
 
-  CString getPulserHWRev() override {
+  size_t getPulserHWRev(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->PulserHWRev);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(m_manager->dotNETManager->PulserHWRev,
+                                       buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setPulserHWRev(CString hwRev) override {
+  void setPulserHWRev(const char *hwRev) override {
     try {
-      std::string str = hwRev.to_std_string();
-      m_manager->dotNETManager->PulserHWRev = marshal_as<String ^>(str);
+      m_manager->dotNETManager->PulserHWRev = gcnew String(hwRev);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1267,10 +1277,10 @@ public:
     }
   }
 
-  CString getReceiverFirmwareVer() override {
+  size_t getReceiverFirmwareVer(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->ReceiverFirmwareVer);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->ReceiverFirmwareVer, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1286,10 +1296,10 @@ public:
     }
   }
 
-  CString getPulserFirmwareVer() override {
+  size_t getPulserFirmwareVer(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->PulserFirmwareVer);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->PulserFirmwareVer, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1372,10 +1382,11 @@ public:
     }
   }
 
-  CVector<CString> getInfo() override {
+  size_t getInfo(char **buffer, size_t bufferCount,
+                 size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->Info);
+      return copyStringList(m_manager->dotNETManager->Info, buffer, bufferCount,
+                            stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1464,21 +1475,19 @@ public:
     }
   }
 
-  CString getReceiverSerialNum() override {
+  size_t getReceiverSerialNum(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(
-          m_manager->dotNETManager->ReceiverSerialNum);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->ReceiverSerialNum, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setReceiverSerialNum(CString serialNum) override {
+  void setReceiverSerialNum(const char *serialNum) override {
     try {
-      std::string str = serialNum.to_std_string();
-      m_manager->dotNETManager->ReceiverSerialNum = marshal_as<String ^>(str);
+      m_manager->dotNETManager->ReceiverSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1530,10 +1539,11 @@ public:
     }
   }
 
-  CVector<CString> getLEDBlinkModeValues() override {
+  size_t getLEDBlinkModeValues(char **buffer, size_t bufferCount,
+                               size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->LEDBlinkModeValues);
+      return copyStringList(m_manager->dotNETManager->LEDBlinkModeValues,
+                            buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1594,65 +1604,66 @@ public:
     }
   }
 
-  CString getLastExceptionContextMessage() override {
+  size_t getLastExceptionContextMessage(char *buffer,
+                                        size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->LastExceptionContextMessage);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->LastExceptionContextMessage, buffer,
+          bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CString getLastExceptionOrNull() override {
+  size_t getLastExceptionOrNull(char *buffer, size_t bufferSize) override {
     try {
       Exception ^ exception = m_manager->dotNETManager->LastExceptionOrNull;
-      if (exception != nullptr) {
-        std::string result = marshal_as<std::string>(exception->Message);
-        return CString::from_std_string(result);
-      } else {
-        return CString();
+      if (exception == nullptr) {
+        if (buffer != nullptr && bufferSize > 0) {
+          buffer[0] = '\0';
+        }
+        return 0;
       }
+      return copyManagedStringToBuffer(exception->Message, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CString getPluginPath() override {
+  size_t getPluginPath(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->PluginPath);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(m_manager->dotNETManager->PluginPath,
+                                       buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setPluginPath(CString path) override {
+  void setPluginPath(const char *path) override {
     try {
-      std::string str = path.to_std_string();
-      m_manager->dotNETManager->PluginPath = marshal_as<String ^>(str);
+      m_manager->dotNETManager->PluginPath = gcnew String(path);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CString getPulserModelName() override {
+  size_t getPulserModelName(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(m_manager->dotNETManager->PulserModelName);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->PulserModelName, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setPulserModelName(CString name) override {
+  void setPulserModelName(const char *name) override {
     try {
-      std::string str = name.to_std_string();
-      m_manager->dotNETManager->PulserModelName = marshal_as<String ^>(str);
+      m_manager->dotNETManager->PulserModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1686,18 +1697,10 @@ public:
     }
   }
 
-  CVector<double> getPulserMaxPRFs() override {
+  size_t getPulserMaxPRFs(double *buffer, size_t bufferCount) override {
     try {
-      auto values = m_manager->dotNETManager->PulserMaxPRFs;
-      int count = values->Length;
-      if (count == 0)
-        return CVector<double>();
-
-      double *buffer = new double[count];
-      for (int i = 0; i < count; ++i)
-        buffer[i] = values[i];
-
-      return CVector<double>(buffer, count, count);
+      return copyDoubleArray(m_manager->dotNETManager->PulserMaxPRFs, buffer,
+                             bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1713,20 +1716,23 @@ public:
     }
   }
 
-  CVector<double> getPulserEnergyCapacitorValues() override {
+  size_t getPulserEnergyCapacitorValues(double *buffer,
+                                        size_t bufferCount) override {
     try {
-      return listToCVector<System::Double, double>(
-          m_manager->dotNETManager->PulserEnergyCapacitorValues);
+      return copyDoubleArray(
+          m_manager->dotNETManager->PulserEnergyCapacitorValues, buffer,
+          bufferCount);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  CVector<CString> getReceiverSupplyVoltages() override {
+  size_t getReceiverSupplyVoltages(char **buffer, size_t bufferCount,
+                                   size_t stringLength) override {
     try {
-      return listToCVectorString<System::String^>(
-          m_manager->dotNETManager->ReceiverSupplyVoltages);
+      return copyStringList(m_manager->dotNETManager->ReceiverSupplyVoltages,
+                            buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
@@ -1751,21 +1757,19 @@ public:
     }
   }
 
-  CString getReceiverModelName() override {
+  size_t getReceiverModelName(char *buffer, size_t bufferSize) override {
     try {
-      std::string result = marshal_as<std::string>(
-          m_manager->dotNETManager->ReceiverModelName);
-      return CString::from_std_string(result);
+      return copyManagedStringToBuffer(
+          m_manager->dotNETManager->ReceiverModelName, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
     }
   }
 
-  void setReceiverModelName(CString name) override {
+  void setReceiverModelName(const char *name) override {
     try {
-      std::string str = name.to_std_string();
-      m_manager->dotNETManager->ReceiverModelName = marshal_as<String ^>(str);
+      m_manager->dotNETManager->ReceiverModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
       std::string msg = marshal_as<std::string>(exception->Message);
       throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);

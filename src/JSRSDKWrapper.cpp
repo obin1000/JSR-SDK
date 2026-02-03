@@ -1,4 +1,4 @@
-#include "JSR-SDK/JSRSDKWrapper.h"
+#include "JSR-SDK/JSRSDKWrapper.hpp"
 
 using namespace JSRDotNETSDK;
 using namespace System;

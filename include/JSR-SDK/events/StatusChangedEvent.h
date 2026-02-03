@@ -7,76 +7,29 @@
 
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
-#include "JSR-SDK/boundary/CString.h"
 
 #include <functional>
 #include <string>
+#include <cstring>
 
-class StatusChangedEvent {
-public:
-  StatusChangedEvent()
-      : pulserState{}, dataType{}, changeType{}, errorCode{} {}
+struct StatusChangedEvent {
+  static constexpr size_t MAX_STRING_LENGTH = 256;
 
-  CString pulserProperty;
-
+  char pulserProperty[MAX_STRING_LENGTH];
   C_PULSER_RECEIVER_STATE pulserState;
-
-  CString newValue;
-
+  char newValue[MAX_STRING_LENGTH];
   C_PULSER_PROPERTY_DATA_TYPE dataType;
-
   C_STATUS_CHANGE changeType;
-
   PulserReceiverID pulserReceiverId;
-
-  CString errorMessage;
-
+  char errorMessage[MAX_STRING_LENGTH];
   C_ERROR_CODE errorCode;
-
   ExceptionJSRSDK thrownException;
 
-  ~StatusChangedEvent() {
-    pulserProperty.free_cstring();
-    newValue.free_cstring();
-    errorMessage.free_cstring();
-  }
-
-  StatusChangedEvent(const StatusChangedEvent &) = delete;
-  StatusChangedEvent &operator=(const StatusChangedEvent &) = delete;
-
-  StatusChangedEvent(StatusChangedEvent &&other) noexcept
-      : pulserProperty(other.pulserProperty), pulserState(other.pulserState),
-        newValue(other.newValue), dataType(other.dataType),
-        changeType(other.changeType),
-        pulserReceiverId(std::move(other.pulserReceiverId)),
-        errorMessage(other.errorMessage), errorCode(other.errorCode),
-        thrownException(std::move(other.thrownException)) {
-    other.pulserProperty = CString();
-    other.newValue = CString();
-    other.errorMessage = CString();
-  }
-
-  StatusChangedEvent &operator=(StatusChangedEvent &&other) noexcept {
-    if (this != &other) {
-      pulserProperty.free_cstring();
-      newValue.free_cstring();
-      errorMessage.free_cstring();
-
-      pulserProperty = other.pulserProperty;
-      pulserState = other.pulserState;
-      newValue = other.newValue;
-      dataType = other.dataType;
-      changeType = other.changeType;
-      pulserReceiverId = std::move(other.pulserReceiverId);
-      errorMessage = other.errorMessage;
-      errorCode = other.errorCode;
-      thrownException = std::move(other.thrownException);
-
-      other.pulserProperty = CString();
-      other.newValue = CString();
-      other.errorMessage = CString();
-    }
-    return *this;
+  StatusChangedEvent()
+      : pulserState{}, dataType{}, changeType{}, errorCode{} {
+    pulserProperty[0] = '\0';
+    newValue[0] = '\0';
+    errorMessage[0] = '\0';
   }
 };
 

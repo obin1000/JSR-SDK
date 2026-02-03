@@ -15,14 +15,16 @@
 #include "structs/InstrumentID.h"
 #include "structs/JSRLibMetadata.h"
 #include "structs/PulserReceiverID.h"
-#include "boundary/CString.h"
-#include "boundary/CVector.h"
 
 /**
  * @brief Abstract class representing the interface to unmanaged C++.
  * This class provides a set of virtual functions to interact with the JSR SDK.
  * The C++/CLI implementation is hidden in the implementation, allowing
  * unmanaged C++ to use this header.
+ * 
+ * All functions that return strings or arrays now use caller-allocated buffers.
+ * Functions return the number of items/characters written, or the required size
+ * if the buffer is too small or null.
  */
 class JSRSDKManager {
 public:
@@ -47,13 +49,12 @@ public:
 
   // === Custom functions added ===
   /**
-   * @brief Tries to load plugins from the same directory as the exectutable.
+   * @brief Tries to load plugins from the same directory as the executable.
    */
   virtual void loadPluginsFromBinaryDir() = 0;
 
   // === Event handlers used for callbacks ===
-  virtual void
-  replaceStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
+  virtual void replaceStatusChangeEventHandler(const StatusChangeCallback &callback) = 0;
   virtual void removeStatusChangeEventHandler() = 0;
   virtual void replaceNotifyEventHandler(const NotifyCallback &callback) = 0;
   virtual void removeNotifyEventHandler() = 0;
@@ -64,31 +65,77 @@ public:
    * If this list is empty, then all ports will be searched. The "port string"
    * is specific to the method used for searching for instruments: e.g. COM port
    * for SERIAL, IP Address for ETHERNET, etc.
+   * @param plugin The name of the plugin.
    * @param port The port to add.
    */
   virtual void AddPortToExclude(const char *plugin, const char *port) = 0;
-  virtual CVector<CString> GetPortsToExclude(const char *plugin) = 0;
+  
+  /**
+   * @brief Get the list of excluded ports for a plugin.
+   * @param plugin The plugin name
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of ports, or required count if buffer is too small
+   */
+  virtual size_t GetPortsToExclude(const char *plugin, char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Adds a port to include when the plugin will search for instruments.
    * If this list is empty, then all ports will be searched. The "port string"
    * is specific to the method used for searching for instruments: e.g. COM port
    * for SERIAL, IP Address for ETHERNET, etc.
+   * @param plugin The name of the plugin.
    * @param port The port to add.
    */
   virtual void AddPortToInclude(const char *plugin, const char *port) = 0;
-  virtual CVector<CString> GetPortsToInclude(const char *plugin) = 0;
+  
+  /**
+   * @brief Get the list of included ports for a plugin.
+   * @param plugin The plugin name
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of ports, or required count if buffer is too small
+   */
+  virtual size_t GetPortsToInclude(const char *plugin, char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
-  virtual bool AddOpenOption(const char *plugin, const char *openOptionName,
-                             const char *openOptionValue) = 0;
-
-  virtual CString GetOpenOption(const char *plugin,
-                                const char *openOptionName) = 0;
-
-  virtual CVector<CString> GetOpenOptionNames(const char *plugin) = 0;
-
-  virtual bool RemoveOpenOption(const char *plugin,
-                                const char *openOptionName) = 0;
+  /**
+   * @brief Adds an open option for a specific plugin.
+   * @param plugin The name of the plugin.
+   * @param openOptionName The name of the option.
+   * @param openOptionValue The value of the option.
+   * @return True if the option was added successfully, false otherwise.
+   */
+  virtual bool AddOpenOption(const char *plugin, const char *openOptionName, const char *openOptionValue) = 0;
+  
+  /**
+   * @brief Get an open option value.
+   * @param plugin The plugin name
+   * @param openOptionName The option name
+   * @param buffer Buffer to write the value to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
+   */
+  virtual size_t GetOpenOption(const char *plugin, const char *openOptionName, char *buffer, size_t bufferSize) = 0;
+  
+  /**
+   * @brief Get the names of all open options for a plugin.
+   * @param plugin The plugin name
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of option names, or required count if buffer is too small
+   */
+  virtual size_t GetOpenOptionNames(const char *plugin, char **buffer, size_t bufferCount, size_t stringLength) = 0;
+  
+  /**
+   * @brief Removes an open option for a specific plugin.
+   * @param plugin The name of the plugin.
+   * @param openOptionName The name of the option to remove.
+   * @return True if the option was removed successfully, false otherwise.
+   */
+  virtual bool RemoveOpenOption(const char *plugin, const char *openOptionName) = 0;
 
   // === Functions provided by SDK ===
 
@@ -104,9 +151,7 @@ public:
    * @param optionName The name of the option.
    * @param optionValue The value of the option.
    */
-  virtual void AddPluginOpenOption(const char *strPluginName,
-                                   const char *optionName,
-                                   const char *optionValue) = 0;
+  virtual void AddPluginOpenOption(const char *strPluginName, const char *optionName, const char *optionValue) = 0;
 
   /**
    * @brief Adds a plugin type to the manager.
@@ -121,36 +166,47 @@ public:
 
   /**
    * @brief Retrieves custom settings available in the manager.
-   * @return A vector of strings representing custom settings.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of settings, or required count if buffer is too small
    */
-  virtual CVector<CString> GetCustomSettings() = 0;
+  virtual size_t GetCustomSettings(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves a list of instruments for a specific plugin.
    * @param pluginName The name of the plugin.
-   * @return A vector of InstrumentID objects representing the instruments.
+   * @param buffer Array of InstrumentID structs to write to (can be nullptr to query size)
+   * @param bufferCount The number of InstrumentID structs available
+   * @return The actual number of instruments, or required count if buffer is too small
    */
-  virtual CVector<InstrumentID> GetInstruments(const char *pluginName) = 0;
+  virtual size_t GetInstruments(const char *pluginName, InstrumentID *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the names of all managed plugins.
-   * @return A vector of strings representing the names of managed plugins.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of plugin names, or required count if buffer is too small
    */
-  virtual CVector<CString> GetManagedPluginNames() = 0;
-
+  virtual size_t GetManagedPluginNames(char **buffer, size_t bufferCount, size_t stringLength) = 0;
+  
   /**
    * @brief Retrieves metadata for a specific plugin library.
    * @param strPluginName The name of the plugin.
-   * @return A JSRLibMetadata object containing metadata about the plugin.
+   * @param metadata Pointer to JSRLibMetadata struct to fill
+   * @return true if successful, false otherwise
    */
-  virtual JSRLibMetadata
-  GetPluginLibraryMetadata(const char *strPluginName) = 0;
+  virtual bool GetPluginLibraryMetadata(const char *strPluginName, JSRLibMetadata *metadata) = 0;
 
   /**
    * @brief Retrieves names of the loaded plugins.
-   * @return A vector of strings representing the names of the loaded plugins.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of plugin names, or required count if buffer is too small
    */
-  virtual CVector<CString> GetPluginNames() = 0;
+  virtual size_t GetPluginNames(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves the attributes of a specific pulser property.
@@ -170,10 +226,11 @@ public:
    * @brief Retrieves the units of a specific pulser property as a string.
    * @param settingName The name of the pulser property.
    * @param useShort Whether to use the short form of the units.
-   * @return A string representing the units of the property.
+   * @param buffer Buffer to write the units string to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString GetPulserPropertyUnitsAsString(const char *settingName,
-                                                 bool useShort = false) = 0;
+  virtual size_t GetPulserPropertyUnitsAsString(const char *settingName, bool useShort, char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Retrieves information about a pulser receiver based on its model,
@@ -181,27 +238,30 @@ public:
    * @param model The model of the pulser receiver.
    * @param serialNum The serial number of the pulser receiver.
    * @param idxPR The index of the pulser receiver.
-   * @return A vector of strings containing information about the pulser
-   * receiver.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of info strings, or required count if buffer is too small
    */
-  virtual CVector<CString> GetPulserReceiverInfo(const char *model,
-                                                 const char *serialNum,
-                                                 int idxPR) = 0;
+  virtual size_t GetPulserReceiverInfo(const char *model, const char *serialNum, int idxPR, char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves information about a pulser receiver based on its ID.
    * @param id The PulserReceiverID of the pulser receiver.
-   * @return A vector of strings containing information about the pulser
-   * receiver.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of info strings, or required count if buffer is too small
    */
-  virtual CVector<CString> GetPulserReceiverInfo(PulserReceiverID id) = 0;
+  virtual size_t GetPulserReceiverInfo(PulserReceiverID id, char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves a list of all Pulser/Receiver IDs detected by the SDK.
-   * @return A vector of PulserReceiverID objects representing the
-   * Pulser/Receivers.
+   * @param buffer Array of PulserReceiverID structs to write to (can be nullptr to query size)
+   * @param bufferCount The number of PulserReceiverID structs available
+   * @return The actual number of pulser/receivers, or required count if buffer is too small
    */
-  virtual CVector<PulserReceiverID> GetPulserReceivers() = 0;
+  virtual size_t GetPulserReceivers(PulserReceiverID *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Checks if a specific pulser setting is supported.
@@ -229,8 +289,7 @@ public:
 
   /**
    * @brief Removes a managed plugin by its name.
-   * @param pluginName The name of the plugin to remove. Defaults to an empty
-   * string.
+   * @param pluginName The name of the plugin to remove. Defaults to an empty string.
    */
   virtual void RemoveManagedPlugin(const char *pluginName = "") = 0;
 
@@ -252,8 +311,7 @@ public:
    * @param serialNum The serial number of the pulser receiver.
    * @param idxPR The index of the pulser receiver.
    */
-  virtual void SetCurrentPulserReceiver(const char *model,
-                                        const char *serialNum, int idxPR) = 0;
+  virtual void SetCurrentPulserReceiver(const char *model, const char *serialNum, int idxPR) = 0;
 
   /**
    * @brief Enables or disables discovery mode.
@@ -266,8 +324,7 @@ public:
    * @param strProp The name of the property.
    * @param value The value to set for the property.
    */
-  virtual void SetPulserPropertyValue(const char *strProp,
-                                      const char *value) = 0;
+  virtual void SetPulserPropertyValue(const char *strProp, const char *value) = 0;
 
   /**
    * @brief Sets the value of a specific pulser property with a role.
@@ -275,9 +332,7 @@ public:
    * @param role The role of the property.
    * @param value The value to set for the property.
    */
-  virtual void SetPulserPropertyValue(const char *settingName,
-                                      C_PULSER_PROPERTY_ROLE role,
-                                      const char *value) = 0;
+  virtual void SetPulserPropertyValue(const char *settingName, C_PULSER_PROPERTY_ROLE role, const char *value) = 0;
 
   /**
    * @brief Shuts down the manager and releases all resources.
@@ -287,8 +342,7 @@ public:
   // === Getters and setters for variables in the manager ===
   /**
    * @brief Checks if the pulse repetition frequency index is supported.
-   * @return True if the pulse repetition frequency index is supported, false
-   * otherwise.
+   * @return True if the pulse repetition frequency index is supported, false otherwise.
    */
   virtual bool getPulseRepetitionFrequencyIndexSupported() = 0;
 
@@ -324,9 +378,11 @@ public:
 
   /**
    * @brief Retrieves the available pulse repetition frequency values.
-   * @return A vector of available pulse repetition frequency values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getPulseRepetitionFrequencyValues() = 0;
+  virtual size_t getPulseRepetitionFrequencyValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the maximum index of the pulse repetition frequency.
@@ -390,9 +446,11 @@ public:
 
   /**
    * @brief Retrieves the available high-pass filter values.
-   * @return A vector of available high-pass filter values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getHighPassFilterValues() = 0;
+  virtual size_t getHighPassFilterValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the maximum index of the high-pass filter.
@@ -462,9 +520,11 @@ public:
 
   /**
    * @brief Retrieves the available gain values.
-   * @return A vector of available gain values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getGainValues() = 0;
+  virtual size_t getGainValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the maximum index of the gain.
@@ -486,9 +546,11 @@ public:
 
   /**
    * @brief Retrieves the available low-pass filter values.
-   * @return A vector of available low-pass filter values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getLowPassFilterValues() = 0;
+  virtual size_t getLowPassFilterValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the minimum high voltage supply value.
@@ -498,8 +560,7 @@ public:
 
   /**
    * @brief Checks if the high voltage supply index is supported.
-   * @return True if the high voltage supply index is supported, false
-   * otherwise.
+   * @return True if the high voltage supply index is supported, false otherwise.
    */
   virtual bool getHVSupplyIndexSupported() = 0;
 
@@ -521,22 +582,39 @@ public:
    */
   virtual double getHVMeasurement() = 0;
 
+  /**
+   * @brief Checks if the high voltage measurement is supported.
+   * @return True if the high voltage measurement is supported, false otherwise.
+   */
   virtual bool getHVMeasurementSupported() = 0;
 
-  virtual CString getUnitModelName() = 0;
-  virtual void setUnitModelName(CString name) = 0;
+  /**
+   * @brief Retrieves the unit model name.
+   * @param buffer Buffer to write the model name to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
+   */
+  virtual size_t getUnitModelName(char *buffer, size_t bufferSize) = 0;
+
+  /**
+   * @brief Sets the unit model name.
+   * @param name The unit model name to set.
+   */
+  virtual void setUnitModelName(const char *name) = 0;
 
   /**
    * @brief Retrieves the unit serial number.
-   * @return A string representing the unit serial number.
+   * @param buffer Buffer to write the serial number to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getUnitSerialNum() = 0;
+  virtual size_t getUnitSerialNum(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the unit serial number.
    * @param serialNum The unit serial number to set.
    */
-  virtual void setUnitSerialNum(CString serialNum) = 0;
+  virtual void setUnitSerialNum(const char *serialNum) = 0;
 
   /**
    * @brief Checks if pulser OEM data is supported.
@@ -576,10 +654,12 @@ public:
 
   /**
    * @brief Retrieves the names of available pulser trigger source values.
-   * @return A vector of strings representing the names of pulser trigger source
-   * values.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of trigger source names, or required count if buffer is too small
    */
-  virtual CVector<CString> getPulserTriggerSourceValueNames() = 0;
+  virtual size_t getPulserTriggerSourceValueNames(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves the maximum index of pulser trigger sources.
@@ -631,9 +711,12 @@ public:
 
   /**
    * @brief Retrieves the names of available pulse energy values.
-   * @return A vector of strings representing the names of pulse energy values.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of pulse energy value names, or required count if buffer is too small
    */
-  virtual CVector<CString> getPulseEnergyValueNames() = 0;
+  virtual size_t getPulseEnergyValueNames(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves the maximum index of pulse energy values.
@@ -661,9 +744,11 @@ public:
 
   /**
    * @brief Retrieves the available damping values.
-   * @return A vector of doubles representing the available damping values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getDampingValues() = 0;
+  virtual size_t getDampingValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the maximum index of damping values.
@@ -691,10 +776,11 @@ public:
 
   /**
    * @brief Retrieves the available high voltage supply values.
-   * @return A vector of doubles representing the available high voltage supply
-   * values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getHVSupplyValues() = 0;
+  virtual size_t getHVSupplyValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the maximum index of high voltage supply values.
@@ -728,15 +814,17 @@ public:
 
   /**
    * @brief Retrieves the pulser serial number.
-   * @return A string representing the pulser serial number.
+   * @param buffer Buffer to write the serial number to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getPulserSerialNum() = 0;
+  virtual size_t getPulserSerialNum(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the pulser serial number.
    * @param serialNum The pulser serial number to set.
    */
-  virtual void setPulserSerialNum(CString serialNum) = 0;
+  virtual void setPulserSerialNum(const char *serialNum) = 0;
 
   /**
    * @brief Checks if the pulser serial number is supported.
@@ -746,22 +834,23 @@ public:
 
   /**
    * @brief Checks if the receiver hardware revision is supported.
-   * @return True if the receiver hardware revision is supported, false
-   * otherwise.
+   * @return True if the receiver hardware revision is supported, false otherwise.
    */
   virtual bool getReceiverHWRevSupported() = 0;
 
   /**
    * @brief Retrieves the receiver hardware revision.
-   * @return A string representing the receiver hardware revision.
+   * @param buffer Buffer to write the hardware revision to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getReceiverHWRev() = 0;
+  virtual size_t getReceiverHWRev(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the receiver hardware revision.
    * @param hwRev The receiver hardware revision to set.
    */
-  virtual void setReceiverHWRev(CString hwRev) = 0;
+  virtual void setReceiverHWRev(const char *hwRev) = 0;
 
   /**
    * @brief Checks if the pulser hardware revision is supported.
@@ -771,28 +860,31 @@ public:
 
   /**
    * @brief Retrieves the pulser hardware revision.
-   * @return A string representing the pulser hardware revision.
+   * @param buffer Buffer to write the hardware revision to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getPulserHWRev() = 0;
+  virtual size_t getPulserHWRev(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the pulser hardware revision.
    * @param hwRev The pulser hardware revision to set.
    */
-  virtual void setPulserHWRev(CString hwRev) = 0;
+  virtual void setPulserHWRev(const char *hwRev) = 0;
 
   /**
    * @brief Checks if the receiver firmware version is supported.
-   * @return True if the receiver firmware version is supported, false
-   * otherwise.
+   * @return True if the receiver firmware version is supported, false otherwise.
    */
   virtual bool getReceiverFirmwareVerSupported() = 0;
 
   /**
    * @brief Retrieves the receiver firmware version.
-   * @return A string representing the receiver firmware version.
+   * @param buffer Buffer to write the firmware version to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getReceiverFirmwareVer() = 0;
+  virtual size_t getReceiverFirmwareVer(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Checks if the pulser firmware version is supported.
@@ -802,9 +894,11 @@ public:
 
   /**
    * @brief Retrieves the pulser firmware version.
-   * @return A string representing the pulser firmware version.
+   * @param buffer Buffer to write the firmware version to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getPulserFirmwareVer() = 0;
+  virtual size_t getPulserFirmwareVer(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Retrieves the maximum frequency.
@@ -820,8 +914,7 @@ public:
 
   /**
    * @brief Sets the trigger impedance.
-   * @param impedance The trigger impedance to set as a TriggerImpedance enum
-   * value.
+   * @param impedance The trigger impedance to set as a TriggerImpedance enum value.
    */
   virtual void setTriggerImpedance(C_TRIGGER_IMPEDANCE impedance) = 0;
 
@@ -839,8 +932,7 @@ public:
 
   /**
    * @brief Sets the pulser impedance.
-   * @param impedance The pulser impedance to set as a PulserImpedance enum
-   * value.
+   * @param impedance The pulser impedance to set as a PulserImpedance enum value.
    */
   virtual void setPulserImpedance(C_PULSER_IMPEDANCE impedance) = 0;
 
@@ -858,9 +950,12 @@ public:
 
   /**
    * @brief Retrieves general information about the system.
-   * @return A vector of strings containing general information.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of info strings, or required count if buffer is too small
    */
-  virtual CVector<CString> getInfo() = 0;
+  virtual size_t getInfo(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves the pulser's current pulsing state.
@@ -900,8 +995,7 @@ public:
 
   /**
    * @brief Checks if enabling the high voltage supply is supported.
-   * @return True if enabling the high voltage supply is supported, false
-   * otherwise.
+   * @return True if enabling the high voltage supply is supported, false otherwise.
    */
   virtual bool getHVSupplyEnableSupported() = 0;
 
@@ -919,15 +1013,17 @@ public:
 
   /**
    * @brief Retrieves the receiver serial number.
-   * @return A string representing the receiver serial number.
+   * @param buffer Buffer to write the serial number to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getReceiverSerialNum() = 0;
+  virtual size_t getReceiverSerialNum(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the receiver serial number.
    * @param serialNum The receiver serial number to set.
    */
-  virtual void setReceiverSerialNum(CString serialNum) = 0;
+  virtual void setReceiverSerialNum(const char *serialNum) = 0;
 
   /**
    * @brief Checks if the pulser model name is supported.
@@ -961,9 +1057,12 @@ public:
 
   /**
    * @brief Retrieves the available LED blink mode values.
-   * @return A vector of strings representing the LED blink mode values.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of LED blink mode values, or required count if buffer is too small
    */
-  virtual CVector<CString> getLEDBlinkModeValues() = 0;
+  virtual size_t getLEDBlinkModeValues(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Retrieves the maximum index of LED blink modes.
@@ -1003,41 +1102,47 @@ public:
 
   /**
    * @brief Retrieves the context message of the last exception.
-   * @return A string containing the context message of the last exception.
+   * @param buffer Buffer to write the context message to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getLastExceptionContextMessage() = 0;
+  virtual size_t getLastExceptionContextMessage(char *buffer, size_t bufferSize) = 0;
 
   /**
-   * @brief Retrieves the last exception message or null if no exception
-   * occurred.
-   * @return A string containing the last exception message or null.
+   * @brief Retrieves the last exception message or null if no exception occurred.
+   * @param buffer Buffer to write the exception message to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator), or 0 if no exception
    */
-  virtual CString getLastExceptionOrNull() = 0;
-  // virtual void setLastExceptionOrNull(Exception exception) = 0;
+  virtual size_t getLastExceptionOrNull(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Retrieves the plugin path.
-   * @return A string representing the plugin path.
+   * @param buffer Buffer to write the plugin path to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getPluginPath() = 0;
+  virtual size_t getPluginPath(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the plugin path.
    * @param path The plugin path to set.
    */
-  virtual void setPluginPath(CString path) = 0;
+  virtual void setPluginPath(const char *path) = 0;
 
   /**
    * @brief Retrieves the pulser model name.
-   * @return A string representing the pulser model name.
+   * @param buffer Buffer to write the model name to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getPulserModelName() = 0;
+  virtual size_t getPulserModelName(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the pulser model name.
    * @param name The pulser model name to set.
    */
-  virtual void setPulserModelName(CString name) = 0;
+  virtual void setPulserModelName(const char *name) = 0;
 
   /**
    * @brief Checks if plugins are loaded.
@@ -1059,29 +1164,34 @@ public:
 
   /**
    * @brief Retrieves the maximum PRFs for the pulser.
-   * @return A vector of doubles representing the maximum PRFs.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getPulserMaxPRFs() = 0;
+  virtual size_t getPulserMaxPRFs(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Checks if pulser energy capacitor values are supported.
-   * @return True if pulser energy capacitor values are supported, false
-   * otherwise.
+   * @return True if pulser energy capacitor values are supported, false otherwise.
    */
   virtual bool getPulserEnergyCapacitorValuesSupported() = 0;
 
   /**
    * @brief Retrieves the pulser energy capacitor values.
-   * @return A vector of doubles representing the pulser energy capacitor
-   * values.
+   * @param buffer Array of doubles to write to (can be nullptr to query size)
+   * @param bufferCount The number of doubles available
+   * @return The actual number of values, or required count if buffer is too small
    */
-  virtual CVector<double> getPulserEnergyCapacitorValues() = 0;
+  virtual size_t getPulserEnergyCapacitorValues(double *buffer, size_t bufferCount) = 0;
 
   /**
    * @brief Retrieves the receiver supply voltages.
-   * @return A vector of strings representing the receiver supply voltages.
+   * @param buffer Array of string buffers to write to (can be nullptr to query size)
+   * @param bufferCount The number of buffers available
+   * @param stringLength The length of each string buffer
+   * @return The actual number of supply voltage strings, or required count if buffer is too small
    */
-  virtual CVector<CString> getReceiverSupplyVoltages() = 0;
+  virtual size_t getReceiverSupplyVoltages(char **buffer, size_t bufferCount, size_t stringLength) = 0;
 
   /**
    * @brief Checks if receiver supply voltages are supported.
@@ -1097,15 +1207,17 @@ public:
 
   /**
    * @brief Retrieves the receiver model name.
-   * @return A string representing the receiver model name.
+   * @param buffer Buffer to write the model name to (can be nullptr to query size)
+   * @param bufferSize Size of the buffer (including null terminator)
+   * @return The required size (including null terminator)
    */
-  virtual CString getReceiverModelName() = 0;
+  virtual size_t getReceiverModelName(char *buffer, size_t bufferSize) = 0;
 
   /**
    * @brief Sets the receiver model name.
    * @param name The receiver model name to set.
    */
-  virtual void setReceiverModelName(CString name) = 0;
+  virtual void setReceiverModelName(const char *name) = 0;
 
   /**
    * @brief Checks if plugins are available.

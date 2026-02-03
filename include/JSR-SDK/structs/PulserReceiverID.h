@@ -11,8 +11,7 @@
  * its index and the description of the associated instrument.
  * Mirrors JSRDotNETSDK::PulserReceiverIdentity
  */
-class PulserReceiverID {
-public:
+struct PulserReceiverID {
   /**
    * @brief The instrument associated with this Pulser/Receiver.
    */
@@ -25,6 +24,7 @@ public:
 
   PulserReceiverID() : PulserReceiverIndex(0) {}
 
+#ifdef __cplusplus
   /**
    * @brief Constructs a detailed description of the Pulser/Receiver.
    *
@@ -47,5 +47,6 @@ public:
    *
    * @return A string containing the Pulser/Receiver's description.
    */
-  std::string ToString() { return GetDescription(); }
+  std::string ToString() const { return GetDescription(); }
+#endif
 };
