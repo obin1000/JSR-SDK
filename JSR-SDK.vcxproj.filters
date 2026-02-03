@@ -23,7 +23,7 @@
     <None Include=".clang-tidy" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\JSR-SDK\JSRSDKManager.h">
+    <ClInclude Include="include\JSR-SDK\JSRSDKManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h">
@@ -101,9 +101,10 @@
     <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.h">
+    <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">
