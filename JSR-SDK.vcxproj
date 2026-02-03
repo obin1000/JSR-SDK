@@ -23,8 +23,7 @@
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\JSR-SDK\boundary\CString.h" />
-    <ClInclude Include="include\JSR-SDK\boundary\CVector.h" />
+
     <ClInclude Include="include\JSR-SDK\enums\C_CONNECTION_TYPE.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_DISCOVERY_STATE_FLAGS.h" />
     <ClInclude Include="include\JSR-SDK\enums\C_ERROR_CODE.h" />

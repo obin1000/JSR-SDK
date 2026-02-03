@@ -14,7 +14,8 @@
  * and avoid dynamic memory allocation. This makes the structure safe to pass
  * across DLL boundaries and suitable for C interop.
  * 
- * @note This is a POD (Plain Old Data) structure in C, with optional C++ helpers.
+ * @note In C this is a plain aggregate struct; in C++ it is a
+ *       standard-layout, ABI-stable type with optional helper functions.
  */
 struct InstrumentID {
   /// Maximum length for string fields (including null terminator)

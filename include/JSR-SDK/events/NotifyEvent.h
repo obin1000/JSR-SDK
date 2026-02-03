@@ -113,6 +113,7 @@ struct NotifyEvent {
     errorText[0] = '\0';
     serial[0] = '\0';
     pluginName[0] = '\0';
+    info[0][0] = '\0';
   }
 };
 

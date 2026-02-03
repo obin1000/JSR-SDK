@@ -104,12 +104,7 @@
     <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\boundary\CString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\JSR-SDK\boundary\CVector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp">

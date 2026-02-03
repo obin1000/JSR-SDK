@@ -16,8 +16,8 @@
  * All string data is stored in fixed-size character arrays to ensure
  * ABI stability and compatibility with C code.
  * 
- * @note This is a POD-like structure that can be safely passed across
- *       module boundaries and used in C/C++ interop scenarios.
+ * @note This is a simple value-type class designed to be safely passed
+ *       across module boundaries and used in C/C++ interop scenarios.
  */
 class ExceptionJSRSDK {
 private:
@@ -40,16 +40,19 @@ private:
    * truncates the source if necessary to fit in the destination.
    * 
    * @param dest Destination buffer
-   * @param src Source string (null-terminated)
+   * @param src Source string (null-terminated). If nullptr, treated as empty.
    * @param destSize Size of destination buffer
    */
   static void safeCopy(char *dest, const char *src, size_t destSize) {
     if (dest == nullptr || destSize == 0)
       return;
 
-    size_t len = std::strlen(src);
-    if (len >= destSize) {
-      len = destSize - 1;
+    size_t len = 0;
+    if (src != nullptr) {
+      len = std::strlen(src);
+      if (len >= destSize) {
+        len = destSize - 1;
+      }
     }
 
     if (len > 0) {

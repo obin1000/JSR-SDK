@@ -16,7 +16,7 @@
  * 
  * Mirrors JSRDotNETSDK::IPulserReceiverIdentity interface.
  * 
- * @note This is a POD (Plain Old Data) structure in C, with optional C++ helpers.
+ * @note This is a standard-layout structure with optional C++ helpers.
  */
 struct PulserReceiverID {
   /**
