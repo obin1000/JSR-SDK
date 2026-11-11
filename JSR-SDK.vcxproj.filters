@@ -107,6 +107,9 @@
     <ClInclude Include="src\SdkError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ManagedErrors.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
 
   </ItemGroup>
   <ItemGroup>

@@ -2,13 +2,17 @@
 //
 // Needs no hardware: it starts the .NET runtime inside JSR-SDK.dll, loads the
 // plugins that sit next to the program, checks that an SDK error reaches the
-// caller as a C++ exception and shuts the manager down again.
+// caller as a C++ exception, then discovers, selects and configures a
+// simulated pulser-receiver and shuts the manager down again.
 #include "JSR-SDK/JSRSDKManager.hpp"
 
+#include <atomic>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <exception>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -72,6 +76,51 @@ void run(JSRSDKManager &manager) {
   CHECK(threw);
 }
 
+// Discovers a simulated pulser-receiver (the SDK's JSRDotNET_DiagLib plugin),
+// selects it, changes a setting and waits for the status event. This is the
+// job a real program does, with the simulator standing in for hardware.
+void runSimulator(JSRSDKManager &manager) {
+  const char *plugin = "JSRDotNET_DiagLib";
+  std::atomic<int> gainEvents{0};
+  manager.replaceStatusChangeEventHandler([&](const StatusChangedEvent &e) {
+    if (std::strcmp(e.pulserProperty, "GainIndex") == 0) {
+      ++gainEvents;
+    }
+  });
+
+  manager.AddManagedPlugin(plugin);
+  manager.AddPluginOpenOption(plugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.AddPluginOpenOption(plugin, "CONNECT_ON_OPEN", "YES");
+  manager.SetDiscoveryEnable(true);
+
+  size_t found = 0;
+  for (int i = 0; i < 200 && found == 0; ++i) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    found = manager.GetPulserReceivers(nullptr, 0);
+  }
+  std::printf("Simulator: %zu pulser-receiver(s)\n", found);
+  CHECK(found > 0);
+  if (found == 0) {
+    return;
+  }
+
+  std::vector<PulserReceiverID> ids(found);
+  ids.resize(manager.GetPulserReceivers(ids.data(), ids.size()));
+  manager.SetCurrentPulserReceiver(ids.front());
+  CHECK(manager.getIsPulserReceiverSelected());
+  CHECK(std::strcmp(manager.getId().InstrumentId.ModelName, "SIM") == 0);
+
+  manager.setGainIndex(4);
+  CHECK(manager.getGainIndex() == 4);
+  for (int i = 0; i < 100 && gainEvents == 0; ++i) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  std::printf("Simulator: gain index %d, %d status event(s)\n",
+              manager.getGainIndex(), gainEvents.load());
+  CHECK(gainEvents > 0);
+  manager.removeStatusChangeEventHandler();
+}
+
 } // namespace
 
 int main() {
@@ -83,6 +132,7 @@ int main() {
 
   try {
     run(*manager);
+    runSimulator(*manager);
   } catch (const std::exception &e) {
     std::fprintf(stderr, "Unexpected exception: %s\n", e.what());
     ++failures;

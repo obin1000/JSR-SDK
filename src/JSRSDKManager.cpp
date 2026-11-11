@@ -1,6 +1,7 @@
 ﻿#include "JSR-SDK/JSRSDKManager.hpp"
 #include "JSR-SDK/JSRSDKWrapper.hpp"
 #include "JSR-SDK/marshals/MarshalTypes.h"
+#include "ManagedErrors.hpp"
 #include "SdkError.hpp"
 
 #include <msclr/marshal.h>
@@ -15,44 +16,7 @@ using namespace System::Reflection;
 using namespace System::IO;
 using namespace System::Collections::Generic;
 
-/**
- * @brief Picks the error code that best describes a managed exception.
- *
- * Exceptions from the JSR SDK carry their own code. For standard .NET
- * exceptions the closest code is used, and UNKNOWN for everything else.
- */
-static C_ERROR_CODE errorCodeForManaged(System::Exception ^ exception) {
-  if (auto sdkException = dynamic_cast<ExceptionJSRDotNET ^>(exception)) {
-    return errorCodeFromManaged(sdkException->ErrorCode);
-  }
-  if (dynamic_cast<ArgumentException ^>(exception)) {
-    return C_ERROR_CODE::INVALID_ARGUMENT;
-  }
-  if (dynamic_cast<NullReferenceException ^>(exception)) {
-    return C_ERROR_CODE::NULL_POINTER;
-  }
-  if (dynamic_cast<NotSupportedException ^>(exception) ||
-      dynamic_cast<NotImplementedException ^>(exception)) {
-    return C_ERROR_CODE::OPERATION_NOT_SUPPORTED;
-  }
-  if (dynamic_cast<TimeoutException ^>(exception)) {
-    return C_ERROR_CODE::TIMEOUT;
-  }
-  return C_ERROR_CODE::UNKNOWN;
-}
-
-/**
- * @brief Turns a managed exception into a native SdkError.
- *
- * The message keeps the "<context>: <managed message>" form that callers
- * already see, and the error code is preserved for the C API.
- */
-[[noreturn]] static void rethrowManaged(System::Exception ^ exception,
-                                        const char *context) {
-  std::string msg = marshal_as<std::string>(exception->Message);
-  throw jsr::detail::SdkError(errorCodeForManaged(exception),
-                              std::string(context) + ": " + msg);
-}
+using jsr::detail::rethrowManaged;
 
 class JSRSDKManagerAdapter : public JSRSDKManager {
 private:
