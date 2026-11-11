@@ -2,6 +2,7 @@
 #include "marshals/MarshalTypes.h"
 
 #include <msclr/lock.h>
+#include <stdexcept>
 
 using jsr::detail::notifyEventFromManaged;
 using jsr::detail::statusChangedEventFromManaged;

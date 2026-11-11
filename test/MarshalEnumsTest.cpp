@@ -7,7 +7,7 @@ using namespace jsr::detail;
 
 TEST(EnumConversionTest, ReceiverMode_RoundTrip) {
   RECEIVER_MODE values[] = {RECEIVER_MODE::BOTH, RECEIVER_MODE::ECHO,
-                            RECEIVER_MODE::LAST_VAL, RECEIVER_MODE::THRU};
+                            RECEIVER_MODE::THRU};
   for (auto v : values) {
     C_RECEIVER_MODE native = receiverModeFromManaged(v);
     RECEIVER_MODE back = receiverModeToManaged(native);
@@ -17,7 +17,7 @@ TEST(EnumConversionTest, ReceiverMode_RoundTrip) {
 
 TEST(EnumConversionTest, TriggerSource_RoundTrip) {
   TRIGGER_SOURCE values[] = {TRIGGER_SOURCE::INTERNAL, TRIGGER_SOURCE::EXTERNAL,
-                             TRIGGER_SOURCE::LAST_VAL, TRIGGER_SOURCE::SLAVE};
+                             TRIGGER_SOURCE::SLAVE};
   for (auto v : values) {
     C_TRIGGER_SOURCE native = triggerSourceFromManaged(v);
     TRIGGER_SOURCE back = triggerSourceToManaged(native);
@@ -27,8 +27,7 @@ TEST(EnumConversionTest, TriggerSource_RoundTrip) {
 
 TEST(EnumConversionTest, TriggerPolarity_RoundTrip) {
   TRIGGER_POLARITY values[] = {TRIGGER_POLARITY::FALLING,
-                               TRIGGER_POLARITY::RISING,
-                               TRIGGER_POLARITY::LAST_VAL};
+                               TRIGGER_POLARITY::RISING};
   for (auto v : values) {
     C_TRIGGER_POLARITY native = triggerPolarityFromManaged(v);
     TRIGGER_POLARITY back = triggerPolarityToManaged(native);
@@ -38,8 +37,7 @@ TEST(EnumConversionTest, TriggerPolarity_RoundTrip) {
 
 TEST(EnumConversionTest, TriggerImpedance_RoundTrip) {
   TRIGGER_IMPEDANCE values[] = {TRIGGER_IMPEDANCE::HIGH_Z,
-                                TRIGGER_IMPEDANCE::LOW_Z,
-                                TRIGGER_IMPEDANCE::LAST_VAL};
+                                TRIGGER_IMPEDANCE::LOW_Z};
   for (auto v : values) {
     C_TRIGGER_IMPEDANCE native = triggerImpedanceFromManaged(v);
     TRIGGER_IMPEDANCE back = triggerImpedanceToManaged(native);
@@ -49,8 +47,7 @@ TEST(EnumConversionTest, TriggerImpedance_RoundTrip) {
 
 TEST(EnumConversionTest, PulserImpedance_RoundTrip) {
   PULSER_IMPEDANCE values[] = {PULSER_IMPEDANCE::HIGH_Z,
-                               PULSER_IMPEDANCE::LOW_Z,
-                               PULSER_IMPEDANCE::LAST_VAL};
+                               PULSER_IMPEDANCE::LOW_Z};
   for (auto v : values) {
     C_PULSER_IMPEDANCE native = pulserImpedanceFromManaged(v);
     PULSER_IMPEDANCE back = pulserImpedanceToManaged(native);
@@ -237,4 +234,86 @@ TEST(EnumConversionTest, NotifyType_RoundTrip) {
     NOTIFY_TYPE back = notifyTypeToManaged(native);
     EXPECT_EQ(v, back);
   }
+}
+
+//--------------------------------------------------------------------------
+//  Invalid and unknown values (#15, #25)
+//--------------------------------------------------------------------------
+namespace {
+
+/// Runs f and reports whether it threw System::ArgumentException.
+template <class F> bool throwsArgumentException(F f) {
+  try {
+    f();
+  } catch (System::ArgumentException ^) {
+    return true;
+  }
+  return false;
+}
+
+} // namespace
+
+TEST(EnumConversionTest, ToManaged_RejectsUndefinedValues) {
+  // A wrong number must not become a different hardware setting.
+  EXPECT_TRUE(throwsArgumentException(
+      [] { receiverModeToManaged(static_cast<C_RECEIVER_MODE>(7)); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { triggerSourceToManaged(static_cast<C_TRIGGER_SOURCE>(-1)); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { pulserImpedanceToManaged(static_cast<C_PULSER_IMPEDANCE>(99)); }));
+  EXPECT_TRUE(throwsArgumentException([] {
+    pulserPropertyRoleToManaged(static_cast<C_PULSER_PROPERTY_ROLE>(14));
+  }));
+}
+
+TEST(EnumConversionTest, ToManaged_RejectsLastVal) {
+  // LAST_VAL counts the values; it isn't a setting.
+  EXPECT_TRUE(throwsArgumentException(
+      [] { receiverModeToManaged(C_RECEIVER_MODE::LAST_VAL); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { triggerSourceToManaged(C_TRIGGER_SOURCE::LAST_VAL); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { triggerPolarityToManaged(C_TRIGGER_POLARITY::LAST_VAL); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { triggerImpedanceToManaged(C_TRIGGER_IMPEDANCE::LAST_VAL); }));
+  EXPECT_TRUE(throwsArgumentException(
+      [] { pulserImpedanceToManaged(C_PULSER_IMPEDANCE::LAST_VAL); }));
+}
+
+TEST(EnumConversionTest, ToManaged_ErrorNamesTypeAndValue) {
+  try {
+    receiverModeToManaged(static_cast<C_RECEIVER_MODE>(7));
+    FAIL() << "expected ArgumentException";
+  } catch (System::ArgumentException ^ e) {
+    EXPECT_TRUE(e->Message->Contains("7"));
+    EXPECT_TRUE(e->Message->Contains("RECEIVER_MODE"));
+  }
+}
+
+TEST(EnumConversionTest, FromManaged_PassesUnknownValuesThrough) {
+  // The SDK's POWER_LIMIT has UNKNOWN = 2; it used to become WITHIN_LIMIT.
+  EXPECT_EQ(powerLimitFromManaged(POWER_LIMIT::UNKNOWN),
+            C_POWER_LIMIT::UNKNOWN);
+  EXPECT_NE(powerLimitFromManaged(POWER_LIMIT::UNKNOWN),
+            C_POWER_LIMIT::WITHIN_LIMIT);
+  // A value neither side names keeps its number instead of becoming another.
+  EXPECT_EQ(
+      static_cast<int>(receiverModeFromManaged(static_cast<RECEIVER_MODE>(42))),
+      42);
+}
+
+TEST(EnumConversionTest, DiscoveryStateFlags_CombinationsRoundTrip) {
+  // These are flags: combinations used to be reported as NONE.
+  const DiscoveryStateFlags combined = static_cast<DiscoveryStateFlags>(
+      static_cast<int>(DiscoveryStateFlags::ACTIVE) |
+      static_cast<int>(DiscoveryStateFlags::PENDING));
+  const C_DISCOVERY_STATE_FLAGS native =
+      discoveryStateFlagsFromManaged(combined);
+  EXPECT_EQ(static_cast<int>(native), 3);
+  EXPECT_EQ(discoveryStateFlagsToManaged(native), combined);
+
+  // A bit the SDK doesn't define is still rejected.
+  EXPECT_TRUE(throwsArgumentException([] {
+    discoveryStateFlagsToManaged(static_cast<C_DISCOVERY_STATE_FLAGS>(8));
+  }));
 }

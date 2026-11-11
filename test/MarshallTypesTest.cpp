@@ -29,38 +29,32 @@ private:
 
 public:
   // Auto properties with explicit backing fields to keep older MSVC happy
-  virtual property String ^
-      ModelName {
-        String ^ get() { return modelName; } void set(String ^ value) {
-          modelName = value;
-        }
-      } virtual property String ^
-      SerialNum {
-        String ^ get() { return serialNum; } void set(String ^ value) {
-          serialNum = value;
-        }
-      } virtual property String ^
-      Port {
-        String ^ get() { return port; } void set(String ^ value) {
-          port = value;
-        }
-      } virtual property String ^
-      PluginName {
-        String ^ get() { return pluginName; } void set(String ^ value) {
-          pluginName = value;
-        }
-      }
+  virtual property String ^ ModelName {
+    String ^ get() { return modelName; }
+    void set(String ^ value) { modelName = value; }
+  }
+  virtual property String ^ SerialNum {
+    String ^ get() { return serialNum; }
+    void set(String ^ value) { serialNum = value; }
+  }
+  virtual property String ^ Port {
+    String ^ get() { return port; }
+    void set(String ^ value) { port = value; }
+  }
+  virtual property String ^ PluginName {
+    String ^ get() { return pluginName; }
+    void set(String ^ value) { pluginName = value; }
+  }
 
-      // Equality helpers – not used by marshal code, so a very simple impl is
-      // fine.
-      virtual bool
-      Equals(IInstrumentIdentity ^ other) {
+  // Equality helpers – not used by marshal code, so a very simple impl is
+  // fine.
+  virtual bool Equals(IInstrumentIdentity ^ other) {
     return ToString()->Equals(other->ToString());
   }
   virtual bool Equals(String ^ other) { return ToString()->Equals(other); }
 
-  virtual String ^ GetDescription() { return ToString(); } virtual String ^
-      ToString() override {
+  virtual String ^ GetDescription() { return ToString(); }
+  virtual String ^ ToString() override {
     return String::Format("{0} {1}", ModelName, SerialNum);
   }
 };
@@ -74,11 +68,10 @@ private:
 
 public:
   virtual property IInstrumentIdentity ^ InstrumentId {
-    IInstrumentIdentity ^
-        get() { return instrumentId; } void set(IInstrumentIdentity ^ value) {
-      instrumentId = value;
-    }
-  } virtual property int PulserReceiverIndex {
+    IInstrumentIdentity ^ get() { return instrumentId; }
+    void set(IInstrumentIdentity ^ value) { instrumentId = value; }
+  }
+  virtual property int PulserReceiverIndex {
     int get() { return prIndex; }
     void set(int value) { prIndex = value; }
   }
@@ -88,8 +81,8 @@ public:
   }
   virtual bool Equals(String ^ other) { return ToString()->Equals(other); }
 
-  virtual String ^ GetDescription() { return ToString(); } virtual String ^
-      ToString() override {
+  virtual String ^ GetDescription() { return ToString(); }
+  virtual String ^ ToString() override {
     return String::Format("PR {0} ({1})", PulserReceiverIndex,
                           InstrumentId == nullptr ? "none"
                                                   : InstrumentId->ToString());
@@ -110,22 +103,19 @@ private:
   String ^ version;
 
 public:
-  virtual property String ^
-      Name {
-        String ^ get() { return name; } void set(String ^ value) {
-          name = value;
-        }
-      } virtual property String ^
-      GUID {
-        String ^ get() { return guid; } void set(String ^ value) {
-          guid = value;
-        }
-      } virtual property String ^
-      FriendlyName {
-        String ^ get() { return friendlyName; } void set(String ^ value) {
-          friendlyName = value;
-        }
-      } virtual property cli::array<CONNECTION_TYPE> ^
+  virtual property String ^ Name {
+    String ^ get() { return name; }
+    void set(String ^ value) { name = value; }
+  }
+  virtual property String ^ GUID {
+    String ^ get() { return guid; }
+    void set(String ^ value) { guid = value; }
+  }
+  virtual property String ^ FriendlyName {
+    String ^ get() { return friendlyName; }
+    void set(String ^ value) { friendlyName = value; }
+  }
+  virtual property cli::array<CONNECTION_TYPE> ^
       ConnectionType {
         cli::array<CONNECTION_TYPE> ^ get() {
           return connectionType;
@@ -151,9 +141,8 @@ public:
     void set(int value) { interfaceVersion = value; }
   }
   virtual property String ^ Version {
-    String ^ get() { return version; } void set(String ^ value) {
-      version = value;
-    }
+    String ^ get() { return version; }
+    void set(String ^ value) { version = value; }
   }
 };
 
@@ -182,8 +171,8 @@ TEST(MarshalTypesTests, ListToVectorMarshall_String_Success) {
   managed->Add("one");
   managed->Add("two");
 
-  std::vector<std::string> native = listToVectorMarshall < String ^,
-                           std::string > (managed);
+  std::vector<std::string> native =
+      listToVectorMarshall<String ^, std::string>(managed);
   ASSERT_EQ(native.size(), 2u);
   EXPECT_EQ(native[0], "one");
   EXPECT_EQ(native[1], "two");
@@ -304,4 +293,40 @@ TEST(MarshalTypesTests, NotifyEventFromManaged_MapsPropertyChange) {
   EXPECT_EQ(static_cast<int>(native.notifyType),
             static_cast<int>(NOTIFY_TYPE::PROPERTY_CHANGE));
   EXPECT_EQ(native.pulserReceiverId.PulserReceiverIndex, 2);
+}
+
+//--------------------------------------------------------------------------
+//  Missing identities (#17) and culture-independent values (#26)
+//--------------------------------------------------------------------------
+TEST(MarshalTypesTests, PulserReceiverFromManaged_NullGivesEmptyId) {
+  PulserReceiverID id = pulsereceiverFromManaged(nullptr);
+  EXPECT_STREQ(id.InstrumentId.SerialNum, "");
+  EXPECT_STREQ(id.InstrumentId.ModelName, "");
+  EXPECT_EQ(id.PulserReceiverIndex, 0);
+}
+
+TEST(MarshalTypesTests, EventValues_DontDependOnCulture) {
+  TestInstrumentIdentity ^ inst = gcnew TestInstrumentIdentity();
+  inst->ModelName = "SIM";
+  inst->SerialNum = "00";
+  TestPulserReceiverIdentity ^ pr = gcnew TestPulserReceiverIdentity();
+  pr->InstrumentId = inst;
+
+  // Dutch formatting writes -9.5 as "-9,5"; event values must not.
+  System::Globalization::CultureInfo ^ previous =
+      System::Threading::Thread::CurrentThread->CurrentCulture;
+  System::Threading::Thread::CurrentThread->CurrentCulture =
+      gcnew System::Globalization::CultureInfo("nl-NL");
+
+  StatusChangedEvent status =
+      statusChangedEventFromManaged(gcnew EventArgsStatusChange(
+          pr, "Gain", -9.5, PulserPropertyDataType::DOUBLE));
+  NotifyEvent notify =
+      notifyEventFromManaged(EventArgsManagerNotify::CreatePropertyChangeEvent(
+          "MockPlugin", pr, "Gain", -9.5, PulserPropertyDataType::DOUBLE));
+
+  System::Threading::Thread::CurrentThread->CurrentCulture = previous;
+
+  EXPECT_STREQ(status.newValue, "-9.5");
+  EXPECT_STREQ(notify.newValue, "-9.5");
 }

@@ -162,7 +162,8 @@ typedef enum JSR_NotifyType {
 /** Mirrors C_POWER_LIMIT. */
 typedef enum JSR_PowerLimit {
   JSR_POWER_LIMIT_WITHIN_LIMIT = 0,
-  JSR_POWER_LIMIT_OVER_LIMIT = 1
+  JSR_POWER_LIMIT_OVER_LIMIT = 1,
+  JSR_POWER_LIMIT_UNKNOWN = 2
 } JSR_PowerLimit;
 
 /** Mirrors C_PROPERTY_UNITS. */

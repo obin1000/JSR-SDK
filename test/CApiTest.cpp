@@ -194,6 +194,15 @@ TEST_F(CApiTest, SdkException_BecomesCodeAndMessage) {
   EXPECT_NE(lastError().find("NO-SUCH-MODEL"), std::string::npos);
 }
 
+TEST_F(CApiTest, GetIdWithoutSelection_ReportsNoPulserSelected) {
+  // It used to fail with "Object reference not set to an instance of an
+  // object" (#17).
+  JSR_PulserReceiverID id{};
+  EXPECT_EQ(JSR_GetId(manager, &id), JSR_ERROR_NO_PULSER_RCVR_SELECTED);
+  EXPECT_NE(lastError().find("No pulser-receiver is selected"),
+            std::string::npos);
+}
+
 TEST_F(CApiTest, Callbacks_CanBeSetAndRemoved) {
   auto onStatus = [](const JSR_StatusChangedEvent *, void *) {};
   auto onNotify = [](const JSR_NotifyEvent *, void *) {};

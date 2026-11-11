@@ -192,6 +192,31 @@ TEST_F(CApiSimulatorTest, EnumSetting_RoundTrips) {
   JSR_SetReceiverMode(manager, original);
 }
 
+TEST_F(CApiSimulatorTest, InvalidEnumSetting_IsRejectedAndChangesNothing) {
+  // #15: an invalid value used to switch the device to a different, valid
+  // mode and report success.
+  int32_t original = -1;
+  ASSERT_EQ(JSR_GetReceiverMode(manager, &original), JSR_OK);
+  for (int32_t invalid :
+       {7, -1, static_cast<int32_t>(JSR_RECEIVER_MODE_LAST_VAL)}) {
+    SCOPED_TRACE(invalid);
+    EXPECT_EQ(JSR_SetReceiverMode(manager, invalid),
+              JSR_ERROR_INVALID_ARGUMENT);
+    EXPECT_NE(lastError().find("RECEIVER_MODE"), std::string::npos);
+    int32_t value = -1;
+    ASSERT_EQ(JSR_GetReceiverMode(manager, &value), JSR_OK);
+    EXPECT_EQ(value, original);
+  }
+}
+
+TEST_F(CApiSimulatorTest, PowerLimit_UnknownIsNotWithinLimit) {
+  // The simulator doesn't report a power limit; that used to read as
+  // WITHIN_LIMIT.
+  int32_t value = -1;
+  ASSERT_EQ(JSR_GetPulserPowerLimitStatus(manager, &value), JSR_OK);
+  EXPECT_EQ(value, JSR_POWER_LIMIT_UNKNOWN);
+}
+
 TEST_F(CApiSimulatorTest, DoubleList_MatchesIndexedValue) {
   size_t count = 0;
   ASSERT_EQ(JSR_GetGainValues(manager, nullptr, 0, &count), JSR_OK);

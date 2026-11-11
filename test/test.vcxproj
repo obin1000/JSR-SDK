@@ -82,6 +82,7 @@
     <ClCompile Include="CApiParityTest.cpp" />
     <ClCompile Include="CApiSimulatorTest.cpp" />
     <ClCompile Include="CApiTest.cpp" />
+    <ClCompile Include="EnumParityTest.cpp" />
     <ClCompile Include="JSRSDKManagerIntegrationTest.cpp" />
     <ClCompile Include="JsrManagerIntegrationTest.cpp" />
     <ClCompile Include="ManagedErrorsTest.cpp" />
