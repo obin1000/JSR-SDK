@@ -1,0 +1,314 @@
+// CApiSimulatorTest.cpp
+// Tests for the C API callbacks and the jsr::Manager wrapper against the
+// SDK's simulated pulser-receivers: events arrive with their data, the user
+// pointer comes back, callbacks can be replaced and removed, and a throwing
+// C++ callback doesn't stop later events. No hardware needed.
+#include "pch.h"
+#include <gtest/gtest.h>
+
+#include "JSR-SDK/jsr_sdk.h"
+#include "JSR-SDK/jsr_sdk.hpp"
+#include "SimulatorSupport.h"
+
+#include <atomic>
+#include <cstring>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+namespace {
+
+std::string lastError() {
+  std::vector<char> buffer(JSR_GetLastErrorMessage(nullptr, 0));
+  JSR_GetLastErrorMessage(buffer.data(), buffer.size());
+  return buffer.data();
+}
+
+/// Loads the simulator plugin, discovers and selects "SIM 00" channel 0.
+bool selectSimulator(JSR_Manager *manager) {
+  if (JSR_LoadPluginsFromBinaryDir(manager) != JSR_OK ||
+      JSR_AddManagedPlugin(manager, sim::kPlugin) != JSR_OK ||
+      JSR_AddPluginOpenOption(manager, sim::kPlugin, "SHOW_SIMULATOR_WINDOWS",
+                              "NO") != JSR_OK ||
+      JSR_AddPluginOpenOption(manager, sim::kPlugin, "CONNECT_ON_OPEN",
+                              "YES") != JSR_OK ||
+      JSR_SetDiscoveryEnable(manager, 1) != JSR_OK) {
+    return false;
+  }
+  return sim::waitFor([&] {
+    return JSR_SetCurrentPulserReceiverByModel(manager, sim::kModel,
+                                               sim::kSerial, 0) == JSR_OK;
+  });
+}
+
+// C callbacks: user points at the log the event goes to.
+void JSR_CALL logStatus(const JSR_StatusChangedEvent *event, void *user) {
+  static_cast<sim::EventLog<JSR_StatusChangedEvent> *>(user)->add(*event);
+}
+
+void JSR_CALL logNotify(const JSR_NotifyEvent *event, void *user) {
+  static_cast<sim::EventLog<JSR_NotifyEvent> *>(user)->add(*event);
+}
+
+bool isGainIndexEvent(const JSR_StatusChangedEvent &e) {
+  return std::strcmp(e.pulserProperty, "GainIndex") == 0;
+}
+
+class CApiSimulatorTest : public ::testing::Test {
+protected:
+  static JSR_Manager *manager;
+  static bool ready;
+
+  static void SetUpTestCase() {
+    ready = JSR_Create(&manager) == JSR_OK && selectSimulator(manager);
+  }
+
+  static void TearDownTestCase() {
+    JSR_Destroy(manager);
+    manager = nullptr;
+  }
+
+  sim::EventLog<JSR_StatusChangedEvent> statusEvents;
+  sim::EventLog<JSR_NotifyEvent> notifyEvents;
+
+  void SetUp() override {
+    ASSERT_TRUE(ready) << "Could not select a simulated pulser-receiver: "
+                       << lastError();
+    ASSERT_EQ(JSR_SetCurrentPulserReceiverByModel(manager, sim::kModel,
+                                                  sim::kSerial, 0),
+              JSR_OK);
+    ASSERT_EQ(JSR_SetStatusChangeCallback(manager, logStatus, &statusEvents),
+              JSR_OK);
+    ASSERT_EQ(JSR_SetNotifyCallback(manager, logNotify, &notifyEvents), JSR_OK);
+  }
+
+  void TearDown() override {
+    // The logs are members: remove the callbacks before they go away.
+    JSR_SetStatusChangeCallback(manager, nullptr, nullptr);
+    JSR_SetNotifyCallback(manager, nullptr, nullptr);
+  }
+
+  int32_t gainIndex() {
+    int32_t value = -1;
+    EXPECT_EQ(JSR_GetGainIndex(manager, &value), JSR_OK) << lastError();
+    return value;
+  }
+};
+
+JSR_Manager *CApiSimulatorTest::manager = nullptr;
+bool CApiSimulatorTest::ready = false;
+
+} // namespace
+
+//--------------------------------------------------------------------------
+//  C API callbacks
+//--------------------------------------------------------------------------
+TEST_F(CApiSimulatorTest, StatusEvent_CarriesPropertyValueAndDevice) {
+  const int32_t original = gainIndex();
+  const int32_t target = original == 5 ? 6 : 5;
+  ASSERT_EQ(JSR_SetGainIndex(manager, target), JSR_OK) << lastError();
+
+  JSR_StatusChangedEvent event{};
+  ASSERT_TRUE(statusEvents.waitFor(isGainIndexEvent, &event));
+  EXPECT_STREQ(event.newValue, std::to_string(target).c_str());
+  EXPECT_EQ(event.changeType, JSR_STATUS_CHANGE_PROPERTY_CHANGE);
+  EXPECT_EQ(event.errorCode, JSR_OK);
+  EXPECT_STREQ(event.pulserReceiverId.InstrumentId.ModelName, sim::kModel);
+  EXPECT_STREQ(event.pulserReceiverId.InstrumentId.SerialNum, sim::kSerial);
+  EXPECT_STREQ(event.pulserReceiverId.InstrumentId.PluginName, sim::kPlugin);
+  EXPECT_EQ(event.pulserReceiverId.PulserReceiverIndex, 0);
+
+  JSR_SetGainIndex(manager, original);
+}
+
+TEST_F(CApiSimulatorTest, NotifyEvent_ReportsSelectionChange) {
+  ASSERT_EQ(JSR_SetCurrentPulserReceiverByModel(manager, sim::kModel,
+                                                sim::kSerial, 1),
+            JSR_OK);
+  JSR_NotifyEvent event{};
+  ASSERT_TRUE(notifyEvents.waitFor(
+      [](const JSR_NotifyEvent &e) {
+        return e.notifyType == JSR_NOTIFY_TYPE_CURRENT_PULSER_RCVR_CHANGED;
+      },
+      &event));
+  EXPECT_STREQ(event.model, sim::kModel);
+  EXPECT_STREQ(event.serial, sim::kSerial);
+  EXPECT_STREQ(event.pluginName, sim::kPlugin);
+  EXPECT_STREQ(event.pulserReceiverId.InstrumentId.SerialNum, sim::kSerial);
+  EXPECT_LE(event.infoCount, static_cast<size_t>(JSR_MAX_INFO_COUNT));
+}
+
+TEST_F(CApiSimulatorTest, NotifyEvent_ReportsPropertyChange) {
+  const int32_t original = gainIndex();
+  ASSERT_EQ(JSR_SetGainIndex(manager, original == 3 ? 4 : 3), JSR_OK);
+  JSR_NotifyEvent event{};
+  ASSERT_TRUE(notifyEvents.waitFor(
+      [](const JSR_NotifyEvent &e) {
+        return e.notifyType == JSR_NOTIFY_TYPE_PROPERTY_CHANGE &&
+               std::strcmp(e.propertyName, "GainIndex") == 0;
+      },
+      &event));
+  EXPECT_STREQ(event.model, sim::kModel);
+  JSR_SetGainIndex(manager, original);
+}
+
+TEST_F(CApiSimulatorTest, ReplacedCallback_IsNoLongerCalled) {
+  sim::EventLog<JSR_StatusChangedEvent> replacement;
+  ASSERT_EQ(JSR_SetStatusChangeCallback(manager, logStatus, &replacement),
+            JSR_OK);
+
+  const int32_t original = gainIndex();
+  ASSERT_EQ(JSR_SetGainIndex(manager, original == 2 ? 3 : 2), JSR_OK);
+  EXPECT_TRUE(replacement.waitFor(isGainIndexEvent));
+  EXPECT_TRUE(statusEvents.snapshot().empty());
+
+  JSR_SetStatusChangeCallback(manager, nullptr, nullptr);
+  JSR_SetGainIndex(manager, original);
+}
+
+TEST_F(CApiSimulatorTest, RemovedCallback_IsNoLongerCalled) {
+  ASSERT_EQ(JSR_SetStatusChangeCallback(manager, nullptr, nullptr), JSR_OK);
+  const int32_t original = gainIndex();
+  ASSERT_EQ(JSR_SetGainIndex(manager, original == 2 ? 3 : 2), JSR_OK);
+  JSR_SetGainIndex(manager, original);
+
+  // Give stray events time to arrive; none may.
+  EXPECT_FALSE(sim::waitFor([&] { return !statusEvents.snapshot().empty(); },
+                            std::chrono::milliseconds(1500)));
+}
+
+//--------------------------------------------------------------------------
+//  Typed values through the C API
+//--------------------------------------------------------------------------
+TEST_F(CApiSimulatorTest, EnumSetting_RoundTrips) {
+  int32_t original = -1;
+  ASSERT_EQ(JSR_GetReceiverMode(manager, &original), JSR_OK);
+  for (int32_t mode : {JSR_RECEIVER_MODE_THRU, JSR_RECEIVER_MODE_ECHO}) {
+    ASSERT_EQ(JSR_SetReceiverMode(manager, mode), JSR_OK) << lastError();
+    int32_t value = -1;
+    ASSERT_EQ(JSR_GetReceiverMode(manager, &value), JSR_OK);
+    EXPECT_EQ(value, mode);
+  }
+  JSR_SetReceiverMode(manager, original);
+}
+
+TEST_F(CApiSimulatorTest, DoubleList_MatchesIndexedValue) {
+  size_t count = 0;
+  ASSERT_EQ(JSR_GetGainValues(manager, nullptr, 0, &count), JSR_OK);
+  ASSERT_GT(count, 3u);
+  std::vector<double> values(count);
+  ASSERT_EQ(JSR_GetGainValues(manager, values.data(), values.size(), &count),
+            JSR_OK);
+
+  // A short buffer gets the first values and the full count.
+  double first[2] = {};
+  size_t available = 0;
+  ASSERT_EQ(JSR_GetGainValues(manager, first, 2, &available), JSR_OK);
+  EXPECT_EQ(available, count);
+  EXPECT_DOUBLE_EQ(first[1], values[1]);
+
+  const int32_t original = gainIndex();
+  ASSERT_EQ(JSR_SetGainIndex(manager, 3), JSR_OK);
+  double gain = 0.0;
+  ASSERT_EQ(JSR_GetGain(manager, &gain), JSR_OK);
+  EXPECT_DOUBLE_EQ(gain, values[3]);
+  JSR_SetGainIndex(manager, original);
+}
+
+TEST_F(CApiSimulatorTest, SelectById_UsesTheStruct) {
+  size_t count = 0;
+  ASSERT_EQ(JSR_GetPulserReceivers(manager, nullptr, 0, &count), JSR_OK);
+  std::vector<JSR_PulserReceiverID> ids(count);
+  ASSERT_EQ(JSR_GetPulserReceivers(manager, ids.data(), ids.size(), &count),
+            JSR_OK);
+  ASSERT_GE(ids.size(), 2u);
+
+  ASSERT_EQ(JSR_SetCurrentPulserReceiverById(manager, &ids[1]), JSR_OK)
+      << lastError();
+  JSR_PulserReceiverID current{};
+  ASSERT_EQ(JSR_GetId(manager, &current), JSR_OK);
+  EXPECT_STREQ(current.InstrumentId.SerialNum, ids[1].InstrumentId.SerialNum);
+  EXPECT_EQ(current.PulserReceiverIndex, ids[1].PulserReceiverIndex);
+}
+
+TEST_F(CApiSimulatorTest, UnsupportedProperty_IsAnError) {
+  char buffer[64];
+  size_t required = 0;
+  const int32_t rc =
+      JSR_GetPulserFirmwareVer(manager, buffer, sizeof buffer, &required);
+  EXPECT_LT(rc, 0);
+  EXPECT_NE(lastError().find("PulserFirmwareVer"), std::string::npos);
+}
+
+//--------------------------------------------------------------------------
+//  jsr::Manager
+//--------------------------------------------------------------------------
+TEST(JsrManagerSimulatorTest, DiscoversConfiguresAndReceivesEvents) {
+  jsr::Manager manager;
+  manager.loadPluginsFromBinaryDir();
+  manager.AddManagedPlugin(sim::kPlugin);
+  manager.AddPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.AddPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
+
+  sim::EventLog<jsr::StatusChangedEvent> events;
+  std::atomic<int> thrown{0};
+  manager.replaceStatusChangeEventHandler(
+      [&](const jsr::StatusChangedEvent &e) {
+        events.add(e);
+        // A throwing callback must not stop the events that follow.
+        ++thrown;
+        throw std::runtime_error("callback failure");
+      });
+
+  manager.SetDiscoveryEnable(true);
+  ASSERT_TRUE(
+      sim::waitFor([&] { return !manager.GetPulserReceivers().empty(); }));
+  const auto ids = manager.GetPulserReceivers();
+  for (const auto &id : ids) {
+    EXPECT_STREQ(id.InstrumentId.ModelName, sim::kModel);
+  }
+  EXPECT_FALSE(manager.GetInstruments(sim::kPlugin).empty());
+
+  manager.SetCurrentPulserReceiver(ids.front());
+  EXPECT_STREQ(manager.getId().InstrumentId.SerialNum,
+               ids.front().InstrumentId.SerialNum);
+
+  manager.setReceiverMode(JSR_RECEIVER_MODE_THRU);
+  EXPECT_EQ(manager.getReceiverMode(), JSR_RECEIVER_MODE_THRU);
+
+  const auto gains = manager.getGainValues();
+  ASSERT_GT(gains.size(), 6u);
+  manager.setGainIndex(5);
+  EXPECT_EQ(manager.getGainIndex(), 5);
+  EXPECT_DOUBLE_EQ(manager.getGain(), gains[5]);
+  manager.setGainIndex(6);
+
+  EXPECT_TRUE(events.waitFor([](const jsr::StatusChangedEvent &e) {
+    return std::strcmp(e.pulserProperty, "GainIndex") == 0 &&
+           std::strcmp(e.newValue, "6") == 0;
+  }));
+  EXPECT_GE(thrown.load(), 2);
+
+  manager.removeStatusChangeEventHandler();
+}
+
+TEST(JsrManagerSimulatorTest, UnsupportedProperty_ThrowsError) {
+  jsr::Manager manager;
+  manager.loadPluginsFromBinaryDir();
+  manager.AddManagedPlugin(sim::kPlugin);
+  manager.AddPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.AddPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
+  manager.SetDiscoveryEnable(true);
+  ASSERT_TRUE(
+      sim::waitFor([&] { return !manager.GetPulserReceivers().empty(); }));
+  manager.SetCurrentPulserReceiver(manager.GetPulserReceivers().front());
+
+  try {
+    manager.getPulserFirmwareVer();
+    FAIL() << "expected jsr::Error";
+  } catch (const jsr::Error &e) {
+    EXPECT_LT(e.code(), 0);
+    EXPECT_NE(std::string(e.what()).find("PulserFirmwareVer"),
+              std::string::npos);
+  }
+}

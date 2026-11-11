@@ -79,7 +79,11 @@
     <ClInclude Include="SimulatorSupport.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CApiParityTest.cpp" />
+    <ClCompile Include="CApiSimulatorTest.cpp" />
+    <ClCompile Include="CApiTest.cpp" />
     <ClCompile Include="JSRSDKManagerIntegrationTest.cpp" />
+    <ClCompile Include="JsrManagerIntegrationTest.cpp" />
     <ClCompile Include="ManagedErrorsTest.cpp" />
     <ClCompile Include="SimulatorTest.cpp" />
     <ClCompile Include="MarshalEnumsTest.cpp" />

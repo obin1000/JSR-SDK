@@ -50,11 +50,27 @@ jobs:
         timeout-minutes: 10
         run: x64\Release\test.exe --gtest_filter=-*IntegrationTest.*
 
+      - name: Check that the C API covers JSRSDKManager
+        run: python ci/check_c_api_parity.py
+
       - name: Check DLL exports
         shell: pwsh
         run: |
-          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll
-          ./ci/check-exports.ps1 -Dll lib/Win32/dynamic/JSR-SDK.dll
+          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll -AllowedPatterns 'JSR_*'
+          ./ci/check-exports.ps1 -Dll lib/Win32/dynamic/JSR-SDK.dll -AllowedPatterns 'JSR_*'
+
+      - name: Set up MSYS2 for the MinGW import libraries
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: false
+          install: mingw-w64-ucrt-x86_64-tools-git mingw-w64-ucrt-x86_64-binutils
+
+      - name: Create MinGW import libraries
+        shell: msys2 {0}
+        run: |
+          bash ci/make-mingw-implib.sh lib/x64/dynamic/JSR-SDK.dll x64
+          bash ci/make-mingw-implib.sh lib/Win32/dynamic/JSR-SDK.dll Win32
 
       # Make sure the export check can fail: with one allowed name too few it
       # must reject the DLL.
@@ -117,6 +133,71 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.cc }}
           -DCMAKE_CXX_COMPILER=${{ matrix.cc }}
           -DJSR_SDK_DIR="${{ github.workspace }}/jsr-sdk"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  # MinGW compilers can only use the C API and the C++ wrapper.
+  consumer-mingw:
+    name: Consumer (${{ matrix.name }})
+    needs: build
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: MinGW GCC x64
+            msystem: UCRT64
+            toolchain: gcc
+            cc: gcc
+            cxx: g++
+          - name: MinGW GCC x86
+            msystem: MINGW32
+            toolchain: gcc
+            cc: gcc
+            cxx: g++
+          - name: MinGW clang x64
+            msystem: CLANG64
+            toolchain: clang
+            cc: clang
+            cxx: clang++
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release layout
+        uses: actions/download-artifact@v4
+        with:
+          name: jsr-sdk
+          path: jsr-sdk
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: false
+          pacboy: >-
+            ${{ matrix.toolchain }}:p
+            cmake:p
+            ninja:p
+
+      - name: Show compiler
+        run: ${{ matrix.cc }} --version
+
+      - name: Configure
+        run: >
+          cmake -S ci/consumer -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.cc }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DJSR_SDK_DIR="$(cygpath -m "$GITHUB_WORKSPACE/jsr-sdk")"
 
       - name: Build
         run: cmake --build build

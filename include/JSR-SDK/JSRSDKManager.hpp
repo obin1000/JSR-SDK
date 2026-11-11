@@ -1,5 +1,13 @@
 #pragma once
 
+// This is a C++ class interface, so the program must lay out virtual-function
+// tables and standard library types exactly like the MSVC-built DLL does.
+// Only MSVC and clang-cl do. Other compilers (MinGW-w64 GCC, MinGW clang)
+// would build fine and then call the wrong methods at run time.
+#if !defined(_MSC_VER)
+#error "JSRSDKManager.hpp needs MSVC or clang-cl. With other compilers, use the C API in jsr_sdk.h or the C++ wrapper in jsr_sdk.hpp."
+#endif
+
 #include "enums/C_IS_PULSING.h"
 #include "enums/C_MANAGER_STATE.h"
 #include "enums/C_POWER_LIMIT.h"

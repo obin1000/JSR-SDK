@@ -1,0 +1,1996 @@
+// C API of JSR-SDK: see include/JSR-SDK/jsr_sdk.h.
+//
+// This file is compiled as native code (no /clr). It wraps the C++ interface
+// in JSRSDKManager.hpp, which is safe here because both sides are built by
+// MSVC into the same DLL. Being native keeps two things simple:
+// - thread_local works (it doesn't under /clr), so the last error message is
+//   kept per thread;
+// - nothing managed runs while the DLL loads: the CLR only starts on the
+//   first real call, such as JSR_Create.
+//
+// Every exported function catches everything, so no exception ever reaches
+// the caller. The functions below the generated marker are generated from
+// one method list; keep them in step with JSRSDKManager.hpp
+// (ci/check_c_api_parity.py checks that every method has a C function).
+#define JSR_SDK_BUILDING
+#include "JSR-SDK/jsr_sdk.h"
+
+#include "JSR-SDK/JSRSDKManager.hpp"
+#include "SdkError.hpp"
+
+#include <cstring>
+#include <exception>
+#include <memory>
+#include <new>
+#include <string>
+#include <vector>
+
+// JSR_Manager is opaque to callers; it is really a JSRSDKManager.
+
+namespace {
+
+// --- Enum values must match the C++ enums -----------------------------------
+static_assert(JSR_ERROR_UNKNOWN == static_cast<int>(C_ERROR_CODE::UNKNOWN),
+              "JSR_ERROR_UNKNOWN");
+static_assert(JSR_ERROR_DEVICE_NOT_FOUND ==
+                  static_cast<int>(C_ERROR_CODE::DEVICE_NOT_FOUND),
+              "JSR_ERROR_DEVICE_NOT_FOUND");
+static_assert(JSR_ERROR_PLUGINS_NOT_LOADED ==
+                  static_cast<int>(C_ERROR_CODE::PLUGINS_NOT_LOADED),
+              "JSR_ERROR_PLUGINS_NOT_LOADED");
+static_assert(JSR_ERROR_NOT_FOUND == static_cast<int>(C_ERROR_CODE::NOT_FOUND),
+              "JSR_ERROR_NOT_FOUND");
+static_assert(JSR_ERROR_COMMUNICATION_FAILURE ==
+                  static_cast<int>(C_ERROR_CODE::COMMUNICATION_FAILURE),
+              "JSR_ERROR_COMMUNICATION_FAILURE");
+static_assert(JSR_ERROR_RESP_ADDRESS_MISMATCH ==
+                  static_cast<int>(C_ERROR_CODE::RESP_ADDRESS_MISMATCH),
+              "JSR_ERROR_RESP_ADDRESS_MISMATCH");
+static_assert(JSR_ERROR_RESP_INVALID_LENGTH ==
+                  static_cast<int>(C_ERROR_CODE::RESP_INVALID_LENGTH),
+              "JSR_ERROR_RESP_INVALID_LENGTH");
+static_assert(JSR_ERROR_PORT_OPEN_FAILED ==
+                  static_cast<int>(C_ERROR_CODE::PORT_OPEN_FAILED),
+              "JSR_ERROR_PORT_OPEN_FAILED");
+static_assert(JSR_ERROR_TIMEOUT == static_cast<int>(C_ERROR_CODE::TIMEOUT),
+              "JSR_ERROR_TIMEOUT");
+static_assert(JSR_ERROR_VALUE_OUT_RANGE ==
+                  static_cast<int>(C_ERROR_CODE::VALUE_OUT_RANGE),
+              "JSR_ERROR_VALUE_OUT_RANGE");
+static_assert(JSR_ERROR_OPERATION_NOT_SUPPORTED ==
+                  static_cast<int>(C_ERROR_CODE::OPERATION_NOT_SUPPORTED),
+              "JSR_ERROR_OPERATION_NOT_SUPPORTED");
+static_assert(JSR_ERROR_HARDWARE_FAILURE ==
+                  static_cast<int>(C_ERROR_CODE::HARDWARE_FAILURE),
+              "JSR_ERROR_HARDWARE_FAILURE");
+static_assert(JSR_ERROR_INTERNAL_SOFTWARE_FAULT ==
+                  static_cast<int>(C_ERROR_CODE::INTERNAL_SOFTWARE_FAULT),
+              "JSR_ERROR_INTERNAL_SOFTWARE_FAULT");
+static_assert(
+    JSR_ERROR_PROPERTY_WRITE_NOT_FINISHED_YET ==
+        static_cast<int>(C_ERROR_CODE::PROPERTY_WRITE_NOT_FINISHED_YET),
+    "JSR_ERROR_PROPERTY_WRITE_NOT_FINISHED_YET");
+static_assert(JSR_ERROR_NO_PULSER_RCVR_SELECTED ==
+                  static_cast<int>(C_ERROR_CODE::NO_PULSER_RCVR_SELECTED),
+              "JSR_ERROR_NO_PULSER_RCVR_SELECTED");
+static_assert(JSR_ERROR_INVALID_ARGUMENT ==
+                  static_cast<int>(C_ERROR_CODE::INVALID_ARGUMENT),
+              "JSR_ERROR_INVALID_ARGUMENT");
+static_assert(JSR_ERROR_NULL_POINTER ==
+                  static_cast<int>(C_ERROR_CODE::NULL_POINTER),
+              "JSR_ERROR_NULL_POINTER");
+static_assert(JSR_ERROR_OPERATION_FAILED ==
+                  static_cast<int>(C_ERROR_CODE::OPERATION_FAILED),
+              "JSR_ERROR_OPERATION_FAILED");
+static_assert(JSR_ERROR_VERSION_MISMATCH ==
+                  static_cast<int>(C_ERROR_CODE::VERSION_MISMATCH),
+              "JSR_ERROR_VERSION_MISMATCH");
+static_assert(JSR_ERROR_PLUGIN_LOAD_ERROR ==
+                  static_cast<int>(C_ERROR_CODE::PLUGIN_LOAD_ERROR),
+              "JSR_ERROR_PLUGIN_LOAD_ERROR");
+static_assert(JSR_ERROR_DEVICE_DISCOVERY_ERROR ==
+                  static_cast<int>(C_ERROR_CODE::DEVICE_DISCOVERY_ERROR),
+              "JSR_ERROR_DEVICE_DISCOVERY_ERROR");
+static_assert(JSR_ERROR_DEVICE_NOT_READY ==
+                  static_cast<int>(C_ERROR_CODE::DEVICE_NOT_READY),
+              "JSR_ERROR_DEVICE_NOT_READY");
+static_assert(JSR_OK == static_cast<int>(C_ERROR_CODE::SUCCESS), "JSR_OK");
+static_assert(JSR_CONNECTION_TYPE_SOFTWARE ==
+                  static_cast<int>(C_CONNECTION_TYPE::SOFTWARE),
+              "JSR_CONNECTION_TYPE_SOFTWARE");
+static_assert(JSR_CONNECTION_TYPE_SERIALPORT ==
+                  static_cast<int>(C_CONNECTION_TYPE::SERIALPORT),
+              "JSR_CONNECTION_TYPE_SERIALPORT");
+static_assert(JSR_CONNECTION_TYPE_PCI ==
+                  static_cast<int>(C_CONNECTION_TYPE::PCI),
+              "JSR_CONNECTION_TYPE_PCI");
+static_assert(JSR_CONNECTION_TYPE_USB ==
+                  static_cast<int>(C_CONNECTION_TYPE::USB),
+              "JSR_CONNECTION_TYPE_USB");
+static_assert(JSR_CONNECTION_TYPE_ETHERNET ==
+                  static_cast<int>(C_CONNECTION_TYPE::ETHERNET),
+              "JSR_CONNECTION_TYPE_ETHERNET");
+static_assert(JSR_CONNECTION_TYPE_FIREWIRE ==
+                  static_cast<int>(C_CONNECTION_TYPE::FIREWIRE),
+              "JSR_CONNECTION_TYPE_FIREWIRE");
+static_assert(JSR_CONNECTION_TYPE_BLUETOOTH ==
+                  static_cast<int>(C_CONNECTION_TYPE::BLUETOOTH),
+              "JSR_CONNECTION_TYPE_BLUETOOTH");
+static_assert(JSR_DISCOVERY_STATE_NONE ==
+                  static_cast<int>(C_DISCOVERY_STATE_FLAGS::NONE),
+              "JSR_DISCOVERY_STATE_NONE");
+static_assert(JSR_DISCOVERY_STATE_ACTIVE ==
+                  static_cast<int>(C_DISCOVERY_STATE_FLAGS::ACTIVE),
+              "JSR_DISCOVERY_STATE_ACTIVE");
+static_assert(JSR_DISCOVERY_STATE_PENDING ==
+                  static_cast<int>(C_DISCOVERY_STATE_FLAGS::PENDING),
+              "JSR_DISCOVERY_STATE_PENDING");
+static_assert(JSR_DISCOVERY_STATE_STOPPED_ON_ERR ==
+                  static_cast<int>(C_DISCOVERY_STATE_FLAGS::STOPPED_ON_ERR),
+              "JSR_DISCOVERY_STATE_STOPPED_ON_ERR");
+static_assert(JSR_IS_PULSING_INACTIVE ==
+                  static_cast<int>(C_IS_PULSING::INACTIVE),
+              "JSR_IS_PULSING_INACTIVE");
+static_assert(JSR_IS_PULSING_ACTIVE == static_cast<int>(C_IS_PULSING::ACTIVE),
+              "JSR_IS_PULSING_ACTIVE");
+static_assert(JSR_IS_PULSING_UNKNOWN == static_cast<int>(C_IS_PULSING::UNKNOWN),
+              "JSR_IS_PULSING_UNKNOWN");
+static_assert(JSR_MANAGER_STATE_NOT_STARTED ==
+                  static_cast<int>(C_MANAGER_STATE::NOT_STARTED),
+              "JSR_MANAGER_STATE_NOT_STARTED");
+static_assert(JSR_MANAGER_STATE_PLUGINS_LOADED ==
+                  static_cast<int>(C_MANAGER_STATE::PLUGINS_LOADED),
+              "JSR_MANAGER_STATE_PLUGINS_LOADED");
+static_assert(JSR_MANAGER_STATE_RUNNING ==
+                  static_cast<int>(C_MANAGER_STATE::RUNNING),
+              "JSR_MANAGER_STATE_RUNNING");
+static_assert(JSR_MANAGER_STATE_SHUTTING_DOWN ==
+                  static_cast<int>(C_MANAGER_STATE::SHUTTING_DOWN),
+              "JSR_MANAGER_STATE_SHUTTING_DOWN");
+static_assert(JSR_NOTIFY_TYPE_PULSER_RCVR_DISCOVERED ==
+                  static_cast<int>(C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED),
+              "JSR_NOTIFY_TYPE_PULSER_RCVR_DISCOVERED");
+static_assert(JSR_NOTIFY_TYPE_CURRENT_PULSER_RCVR_CHANGED ==
+                  static_cast<int>(C_NOTIFY_TYPE::CURRENT_PULSER_RCVR_CHANGED),
+              "JSR_NOTIFY_TYPE_CURRENT_PULSER_RCVR_CHANGED");
+static_assert(JSR_NOTIFY_TYPE_PULSER_RCVR_DETACH ==
+                  static_cast<int>(C_NOTIFY_TYPE::PULSER_RCVR_DETACH),
+              "JSR_NOTIFY_TYPE_PULSER_RCVR_DETACH");
+static_assert(JSR_NOTIFY_TYPE_DISCOVERY_STARTED ==
+                  static_cast<int>(C_NOTIFY_TYPE::DISCOVERY_STARTED),
+              "JSR_NOTIFY_TYPE_DISCOVERY_STARTED");
+static_assert(JSR_NOTIFY_TYPE_DISCOVERY_COMPLETE ==
+                  static_cast<int>(C_NOTIFY_TYPE::DISCOVERY_COMPLETE),
+              "JSR_NOTIFY_TYPE_DISCOVERY_COMPLETE");
+static_assert(JSR_NOTIFY_TYPE_PROPERTY_CHANGE ==
+                  static_cast<int>(C_NOTIFY_TYPE::PROPERTY_CHANGE),
+              "JSR_NOTIFY_TYPE_PROPERTY_CHANGE");
+static_assert(JSR_NOTIFY_TYPE_STATE_CHANGE ==
+                  static_cast<int>(C_NOTIFY_TYPE::STATE_CHANGE),
+              "JSR_NOTIFY_TYPE_STATE_CHANGE");
+static_assert(JSR_NOTIFY_TYPE_ERROR == static_cast<int>(C_NOTIFY_TYPE::ERROR),
+              "JSR_NOTIFY_TYPE_ERROR");
+static_assert(JSR_POWER_LIMIT_WITHIN_LIMIT ==
+                  static_cast<int>(C_POWER_LIMIT::WITHIN_LIMIT),
+              "JSR_POWER_LIMIT_WITHIN_LIMIT");
+static_assert(JSR_POWER_LIMIT_OVER_LIMIT ==
+                  static_cast<int>(C_POWER_LIMIT::OVER_LIMIT),
+              "JSR_POWER_LIMIT_OVER_LIMIT");
+static_assert(JSR_PROPERTY_UNITS_NONE ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_NONE),
+              "JSR_PROPERTY_UNITS_NONE");
+static_assert(JSR_PROPERTY_UNITS_HERTZ ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_HERTZ),
+              "JSR_PROPERTY_UNITS_HERTZ");
+static_assert(JSR_PROPERTY_UNITS_KILOHERTZ ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_KILOHERTZ),
+              "JSR_PROPERTY_UNITS_KILOHERTZ");
+static_assert(JSR_PROPERTY_UNITS_MEGAHERTZ ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_MEGAHERTZ),
+              "JSR_PROPERTY_UNITS_MEGAHERTZ");
+static_assert(JSR_PROPERTY_UNITS_MICROJOULES ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_MICROJOULES),
+              "JSR_PROPERTY_UNITS_MICROJOULES");
+static_assert(JSR_PROPERTY_UNITS_JOULES ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_JOULES),
+              "JSR_PROPERTY_UNITS_JOULES");
+static_assert(JSR_PROPERTY_UNITS_WATTS ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_WATTS),
+              "JSR_PROPERTY_UNITS_WATTS");
+static_assert(JSR_PROPERTY_UNITS_DB ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_DB),
+              "JSR_PROPERTY_UNITS_DB");
+static_assert(JSR_PROPERTY_UNITS_VOLTS ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_VOLTS),
+              "JSR_PROPERTY_UNITS_VOLTS");
+static_assert(JSR_PROPERTY_UNITS_OHMS ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_OHMS),
+              "JSR_PROPERTY_UNITS_OHMS");
+static_assert(JSR_PROPERTY_UNITS_PICOFARADS ==
+                  static_cast<int>(C_PROPERTY_UNITS::UNIT_PICOFARADS),
+              "JSR_PROPERTY_UNITS_PICOFARADS");
+static_assert(JSR_PULSER_IMPEDANCE_LOW_Z ==
+                  static_cast<int>(C_PULSER_IMPEDANCE::LOW_Z),
+              "JSR_PULSER_IMPEDANCE_LOW_Z");
+static_assert(JSR_PULSER_IMPEDANCE_HIGH_Z ==
+                  static_cast<int>(C_PULSER_IMPEDANCE::HIGH_Z),
+              "JSR_PULSER_IMPEDANCE_HIGH_Z");
+static_assert(JSR_PULSER_IMPEDANCE_LAST_VAL ==
+                  static_cast<int>(C_PULSER_IMPEDANCE::LAST_VAL),
+              "JSR_PULSER_IMPEDANCE_LAST_VAL");
+static_assert(JSR_DATA_TYPE_INTEGER ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::INTEGER),
+              "JSR_DATA_TYPE_INTEGER");
+static_assert(JSR_DATA_TYPE_BYTE ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::BYTE),
+              "JSR_DATA_TYPE_BYTE");
+static_assert(JSR_DATA_TYPE_DOUBLE ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::DOUBLE),
+              "JSR_DATA_TYPE_DOUBLE");
+static_assert(JSR_DATA_TYPE_BOOLEAN ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::BOOLEAN),
+              "JSR_DATA_TYPE_BOOLEAN");
+static_assert(JSR_DATA_TYPE_STRING ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::STRING),
+              "JSR_DATA_TYPE_STRING");
+static_assert(JSR_DATA_TYPE_BYTE_ARRAY ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::BYTE_ARRAY),
+              "JSR_DATA_TYPE_BYTE_ARRAY");
+static_assert(JSR_DATA_TYPE_INTEGER_ARRAY ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::INTEGER_ARRAY),
+              "JSR_DATA_TYPE_INTEGER_ARRAY");
+static_assert(JSR_DATA_TYPE_DOUBLE_ARRAY ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::DOUBLE_ARRAY),
+              "JSR_DATA_TYPE_DOUBLE_ARRAY");
+static_assert(JSR_DATA_TYPE_BOOLEAN_ARRAY ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::BOOLEAN_ARRAY),
+              "JSR_DATA_TYPE_BOOLEAN_ARRAY");
+static_assert(JSR_DATA_TYPE_STRING_ARRAY ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::STRING_ARRAY),
+              "JSR_DATA_TYPE_STRING_ARRAY");
+static_assert(JSR_DATA_TYPE_ENUM ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::ENUM),
+              "JSR_DATA_TYPE_ENUM");
+static_assert(JSR_DATA_TYPE_ID ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::ID),
+              "JSR_DATA_TYPE_ID");
+static_assert(JSR_DATA_TYPE_OTHER ==
+                  static_cast<int>(C_PULSER_PROPERTY_DATA_TYPE::OTHER),
+              "JSR_DATA_TYPE_OTHER");
+static_assert(JSR_PROPERTY_ROLE_DIRECT ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::DIRECT),
+              "JSR_PROPERTY_ROLE_DIRECT");
+static_assert(JSR_PROPERTY_ROLE_DIRECTSUPPORTED ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::DIRECTSUPPORTED),
+              "JSR_PROPERTY_ROLE_DIRECTSUPPORTED");
+static_assert(
+    JSR_PROPERTY_ROLE_SPECIFICVALUESUPPORTED ==
+        static_cast<int>(C_PULSER_PROPERTY_ROLE::SPECIFICVALUESUPPORTED),
+    "JSR_PROPERTY_ROLE_SPECIFICVALUESUPPORTED");
+static_assert(JSR_PROPERTY_ROLE_DIRECTVALUES ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::DIRECTVALUES),
+              "JSR_PROPERTY_ROLE_DIRECTVALUES");
+static_assert(JSR_PROPERTY_ROLE_STEPSIZE ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::STEPSIZE),
+              "JSR_PROPERTY_ROLE_STEPSIZE");
+static_assert(JSR_PROPERTY_ROLE_STEPSIZESUPPORTED ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::STEPSIZESUPPORTED),
+              "JSR_PROPERTY_ROLE_STEPSIZESUPPORTED");
+static_assert(JSR_PROPERTY_ROLE_INDEX ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::INDEX),
+              "JSR_PROPERTY_ROLE_INDEX");
+static_assert(JSR_PROPERTY_ROLE_INDEXMAX ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::INDEXMAX),
+              "JSR_PROPERTY_ROLE_INDEXMAX");
+static_assert(JSR_PROPERTY_ROLE_INDEXSUPPORTED ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::INDEXSUPPORTED),
+              "JSR_PROPERTY_ROLE_INDEXSUPPORTED");
+static_assert(JSR_PROPERTY_ROLE_MAX ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::MAX),
+              "JSR_PROPERTY_ROLE_MAX");
+static_assert(JSR_PROPERTY_ROLE_MIN ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::MIN),
+              "JSR_PROPERTY_ROLE_MIN");
+static_assert(JSR_PROPERTY_ROLE_INDEXVALUES ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::INDEXVALUES),
+              "JSR_PROPERTY_ROLE_INDEXVALUES");
+static_assert(JSR_PROPERTY_ROLE_NUMERATOR ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::NUMERATOR),
+              "JSR_PROPERTY_ROLE_NUMERATOR");
+static_assert(JSR_PROPERTY_ROLE_OTHER ==
+                  static_cast<int>(C_PULSER_PROPERTY_ROLE::OTHER),
+              "JSR_PROPERTY_ROLE_OTHER");
+static_assert(JSR_PULSER_RECEIVER_STATE_DETECTED ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::DETECTED),
+              "JSR_PULSER_RECEIVER_STATE_DETECTED");
+static_assert(JSR_PULSER_RECEIVER_STATE_INITIALIZING ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::INITIALIZING),
+              "JSR_PULSER_RECEIVER_STATE_INITIALIZING");
+static_assert(JSR_PULSER_RECEIVER_STATE_READY ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::READY),
+              "JSR_PULSER_RECEIVER_STATE_READY");
+static_assert(JSR_PULSER_RECEIVER_STATE_ERROR ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::ERRORC),
+              "JSR_PULSER_RECEIVER_STATE_ERROR");
+static_assert(JSR_PULSER_RECEIVER_STATE_NO_PULSER ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::NO_PULSER),
+              "JSR_PULSER_RECEIVER_STATE_NO_PULSER");
+static_assert(JSR_PULSER_RECEIVER_STATE_DETACHED ==
+                  static_cast<int>(C_PULSER_RECEIVER_STATE::DETACHED),
+              "JSR_PULSER_RECEIVER_STATE_DETACHED");
+static_assert(JSR_RECEIVER_MODE_ECHO == static_cast<int>(C_RECEIVER_MODE::ECHO),
+              "JSR_RECEIVER_MODE_ECHO");
+static_assert(JSR_RECEIVER_MODE_THRU == static_cast<int>(C_RECEIVER_MODE::THRU),
+              "JSR_RECEIVER_MODE_THRU");
+static_assert(JSR_RECEIVER_MODE_BOTH == static_cast<int>(C_RECEIVER_MODE::BOTH),
+              "JSR_RECEIVER_MODE_BOTH");
+static_assert(JSR_RECEIVER_MODE_LAST_VAL ==
+                  static_cast<int>(C_RECEIVER_MODE::LAST_VAL),
+              "JSR_RECEIVER_MODE_LAST_VAL");
+static_assert(JSR_STATUS_CHANGE_INSTRUMENT_DISCONNECT ==
+                  static_cast<int>(C_STATUS_CHANGE::INSTRUMENT_DISCONNECT),
+              "JSR_STATUS_CHANGE_INSTRUMENT_DISCONNECT");
+static_assert(JSR_STATUS_CHANGE_PROPERTY_CHANGE ==
+                  static_cast<int>(C_STATUS_CHANGE::PROPERTY_CHANGE),
+              "JSR_STATUS_CHANGE_PROPERTY_CHANGE");
+static_assert(JSR_STATUS_CHANGE_OPERATIONAL_FAULT ==
+                  static_cast<int>(C_STATUS_CHANGE::OPERATIONAL_FAULT),
+              "JSR_STATUS_CHANGE_OPERATIONAL_FAULT");
+static_assert(JSR_STATUS_CHANGE_STATE_CHANGE ==
+                  static_cast<int>(C_STATUS_CHANGE::STATE_CHANGE),
+              "JSR_STATUS_CHANGE_STATE_CHANGE");
+static_assert(JSR_TRIGGER_IMPEDANCE_LOW_Z ==
+                  static_cast<int>(C_TRIGGER_IMPEDANCE::LOW_Z),
+              "JSR_TRIGGER_IMPEDANCE_LOW_Z");
+static_assert(JSR_TRIGGER_IMPEDANCE_HIGH_Z ==
+                  static_cast<int>(C_TRIGGER_IMPEDANCE::HIGH_Z),
+              "JSR_TRIGGER_IMPEDANCE_HIGH_Z");
+static_assert(JSR_TRIGGER_IMPEDANCE_LAST_VAL ==
+                  static_cast<int>(C_TRIGGER_IMPEDANCE::LAST_VAL),
+              "JSR_TRIGGER_IMPEDANCE_LAST_VAL");
+static_assert(JSR_TRIGGER_POLARITY_RISING ==
+                  static_cast<int>(C_TRIGGER_POLARITY::RISING),
+              "JSR_TRIGGER_POLARITY_RISING");
+static_assert(JSR_TRIGGER_POLARITY_FALLING ==
+                  static_cast<int>(C_TRIGGER_POLARITY::FALLING),
+              "JSR_TRIGGER_POLARITY_FALLING");
+static_assert(JSR_TRIGGER_POLARITY_LAST_VAL ==
+                  static_cast<int>(C_TRIGGER_POLARITY::LAST_VAL),
+              "JSR_TRIGGER_POLARITY_LAST_VAL");
+static_assert(JSR_TRIGGER_SOURCE_INTERNAL ==
+                  static_cast<int>(C_TRIGGER_SOURCE::INTERNAL),
+              "JSR_TRIGGER_SOURCE_INTERNAL");
+static_assert(JSR_TRIGGER_SOURCE_EXTERNAL ==
+                  static_cast<int>(C_TRIGGER_SOURCE::EXTERNAL),
+              "JSR_TRIGGER_SOURCE_EXTERNAL");
+static_assert(JSR_TRIGGER_SOURCE_SLAVE ==
+                  static_cast<int>(C_TRIGGER_SOURCE::SLAVE),
+              "JSR_TRIGGER_SOURCE_SLAVE");
+static_assert(JSR_TRIGGER_SOURCE_LAST_VAL ==
+                  static_cast<int>(C_TRIGGER_SOURCE::LAST_VAL),
+              "JSR_TRIGGER_SOURCE_LAST_VAL");
+
+// --- Last error, per thread --------------------------------------------------
+constexpr size_t kMaxErrorLength = 1024;
+thread_local char t_lastError[kMaxErrorLength] = "";
+
+int32_t fail(int32_t code, const char *message) noexcept {
+  const char *text = message != nullptr ? message : "";
+  size_t length = strnlen(text, kMaxErrorLength - 1);
+  std::memcpy(t_lastError, text, length);
+  t_lastError[length] = '\0';
+  // An error must never look like success.
+  return code != JSR_OK ? code : JSR_ERROR_UNKNOWN;
+}
+
+// --- Argument helpers -------------------------------------------------------
+// They throw SdkError, which the call() guard turns into an error code.
+template <class T> T *required(T *pointer, const char *name) {
+  if (pointer == nullptr) {
+    throw jsr::detail::SdkError(C_ERROR_CODE::NULL_POINTER,
+                                std::string(name) + " is NULL");
+  }
+  return pointer;
+}
+
+const char *text(const char *value, const char *name) {
+  return required(value, name);
+}
+
+void report(size_t *out, size_t value) noexcept {
+  if (out != nullptr) {
+    *out = value;
+  }
+}
+
+// Runs f and turns any exception into an error code and message.
+template <class F> int32_t guarded(F &&f) noexcept {
+  try {
+    f();
+    return JSR_OK;
+  } catch (const jsr::detail::SdkError &e) {
+    return fail(static_cast<int32_t>(e.code()), e.what());
+  } catch (const std::bad_alloc &) {
+    return fail(JSR_ERROR_INTERNAL_SOFTWARE_FAULT, "out of memory");
+  } catch (const std::exception &e) {
+    return fail(JSR_ERROR_INTERNAL_SOFTWARE_FAULT, e.what());
+  } catch (...) {
+    // Compiled with /EHa, so this also stops structured and managed
+    // exceptions that would otherwise unwind into the caller.
+    return fail(JSR_ERROR_UNKNOWN, "unknown exception");
+  }
+}
+
+JSRSDKManager *native(JSR_Manager *manager) {
+  return reinterpret_cast<JSRSDKManager *>(required(manager, "manager"));
+}
+
+// Runs f(manager) under the guard.
+template <class F> int32_t call(JSR_Manager *manager, F &&f) noexcept {
+  return guarded([&] { f(*native(manager)); });
+}
+
+// --- Struct conversions -----------------------------------------------------
+template <size_t N> void copyText(char (&dest)[N], const char *src) noexcept {
+  size_t length = src != nullptr ? strnlen(src, N - 1) : 0;
+  std::memcpy(dest, src, length);
+  dest[length] = '\0';
+}
+
+template <size_t N>
+void copyText(char (&dest)[N], const std::string &src) noexcept {
+  copyText(dest, src.c_str());
+}
+
+JSR_InstrumentID toC(const InstrumentID &in) noexcept {
+  JSR_InstrumentID out{};
+  copyText(out.ModelName, in.ModelName);
+  copyText(out.SerialNum, in.SerialNum);
+  copyText(out.Port, in.Port);
+  copyText(out.PluginName, in.PluginName);
+  return out;
+}
+
+InstrumentID toNative(const JSR_InstrumentID &in) noexcept {
+  InstrumentID out;
+  copyText(out.ModelName, in.ModelName);
+  copyText(out.SerialNum, in.SerialNum);
+  copyText(out.Port, in.Port);
+  copyText(out.PluginName, in.PluginName);
+  return out;
+}
+
+JSR_PulserReceiverID toC(const PulserReceiverID &in) noexcept {
+  JSR_PulserReceiverID out{};
+  out.InstrumentId = toC(in.InstrumentId);
+  out.PulserReceiverIndex = in.PulserReceiverIndex;
+  return out;
+}
+
+PulserReceiverID toNative(const JSR_PulserReceiverID &in) noexcept {
+  PulserReceiverID out;
+  out.InstrumentId = toNative(in.InstrumentId);
+  out.PulserReceiverIndex = in.PulserReceiverIndex;
+  return out;
+}
+
+size_t clampCount(size_t count, size_t capacity) noexcept {
+  return count < capacity ? count : capacity;
+}
+
+void toC(const JSRLibMetadata &in, JSR_LibMetadata &out) noexcept {
+  out = JSR_LibMetadata{};
+  copyText(out.Name, in.Name);
+  copyText(out.GUID, in.GUID);
+  copyText(out.FriendlyName, in.FriendlyName);
+  copyText(out.Version, in.Version);
+  out.InterfaceVersion = in.InterfaceVersion;
+  out.ConnectionTypeCount =
+      clampCount(in.ConnectionTypeCount, JSR_MAX_ARRAY_SIZE);
+  for (size_t i = 0; i < out.ConnectionTypeCount; ++i) {
+    out.ConnectionType[i] = static_cast<int32_t>(in.ConnectionType[i]);
+  }
+  out.SupportedModelsCount =
+      clampCount(in.SupportedModelsCount, JSR_MAX_ARRAY_SIZE);
+  for (size_t i = 0; i < out.SupportedModelsCount; ++i) {
+    copyText(out.SupportedModels[i], in.SupportedModels[i]);
+  }
+  out.OpenOptionsCount = clampCount(in.OpenOptionsCount, JSR_MAX_ARRAY_SIZE);
+  for (size_t i = 0; i < out.OpenOptionsCount; ++i) {
+    copyText(out.OpenOptions[i], in.OpenOptions[i]);
+  }
+}
+
+void toC(const StatusChangedEvent &in, JSR_StatusChangedEvent &out) noexcept {
+  out = JSR_StatusChangedEvent{};
+  copyText(out.pulserProperty, in.pulserProperty);
+  copyText(out.newValue, in.newValue);
+  out.dataType = static_cast<int32_t>(in.dataType);
+  out.pulserState = static_cast<int32_t>(in.pulserState);
+  out.changeType = static_cast<int32_t>(in.changeType);
+  out.pulserReceiverId = toC(in.pulserReceiverId);
+  copyText(out.errorMessage, in.errorMessage);
+  out.errorCode = static_cast<int32_t>(in.errorCode);
+  out.exceptionErrorCode =
+      static_cast<int32_t>(in.thrownException.getErrorCode());
+  try {
+    copyText(out.exceptionMessage, in.thrownException.getMessage());
+    copyText(out.exceptionInnerMessage, in.thrownException.getInnerMessage());
+  } catch (...) {
+    // getMessage() allocates; an event without its messages beats none.
+  }
+}
+
+void toC(const NotifyEvent &in, JSR_NotifyEvent &out) noexcept {
+  out = JSR_NotifyEvent{};
+  copyText(out.model, in.model);
+  copyText(out.serial, in.serial);
+  copyText(out.pluginName, in.pluginName);
+  out.prIndex = in.prIndex;
+  out.pulserReceiverId = toC(in.pulserReceiverId);
+  out.instrumentId = toC(in.instrumentId);
+  out.state = static_cast<int32_t>(in.state);
+  out.notifyType = static_cast<int32_t>(in.notifyType);
+  out.discoverState = static_cast<int32_t>(in.discoverState);
+  out.wasSelected = in.wasSelected ? 1 : 0;
+  copyText(out.propertyName, in.propertyName);
+  copyText(out.newValue, in.newValue);
+  out.dataType = static_cast<int32_t>(in.dataType);
+  out.maxFrequency = in.maxFrequency;
+  out.infoCount = clampCount(in.infoCount, JSR_MAX_INFO_COUNT);
+  for (size_t i = 0; i < out.infoCount; ++i) {
+    copyText(out.info[i], in.info[i]);
+  }
+  copyText(out.exceptionTypeInfo, in.exceptionTypeInfo);
+  copyText(out.errorMsg, in.errorMsg);
+  copyText(out.errorText, in.errorText);
+}
+
+// Copies a list of native structs into the caller's C structs.
+template <class Native, class C, class Fetch>
+void readList(C *buffer, size_t bufferCount, size_t *count, Fetch fetch) {
+  std::vector<Native> items(buffer != nullptr ? bufferCount : 0);
+  size_t available =
+      fetch(items.empty() ? nullptr : items.data(), items.size());
+  size_t written = clampCount(available, items.size());
+  for (size_t i = 0; i < written; ++i) {
+    buffer[i] = toC(items[i]);
+  }
+  report(count, available);
+}
+
+} // namespace
+
+extern "C" {
+
+// --- Errors and lifetime ----------------------------------------------------
+JSR_API size_t JSR_CALL JSR_GetLastErrorMessage(char *buffer,
+                                                size_t bufferSize) {
+  size_t length = strnlen(t_lastError, kMaxErrorLength);
+  if (buffer != nullptr && bufferSize > 0) {
+    size_t copied = clampCount(length, bufferSize - 1);
+    std::memcpy(buffer, t_lastError, copied);
+    buffer[copied] = '\0';
+  }
+  return length + 1;
+}
+
+JSR_API int32_t JSR_CALL JSR_Create(JSR_Manager **manager) {
+  return guarded([&] {
+    JSR_Manager **out = required(manager, "manager");
+    *out = nullptr;
+    JSRSDKManager *created = CreateJSRSDKManager();
+    if (created == nullptr) {
+      throw jsr::detail::SdkError(C_ERROR_CODE::INTERNAL_SOFTWARE_FAULT,
+                                  "CreateJSRSDKManager returned NULL");
+    }
+    *out = reinterpret_cast<JSR_Manager *>(created);
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_Destroy(JSR_Manager *manager) {
+  if (manager == nullptr) {
+    return JSR_OK;
+  }
+  return guarded([&] {
+    DestroyJSRSDKManager(reinterpret_cast<JSRSDKManager *>(manager));
+  });
+}
+
+// --- Callbacks --------------------------------------------------------------
+JSR_API int32_t JSR_CALL JSR_SetStatusChangeCallback(
+    JSR_Manager *manager, JSR_StatusChangeCallback callback, void *user) {
+  return call(manager, [&](JSRSDKManager &m) {
+    if (callback == nullptr) {
+      m.removeStatusChangeEventHandler();
+      return;
+    }
+    m.replaceStatusChangeEventHandler(
+        [callback, user](const StatusChangedEvent &event) {
+          // Runs on a .NET thread: nothing may escape into the CLR.
+          try {
+            auto converted = std::make_unique<JSR_StatusChangedEvent>();
+            toC(event, *converted);
+            callback(converted.get(), user);
+          } catch (...) {
+          }
+        });
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetNotifyCallback(JSR_Manager *manager,
+                                               JSR_NotifyCallback callback,
+                                               void *user) {
+  return call(manager, [&](JSRSDKManager &m) {
+    if (callback == nullptr) {
+      m.removeNotifyEventHandler();
+      return;
+    }
+    m.replaceNotifyEventHandler([callback, user](const NotifyEvent &event) {
+      // Runs on a .NET thread: nothing may escape into the CLR.
+      try {
+        auto converted = std::make_unique<JSR_NotifyEvent>();
+        toC(event, *converted);
+        callback(converted.get(), user);
+      } catch (...) {
+      }
+    });
+  });
+}
+
+// --- Struct results ---------------------------------------------------------
+JSR_API int32_t JSR_CALL JSR_GetInstruments(JSR_Manager *manager,
+                                            const char *pluginName,
+                                            JSR_InstrumentID *buffer,
+                                            size_t bufferCount, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    const char *plugin = text(pluginName, "pluginName");
+    readList<InstrumentID>(buffer, bufferCount, count,
+                           [&](InstrumentID *items, size_t n) {
+                             return m.GetInstruments(plugin, items, n);
+                           });
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserReceivers(JSR_Manager *manager,
+                                                JSR_PulserReceiverID *buffer,
+                                                size_t bufferCount,
+                                                size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    readList<PulserReceiverID>(buffer, bufferCount, count,
+                               [&](PulserReceiverID *items, size_t n) {
+                                 return m.GetPulserReceivers(items, n);
+                               });
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPluginLibraryMetadata(
+    JSR_Manager *manager, const char *pluginName, JSR_LibMetadata *metadata) {
+  return call(manager, [&](JSRSDKManager &m) {
+    const char *plugin = text(pluginName, "pluginName");
+    JSR_LibMetadata *out = required(metadata, "metadata");
+    // About 33 KB, so not on the stack of the caller's thread.
+    auto native = std::make_unique<JSRLibMetadata>();
+    if (!m.GetPluginLibraryMetadata(plugin, native.get())) {
+      throw jsr::detail::SdkError(C_ERROR_CODE::OPERATION_FAILED,
+                                  "GetPluginLibraryMetadata failed");
+    }
+    toC(*native, *out);
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetId(JSR_Manager *manager,
+                                   JSR_PulserReceiverID *id) {
+  return call(manager,
+              [&](JSRSDKManager &m) { *required(id, "id") = toC(m.getId()); });
+}
+
+// --- Generated from the method list
+// -------------------------------------------
+// --- Plugins ---
+
+JSR_API int32_t JSR_CALL JSR_LoadPluginsFromBinaryDir(JSR_Manager *manager) {
+  return call(manager, [&](JSRSDKManager &m) { m.loadPluginsFromBinaryDir(); });
+}
+
+// --- Instrument open criteria ---
+
+JSR_API int32_t JSR_CALL JSR_AddPortToExclude(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *port) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.AddPortToExclude(text(plugin, "plugin"), text(port, "port"));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPortsToExclude(JSR_Manager *manager, const char *plugin, char **buffers,
+                      size_t bufferCount, size_t stringLength, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetPortsToExclude(text(plugin, "plugin"), buffers,
+                                      bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_AddPortToInclude(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *port) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.AddPortToInclude(text(plugin, "plugin"), text(port, "port"));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPortsToInclude(JSR_Manager *manager, const char *plugin, char **buffers,
+                      size_t bufferCount, size_t stringLength, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetPortsToInclude(text(plugin, "plugin"), buffers,
+                                      bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_AddOpenOption(JSR_Manager *manager,
+                                           const char *plugin,
+                                           const char *optionName,
+                                           const char *optionValue,
+                                           int32_t *added) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(added, "added") =
+        m.AddOpenOption(text(plugin, "plugin"), text(optionName, "optionName"),
+                        text(optionValue, "optionValue"))
+            ? 1
+            : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetOpenOption(JSR_Manager *manager,
+                                           const char *plugin,
+                                           const char *optionName, char *buffer,
+                                           size_t bufferSize,
+                                           size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required,
+           m.GetOpenOption(text(plugin, "plugin"),
+                           text(optionName, "optionName"), buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetOpenOptionNames(JSR_Manager *manager, const char *plugin, char **buffers,
+                       size_t bufferCount, size_t stringLength, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetOpenOptionNames(text(plugin, "plugin"), buffers,
+                                       bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_RemoveOpenOption(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *optionName,
+                                              int32_t *removed) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(removed, "removed") =
+        m.RemoveOpenOption(text(plugin, "plugin"),
+                           text(optionName, "optionName"))
+            ? 1
+            : 0;
+  });
+}
+
+// --- Manager ---
+
+JSR_API int32_t JSR_CALL JSR_AddManagedPlugin(JSR_Manager *manager,
+                                              const char *pluginName) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.AddManagedPlugin(text(pluginName, "pluginName"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_AddPluginOpenOption(JSR_Manager *manager,
+                                                 const char *pluginName,
+                                                 const char *optionName,
+                                                 const char *optionValue) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.AddPluginOpenOption(text(pluginName, "pluginName"),
+                          text(optionName, "optionName"),
+                          text(optionValue, "optionValue"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_AddPluginType(JSR_Manager *manager,
+                                           const char *pluginType) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.AddPluginType(text(pluginType, "pluginType"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_ForceDetach(JSR_Manager *manager) {
+  return call(manager, [&](JSRSDKManager &m) { m.ForceDetach(); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetCustomSettings(JSR_Manager *manager,
+                                               char **buffers,
+                                               size_t bufferCount,
+                                               size_t stringLength,
+                                               size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetCustomSettings(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetManagedPluginNames(JSR_Manager *manager,
+                                                   char **buffers,
+                                                   size_t bufferCount,
+                                                   size_t stringLength,
+                                                   size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetManagedPluginNames(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPluginNames(JSR_Manager *manager,
+                                            char **buffers, size_t bufferCount,
+                                            size_t stringLength,
+                                            size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetPluginNames(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyAttributes(
+    JSR_Manager *manager, const char *settingName, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(
+        m.GetPulserPropertyAttributes(text(settingName, "settingName")));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyUnits(JSR_Manager *manager,
+                                                    const char *settingName,
+                                                    int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(
+        m.GetPulserPropertyUnits(text(settingName, "settingName")));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyUnitsAsString(
+    JSR_Manager *manager, const char *settingName, int32_t useShort,
+    char *buffer, size_t bufferSize, size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required,
+           m.GetPulserPropertyUnitsAsString(text(settingName, "settingName"),
+                                            useShort != 0, buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserReceiverInfoByModel(
+    JSR_Manager *manager, const char *model, const char *serialNum,
+    int32_t index, char **buffers, size_t bufferCount, size_t stringLength,
+    size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetPulserReceiverInfo(text(model, "model"),
+                                          text(serialNum, "serialNum"),
+                                          static_cast<int>(index), buffers,
+                                          bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserReceiverInfoById(
+    JSR_Manager *manager, const JSR_PulserReceiverID *id, char **buffers,
+    size_t bufferCount, size_t stringLength, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.GetPulserReceiverInfo(toNative(*required(id, "id")),
+                                          buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_IsPulserSettingSupported(JSR_Manager *manager,
+                                                      const char *settingName,
+                                                      int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        m.IsPulserSettingSupported(text(settingName, "settingName")) ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_LoadPlugins(JSR_Manager *manager,
+                                         const char *pluginPath) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.LoadPlugins(text(pluginPath, "pluginPath"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_NotifyThreadProc(JSR_Manager *manager) {
+  return call(manager, [&](JSRSDKManager &m) { m.NotifyThreadProc(); });
+}
+
+JSR_API int32_t JSR_CALL JSR_RemoveAllOpenOptions(JSR_Manager *manager,
+                                                  const char *pluginName) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.RemoveAllOpenOptions(text(pluginName, "pluginName"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_RemoveManagedPlugin(JSR_Manager *manager,
+                                                 const char *pluginName) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.RemoveManagedPlugin((pluginName != nullptr ? pluginName : ""));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_RequestThreadProc(JSR_Manager *manager) {
+  return call(manager, [&](JSRSDKManager &m) { m.RequestThreadProc(); });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetCurrentPulserReceiverById(
+    JSR_Manager *manager, const JSR_PulserReceiverID *id) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.SetCurrentPulserReceiver(toNative(*required(id, "id")));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_SetCurrentPulserReceiverByModel(JSR_Manager *manager, const char *model,
+                                    const char *serialNum, int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.SetCurrentPulserReceiver(text(model, "model"),
+                               text(serialNum, "serialNum"),
+                               static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetDiscoveryEnable(JSR_Manager *manager,
+                                                int32_t enable) {
+  return call(manager,
+              [&](JSRSDKManager &m) { m.SetDiscoveryEnable(enable != 0); });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserPropertyValue(JSR_Manager *manager,
+                                                    const char *property,
+                                                    const char *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.SetPulserPropertyValue(text(property, "property"), text(value, "value"));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_SetPulserPropertyValueWithRole(JSR_Manager *manager, const char *property,
+                                   int32_t role, const char *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.SetPulserPropertyValue(text(property, "property"),
+                             static_cast<C_PULSER_PROPERTY_ROLE>(role),
+                             text(value, "value"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_Shutdown(JSR_Manager *manager) {
+  return call(manager, [&](JSRSDKManager &m) { m.Shutdown(); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPluginsLoaded(JSR_Manager *manager,
+                                              int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPluginsLoaded() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetArePluginsAvailable(JSR_Manager *manager,
+                                                    int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getArePluginsAvailable() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetManagerState(JSR_Manager *manager,
+                                             int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getManagerState());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPluginPath(JSR_Manager *manager, char *buffer,
+                                           size_t bufferSize,
+                                           size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getPluginPath(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPluginPath(JSR_Manager *manager,
+                                           const char *path) {
+  return call(manager,
+              [&](JSRSDKManager &m) { m.setPluginPath(text(path, "path")); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetIsPulserReceiverSelected(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getIsPulserReceiverSelected() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLastExceptionContextMessage(
+    JSR_Manager *manager, char *buffer, size_t bufferSize, size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getLastExceptionContextMessage(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLastExceptionOrNull(JSR_Manager *manager,
+                                                    char *buffer,
+                                                    size_t bufferSize,
+                                                    size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getLastExceptionOrNull(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetInfo(JSR_Manager *manager, char **buffers,
+                                     size_t bufferCount, size_t stringLength,
+                                     size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getInfo(buffers, bufferCount, stringLength));
+  });
+}
+
+// --- Pulse repetition frequency ---
+
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequencyIndexSupported(
+    JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        m.getPulseRepetitionFrequencyIndexSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyNumerator(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulseRepetitionFrequencyNumerator());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequencyValues(
+    JSR_Manager *manager, double *buffer, size_t bufferCount, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getPulseRepetitionFrequencyValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyIndexMax(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulseRepetitionFrequencyIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyIndex(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulseRepetitionFrequencyIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_SetPulseRepetitionFrequencyIndex(JSR_Manager *manager, int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulseRepetitionFrequencyIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyMin(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulseRepetitionFrequencyMin();
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyMax(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulseRepetitionFrequencyMax();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequency(JSR_Manager *manager,
+                                                         double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulseRepetitionFrequency();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulseRepetitionFrequency(JSR_Manager *manager,
+                                                         double frequency) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulseRepetitionFrequency(frequency);
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetMaxFrequency(JSR_Manager *manager,
+                                             double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getMaxFrequency();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserMaxPRFsSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserMaxPRFsSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserMaxPRFs(JSR_Manager *manager,
+                                              double *buffer,
+                                              size_t bufferCount,
+                                              size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getPulserMaxPRFs(buffer, bufferCount));
+  });
+}
+
+// --- High voltage supply ---
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyMax(JSR_Manager *manager,
+                                            double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplyMax();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyMin(JSR_Manager *manager,
+                                            double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplyMin();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupply(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupply();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetHVSupply(JSR_Manager *manager, double supply) {
+  return call(manager, [&](JSRSDKManager &m) { m.setHVSupply(supply); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplySupported(JSR_Manager *manager,
+                                                  int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplySupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyValues(JSR_Manager *manager,
+                                               double *buffer,
+                                               size_t bufferCount,
+                                               size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getHVSupplyValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndexSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplyIndexSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndexMax(JSR_Manager *manager,
+                                                 int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getHVSupplyIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndex(JSR_Manager *manager,
+                                              int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getHVSupplyIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetHVSupplyIndex(JSR_Manager *manager,
+                                              int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setHVSupplyIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyEnable(JSR_Manager *manager,
+                                               int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplyEnable() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetHVSupplyEnable(JSR_Manager *manager,
+                                               int32_t enable) {
+  return call(manager,
+              [&](JSRSDKManager &m) { m.setHVSupplyEnable(enable != 0); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyEnableSupported(JSR_Manager *manager,
+                                                        int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVSupplyEnableSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVMeasurement(JSR_Manager *manager,
+                                              double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVMeasurement();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHVMeasurementSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHVMeasurementSupported() ? 1 : 0;
+  });
+}
+
+// --- Trigger ---
+
+JSR_API int32_t JSR_CALL JSR_GetTriggerEdgePolarity(JSR_Manager *manager,
+                                                    int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getTriggerEdgePolarity());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetTriggerEdgePolarity(JSR_Manager *manager,
+                                                    int32_t polarity) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setTriggerEdgePolarity(static_cast<C_TRIGGER_POLARITY>(polarity));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerEdgePolaritySupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerEdgePolaritySupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetTriggerSource(JSR_Manager *manager,
+                                              int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getTriggerSource());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetTriggerSource(JSR_Manager *manager,
+                                              int32_t source) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setTriggerSource(static_cast<C_TRIGGER_SOURCE>(source));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceInternalSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerSourceInternalSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceExternalSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerSourceExternalSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceSlaveSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerSourceSlaveSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerSourceValueNames(
+    JSR_Manager *manager, char **buffers, size_t bufferCount,
+    size_t stringLength, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getPulserTriggerSourceValueNames(buffers, bufferCount,
+                                                     stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulserTriggerSourceIndexMax(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulserTriggerSourceIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerSourceIndex(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulserTriggerSourceIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserTriggerSourceIndex(JSR_Manager *manager,
+                                                         int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulserTriggerSourceIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetTriggerEnable(JSR_Manager *manager,
+                                              int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerEnable() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetTriggerEnable(JSR_Manager *manager,
+                                              int32_t enable) {
+  return call(manager,
+              [&](JSRSDKManager &m) { m.setTriggerEnable(enable != 0); });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetTriggerImpedance(JSR_Manager *manager,
+                                                 int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getTriggerImpedance());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetTriggerImpedance(JSR_Manager *manager,
+                                                 int32_t impedance) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setTriggerImpedance(static_cast<C_TRIGGER_IMPEDANCE>(impedance));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetTriggerImpedanceSupported(JSR_Manager *manager,
+                                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getTriggerImpedanceSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerCount(JSR_Manager *manager,
+                                                   int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getPulserTriggerCount());
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetPulserTriggerCountSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserTriggerCountSupported() ? 1 : 0;
+  });
+}
+
+// --- Filters ---
+
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterValues(JSR_Manager *manager,
+                                                     double *buffer,
+                                                     size_t bufferCount,
+                                                     size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getHighPassFilterValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterIndexMax(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getHighPassFilterIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterIndex(JSR_Manager *manager,
+                                                    int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getHighPassFilterIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetHighPassFilterIndex(JSR_Manager *manager,
+                                                    int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setHighPassFilterIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterValues(JSR_Manager *manager,
+                                                    double *buffer,
+                                                    size_t bufferCount,
+                                                    size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getLowPassFilterValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterIndexMax(JSR_Manager *manager,
+                                                      int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getLowPassFilterIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterIndex(JSR_Manager *manager,
+                                                   int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getLowPassFilterIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetLowPassFilterIndex(JSR_Manager *manager,
+                                                   int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setLowPassFilterIndex(static_cast<int>(index));
+  });
+}
+
+// --- Receiver ---
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverMode(JSR_Manager *manager,
+                                             int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getReceiverMode());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetReceiverMode(JSR_Manager *manager,
+                                             int32_t mode) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setReceiverMode(static_cast<C_RECEIVER_MODE>(mode));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeBothSupported(JSR_Manager *manager,
+                                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverModeBothSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeThruSupported(JSR_Manager *manager,
+                                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverModeThruSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeEchoSupported(JSR_Manager *manager,
+                                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverModeEchoSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverSupplyVoltages(JSR_Manager *manager,
+                                                       char **buffers,
+                                                       size_t bufferCount,
+                                                       size_t stringLength,
+                                                       size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count,
+           m.getReceiverSupplyVoltages(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetReceiverSupplyVoltagesSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverSupplyVoltagesSupported() ? 1 : 0;
+  });
+}
+
+// --- Gain ---
+
+JSR_API int32_t JSR_CALL JSR_GetGainValues(JSR_Manager *manager, double *buffer,
+                                           size_t bufferCount, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getGainValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainIndexMax(JSR_Manager *manager,
+                                             int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getGainIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainIndex(JSR_Manager *manager,
+                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getGainIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetGainIndex(JSR_Manager *manager, int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setGainIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainIndexSupported(JSR_Manager *manager,
+                                                   int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGainIndexSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainStepSizeSupported(JSR_Manager *manager,
+                                                      int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGainStepSizeSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainStepSize(JSR_Manager *manager,
+                                             double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGainStepSize();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainMin(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGainMin();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGainMax(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGainMax();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetGain(JSR_Manager *manager, double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getGain();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetGain(JSR_Manager *manager, double gain) {
+  return call(manager, [&](JSRSDKManager &m) { m.setGain(gain); });
+}
+
+// --- Pulse energy and damping ---
+
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyValueNames(JSR_Manager *manager,
+                                                      char **buffers,
+                                                      size_t bufferCount,
+                                                      size_t stringLength,
+                                                      size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count,
+           m.getPulseEnergyValueNames(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndexMax(JSR_Manager *manager,
+                                                    int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulseEnergyIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndex(JSR_Manager *manager,
+                                                 int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getPulseEnergyIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulseEnergyIndex(JSR_Manager *manager,
+                                                 int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulseEnergyIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndexSupported(JSR_Manager *manager,
+                                                          int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulseEnergyIndexSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetEnergyPerPulse(JSR_Manager *manager,
+                                               double *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getEnergyPerPulse();
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserEnergyCapacitorValuesSupported(
+    JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        m.getPulserEnergyCapacitorValuesSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserEnergyCapacitorValues(
+    JSR_Manager *manager, double *buffer, size_t bufferCount, size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getPulserEnergyCapacitorValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetDampingValues(JSR_Manager *manager,
+                                              double *buffer,
+                                              size_t bufferCount,
+                                              size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getDampingValues(buffer, bufferCount));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetDampingIndexMax(JSR_Manager *manager,
+                                                int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getDampingIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetDampingIndex(JSR_Manager *manager,
+                                             int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getDampingIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetDampingIndex(JSR_Manager *manager,
+                                             int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setDampingIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetDampingIndexSupported(JSR_Manager *manager,
+                                                      int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getDampingIndexSupported() ? 1 : 0;
+  });
+}
+
+// --- Pulser state ---
+
+JSR_API int32_t JSR_CALL JSR_GetPulserImpedance(JSR_Manager *manager,
+                                                int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getPulserImpedance());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserImpedance(JSR_Manager *manager,
+                                                int32_t impedance) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulserImpedance(static_cast<C_PULSER_IMPEDANCE>(impedance));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserImpedanceSupported(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserImpedanceSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserIsPulsing(JSR_Manager *manager,
+                                                int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getPulserIsPulsing());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserPowerLimitStatus(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getPulserPowerLimitStatus());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetIsPulserPresent(JSR_Manager *manager,
+                                                int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getIsPulserPresent() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetIsPulserPresentSupported(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getIsPulserPresentSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetHasManualControls(JSR_Manager *manager,
+                                                  int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getHasManualControls() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeValues(JSR_Manager *manager,
+                                                   char **buffers,
+                                                   size_t bufferCount,
+                                                   size_t stringLength,
+                                                   size_t *count) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(count, m.getLEDBlinkModeValues(buffers, bufferCount, stringLength));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndexMax(JSR_Manager *manager,
+                                                     int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") =
+        static_cast<int32_t>(m.getLEDBlinkModeIndexMax());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndex(JSR_Manager *manager,
+                                                  int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = static_cast<int32_t>(m.getLEDBlinkModeIndex());
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetLEDBlinkModeIndex(JSR_Manager *manager,
+                                                  int32_t index) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setLEDBlinkModeIndex(static_cast<int>(index));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndexSupported(JSR_Manager *manager,
+                                                           int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getLEDBlinkModeIndexSupported() ? 1 : 0;
+  });
+}
+
+// --- Unit identification ---
+
+JSR_API int32_t JSR_CALL JSR_GetUnitModelName(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getUnitModelName(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetUnitModelName(JSR_Manager *manager,
+                                              const char *name) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setUnitModelName(text(name, "name"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetUnitModelNameSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getUnitModelNameSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetUnitSerialNum(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getUnitSerialNum(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetUnitSerialNum(JSR_Manager *manager,
+                                              const char *serialNum) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setUnitSerialNum(text(serialNum, "serialNum"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetUnitSerialNumSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getUnitSerialNumSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserModelName(JSR_Manager *manager,
+                                                char *buffer, size_t bufferSize,
+                                                size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getPulserModelName(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserModelName(JSR_Manager *manager,
+                                                const char *name) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulserModelName(text(name, "name"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserModelNameSupported(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserModelNameSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserSerialNum(JSR_Manager *manager,
+                                                char *buffer, size_t bufferSize,
+                                                size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getPulserSerialNum(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserSerialNum(JSR_Manager *manager,
+                                                const char *serialNum) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulserSerialNum(text(serialNum, "serialNum"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserSerialNumSupported(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserSerialNumSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserHWRev(JSR_Manager *manager, char *buffer,
+                                            size_t bufferSize,
+                                            size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getPulserHWRev(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetPulserHWRev(JSR_Manager *manager,
+                                            const char *hwRev) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setPulserHWRev(text(hwRev, "hwRev"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserHWRevSupported(JSR_Manager *manager,
+                                                     int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserHWRevSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserFirmwareVer(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getPulserFirmwareVer(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserFirmwareVerSupported(JSR_Manager *manager,
+                                                           int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserFirmwareVerSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetPulserOEMDataSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getPulserOEMDataSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverModelName(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getReceiverModelName(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetReceiverModelName(JSR_Manager *manager,
+                                                  const char *name) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setReceiverModelName(text(name, "name"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverModelNameSupported(JSR_Manager *manager,
+                                                           int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverModelNameSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverSerialNum(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getReceiverSerialNum(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetReceiverSerialNum(JSR_Manager *manager,
+                                                  const char *serialNum) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setReceiverSerialNum(text(serialNum, "serialNum"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverSerialNumSupported(JSR_Manager *manager,
+                                                           int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverSerialNumSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverHWRev(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getReceiverHWRev(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_SetReceiverHWRev(JSR_Manager *manager,
+                                              const char *hwRev) {
+  return call(manager, [&](JSRSDKManager &m) {
+    m.setReceiverHWRev(text(hwRev, "hwRev"));
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverHWRevSupported(JSR_Manager *manager,
+                                                       int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverHWRevSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverFirmwareVer(JSR_Manager *manager,
+                                                    char *buffer,
+                                                    size_t bufferSize,
+                                                    size_t *required) {
+  return call(manager, [&](JSRSDKManager &m) {
+    report(required, m.getReceiverFirmwareVer(buffer, bufferSize));
+  });
+}
+
+JSR_API int32_t JSR_CALL
+JSR_GetReceiverFirmwareVerSupported(JSR_Manager *manager, int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverFirmwareVerSupported() ? 1 : 0;
+  });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetReceiverOEMDataSupported(JSR_Manager *manager,
+                                                         int32_t *value) {
+  return call(manager, [&](JSRSDKManager &m) {
+    *required(value, "value") = m.getReceiverOEMDataSupported() ? 1 : 0;
+  });
+}
+
+} // extern "C"

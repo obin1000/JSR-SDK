@@ -21,6 +21,13 @@
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
+    <!-- The C API is native code: thread_local needs it, and nothing managed
+         may run while the DLL loads. /EHa lets catch (...) stop every
+         exception before it reaches a caller. -->
+    <ClCompile Include="src\jsr_sdk_c.cpp">
+      <CompileAsManaged>false</CompileAsManaged>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
 
@@ -51,6 +58,8 @@
     <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.hpp" />
     <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
+    <ClInclude Include="include\JSR-SDK\jsr_sdk.h" />
+    <ClInclude Include="include\JSR-SDK\jsr_sdk.hpp" />
     <ClInclude Include="src\ManagedErrors.hpp" />
     <ClInclude Include="src\SdkError.hpp" />
   </ItemGroup>

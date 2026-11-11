@@ -19,36 +19,94 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(JSR-SDK)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE JSR-SDK)
+# Copy JSR-SDK.dll, JSRDotNETSDK.dll and the plugin DLLs next to my_app.
+jsr_sdk_copy_runtime(my_app)
 ```
-In C++, include the header and create the JSR Manager object.
-``` cpp
-#include "JSR-SDK/JSRSDKManager.h"
 
- int hello_world() {
-    try {
-      std::cout << "Hello, World!\n";
-      auto bridge = CreateJSRSDKManager();
-      if (!bridge) {
-        std::cerr << "Failed to create JSRBridge\n";
-        return 1;
-      }
-      bridge->loadPluginsFromBinaryDir();
+### Supported compilers
+| Compiler | `jsr_sdk.hpp` (C++) | `jsr_sdk.h` (C) | `JSRSDKManager.hpp` (old C++ interface) |
+|---|---|---|---|
+| MSVC, x64 and x86 | ✅ | ✅ | ✅ |
+| clang-cl | ✅ | ✅ | ✅ |
+| MinGW-w64 GCC, x64 and x86 | ✅ | ✅ | ❌ |
+| MinGW clang | ✅ | ✅ | ❌ |
 
+CI builds and runs a small program with each of these on every pull request. MinGW builds need the dynamic library (`JSR_SDK_USE_DYNAMIC_LIB ON`); they link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes.
 
-      auto plugins = bridge->GetPluginNames();
-      for (const auto &plugin : plugins) {
-        std::cout << "Found Plugin: " << plugin << "\n";
-      }
+### C++
+Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17.
+```cpp
+#include "JSR-SDK/jsr_sdk.hpp"
 
-      std::cout << "Done! \n";
-      DestroyJSRSDKManager(bridge);
+#include <iostream>
 
-    } catch (const std::exception &e) {
-      return 1;
+int main() {
+  try {
+    jsr::Manager manager;
+    manager.loadPluginsFromBinaryDir();
+
+    for (const auto &plugin : manager.GetPluginNames()) {
+      std::cout << "Found plugin: " << plugin << "\n";
     }
-    return 0;
+
+    manager.replaceNotifyEventHandler([](const jsr::NotifyEvent &event) {
+      // Runs on a library thread: keep it short and thread-safe.
+      std::cout << "Notify: " << event.model << " " << event.serial << "\n";
+    });
+  } catch (const jsr::Error &e) {
+    std::cerr << "JSR-SDK error " << e.code() << ": " << e.what() << "\n";
+    return 1;
+  }
+  return 0;
 }
 ```
+
+### C
+`JSR-SDK/jsr_sdk.h` is the C API underneath `jsr_sdk.hpp`, for C programs or other languages. Every function returns `JSR_OK` (0) or a negative `JSR_ERROR_*` code, and `JSR_GetLastErrorMessage()` explains the last failure on the thread. Results go into buffers you provide; the header describes the conventions.
+```c
+#include "JSR-SDK/jsr_sdk.h"
+
+#include <stdio.h>
+
+int main(void) {
+  JSR_Manager *manager = NULL;
+  char names[8][JSR_STRING_LENGTH];
+  char *buffers[8];
+  size_t count = 0;
+  size_t i;
+
+  if (JSR_Create(&manager) != JSR_OK ||
+      JSR_LoadPluginsFromBinaryDir(manager) != JSR_OK) {
+    char message[512];
+    JSR_GetLastErrorMessage(message, sizeof message);
+    fprintf(stderr, "JSR-SDK error: %s\n", message);
+    JSR_Destroy(manager);
+    return 1;
+  }
+
+  for (i = 0; i < 8; ++i) {
+    buffers[i] = names[i];
+  }
+  JSR_GetPluginNames(manager, buffers, 8, JSR_STRING_LENGTH, &count);
+  for (i = 0; i < count && i < 8; ++i) {
+    printf("Found plugin: %s\n", names[i]);
+  }
+
+  JSR_Destroy(manager);
+  return 0;
+}
+```
+
+### The old C++ interface
+`JSR-SDK/JSRSDKManager.hpp` (`CreateJSRSDKManager()`) is superseded by `jsr_sdk.hpp`, and stays for existing users. It is an abstract C++ class, so it only works with MSVC and clang-cl; other compilers get a compile error. `jsr::Manager` uses the same method names, so moving over is mostly a matter of replacing `CreateJSRSDKManager()` with a `jsr::Manager` and dropping the buffer arguments.
+
+### Run-time requirements
+- .NET Framework 4.8 and the Microsoft Visual C++ runtime (x64 or x86).
+- `JSR-SDK.dll`, `JSRDotNETSDK.dll` and the plugin DLLs next to the program; `jsr_sdk_copy_runtime(<target>)` copies them after each build.
+- Callbacks run on a .NET thread owned by the library, not on the thread that registered them.
 
 
 ## Disclaimer

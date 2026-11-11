@@ -1,0 +1,1456 @@
+// jsr_sdk.hpp - header-only C++ wrapper over the C API in jsr_sdk.h.
+//
+// Your compiler builds this header, so it works with MSVC, clang-cl, MinGW-w64
+// GCC and MinGW clang alike. It needs C++17.
+//
+// jsr::Manager owns a JSR_Manager, returns std::string and std::vector,
+// takes std::function callbacks and throws jsr::Error when a call fails. The
+// method names match the older JSRSDKManager.hpp interface, so moving over
+// is mostly a matter of replacing CreateJSRSDKManager() with a jsr::Manager.
+//
+//   jsr::Manager manager;
+//   manager.loadPluginsFromBinaryDir();
+//   for (const auto &name : manager.GetPluginNames()) { ... }
+#pragma once
+
+#include "jsr_sdk.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#if !((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+#error "jsr_sdk.hpp needs C++17 or newer."
+#endif
+
+namespace jsr {
+
+using InstrumentID = JSR_InstrumentID;
+using PulserReceiverID = JSR_PulserReceiverID;
+using LibMetadata = JSR_LibMetadata;
+using StatusChangedEvent = JSR_StatusChangedEvent;
+using NotifyEvent = JSR_NotifyEvent;
+
+/// Called on a library thread for every status change; see jsr_sdk.h.
+using StatusChangeCallback = std::function<void(const StatusChangedEvent &)>;
+/// Called on a library thread for every manager notification.
+using NotifyCallback = std::function<void(const NotifyEvent &)>;
+
+/// Thrown when a call fails. code() is one of the JSR_ERROR_* values.
+class Error : public std::runtime_error {
+public:
+  Error(int32_t code, const std::string &message)
+      : std::runtime_error(message), m_code(code) {}
+
+  int32_t code() const noexcept { return m_code; }
+
+private:
+  int32_t m_code;
+};
+
+namespace detail {
+
+/// Length of each string buffer when reading a list of strings.
+constexpr size_t kListStringLength = 1024;
+
+inline std::string lastErrorMessage() {
+  std::string message(JSR_GetLastErrorMessage(nullptr, 0), '\0');
+  JSR_GetLastErrorMessage(message.data(), message.size());
+  message.resize(message.size() - 1); // Drop the NUL.
+  return message;
+}
+
+inline void check(int32_t code) {
+  if (code != JSR_OK) {
+    throw Error(code, lastErrorMessage());
+  }
+}
+
+// The read helpers call the C function again when the result grew between
+// the size query and the read.
+
+template <class Fill> std::string readString(Fill fill) {
+  size_t required = 0;
+  check(fill(nullptr, 0, &required));
+  for (;;) {
+    std::string value(required, '\0');
+    size_t needed = 0;
+    check(fill(value.data(), value.size(), &needed));
+    if (needed <= required) {
+      value.resize(needed > 0 ? needed - 1 : 0);
+      return value;
+    }
+    required = needed;
+  }
+}
+
+template <class Fill> std::vector<std::string> readStrings(Fill fill) {
+  size_t count = 0;
+  check(fill(nullptr, 0, kListStringLength, &count));
+  for (;;) {
+    std::vector<char> storage(count * kListStringLength);
+    std::vector<char *> buffers(count);
+    for (size_t i = 0; i < count; ++i) {
+      buffers[i] = storage.data() + i * kListStringLength;
+    }
+    size_t available = 0;
+    check(fill(buffers.empty() ? nullptr : buffers.data(), buffers.size(),
+               kListStringLength, &available));
+    if (available <= count) {
+      return std::vector<std::string>(buffers.begin(),
+                                      buffers.begin() + available);
+    }
+    count = available;
+  }
+}
+
+template <class T, class Fill> std::vector<T> readArray(Fill fill) {
+  size_t count = 0;
+  check(fill(nullptr, 0, &count));
+  for (;;) {
+    std::vector<T> items(count);
+    size_t available = 0;
+    check(
+        fill(items.empty() ? nullptr : items.data(), items.size(), &available));
+    if (available <= count) {
+      items.resize(available);
+      return items;
+    }
+    count = available;
+  }
+}
+
+} // namespace detail
+
+/// Owns a JSR_Manager. Movable, not copyable.
+class Manager {
+public:
+  /// Creates the manager; the first one starts the .NET runtime.
+  Manager() { detail::check(JSR_Create(&m_handle)); }
+
+  ~Manager() { reset(); }
+
+  Manager(const Manager &) = delete;
+  Manager &operator=(const Manager &) = delete;
+
+  Manager(Manager &&other) noexcept
+      : m_handle(std::exchange(other.m_handle, nullptr)),
+        m_status(std::move(other.m_status)),
+        m_notify(std::move(other.m_notify)) {}
+
+  Manager &operator=(Manager &&other) noexcept {
+    if (this != &other) {
+      reset();
+      m_handle = std::exchange(other.m_handle, nullptr);
+      m_status = std::move(other.m_status);
+      m_notify = std::move(other.m_notify);
+    }
+    return *this;
+  }
+
+  /// The C handle, for calling the C API directly.
+  JSR_Manager *handle() const noexcept { return m_handle; }
+
+  // --- Callbacks ---
+  // A callback runs on a library thread. Exceptions it throws are ignored,
+  // because they can't be passed back to anyone.
+
+  /// Sets the status-change callback, replacing any previous one.
+  void replaceStatusChangeEventHandler(StatusChangeCallback callback) {
+    auto holder = std::make_unique<StatusChangeCallback>(std::move(callback));
+    detail::check(
+        JSR_SetStatusChangeCallback(m_handle, &onStatusChange, holder.get()));
+    m_status = std::move(holder);
+  }
+
+  /// Removes the status-change callback.
+  void removeStatusChangeEventHandler() {
+    detail::check(JSR_SetStatusChangeCallback(m_handle, nullptr, nullptr));
+    m_status.reset();
+  }
+
+  /// Sets the notify callback, replacing any previous one.
+  void replaceNotifyEventHandler(NotifyCallback callback) {
+    auto holder = std::make_unique<NotifyCallback>(std::move(callback));
+    detail::check(JSR_SetNotifyCallback(m_handle, &onNotify, holder.get()));
+    m_notify = std::move(holder);
+  }
+
+  /// Removes the notify callback.
+  void removeNotifyEventHandler() {
+    detail::check(JSR_SetNotifyCallback(m_handle, nullptr, nullptr));
+    m_notify.reset();
+  }
+
+  // --- Struct results ---
+
+  /// Retrieves the instruments a plugin found.
+  std::vector<InstrumentID> GetInstruments(const std::string &pluginName) {
+    return detail::readArray<InstrumentID>(
+        [&](InstrumentID *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetInstruments(m_handle, pluginName.c_str(), buffer,
+                                    bufferCount, count);
+        });
+  }
+
+  /// Retrieves all pulser receivers the SDK detected.
+  std::vector<PulserReceiverID> GetPulserReceivers() {
+    return detail::readArray<PulserReceiverID>(
+        [&](PulserReceiverID *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetPulserReceivers(m_handle, buffer, bufferCount, count);
+        });
+  }
+
+  /// Retrieves the metadata of a plugin library.
+  std::unique_ptr<LibMetadata>
+  GetPluginLibraryMetadata(const std::string &pluginName) {
+    auto metadata = std::make_unique<LibMetadata>();
+    detail::check(JSR_GetPluginLibraryMetadata(m_handle, pluginName.c_str(),
+                                               metadata.get()));
+    return metadata;
+  }
+
+  /// Retrieves the ID of the current pulser receiver.
+  PulserReceiverID getId() {
+    PulserReceiverID id{};
+    detail::check(JSR_GetId(m_handle, &id));
+    return id;
+  }
+
+  // --- Plugins ---
+
+  /** Loads the plugins from the directory that holds JSR-SDK.dll. */
+  void loadPluginsFromBinaryDir() {
+    detail::check(JSR_LoadPluginsFromBinaryDir(m_handle));
+  }
+
+  // --- Instrument open criteria ---
+
+  /** Adds a port to exclude when the plugin will search for instruments. If
+   * this list is empty, then all ports will be searched. The "port string" is
+   * specific to the method used for searching for instruments: e.g. COM port
+   * for SERIAL, IP Address for ETHERNET, etc. */
+  void AddPortToExclude(const std::string &plugin, const std::string &port) {
+    detail::check(JSR_AddPortToExclude(m_handle, plugin.c_str(), port.c_str()));
+  }
+
+  /** Get the list of excluded ports for a plugin. */
+  std::vector<std::string> GetPortsToExclude(const std::string &plugin) {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetPortsToExclude(m_handle, plugin.c_str(), buffers,
+                                       bufferCount, length, count);
+        });
+  }
+
+  /** Adds a port to include when the plugin will search for instruments. If
+   * this list is empty, then all ports will be searched. The "port string" is
+   * specific to the method used for searching for instruments: e.g. COM port
+   * for SERIAL, IP Address for ETHERNET, etc. */
+  void AddPortToInclude(const std::string &plugin, const std::string &port) {
+    detail::check(JSR_AddPortToInclude(m_handle, plugin.c_str(), port.c_str()));
+  }
+
+  /** Get the list of included ports for a plugin. */
+  std::vector<std::string> GetPortsToInclude(const std::string &plugin) {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetPortsToInclude(m_handle, plugin.c_str(), buffers,
+                                       bufferCount, length, count);
+        });
+  }
+
+  /** Adds an open option for a specific plugin. */
+  bool AddOpenOption(const std::string &plugin, const std::string &optionName,
+                     const std::string &optionValue) {
+    int32_t value = 0;
+    detail::check(JSR_AddOpenOption(m_handle, plugin.c_str(),
+                                    optionName.c_str(), optionValue.c_str(),
+                                    &value));
+    return value != 0;
+  }
+
+  /** Get an open option value. */
+  std::string GetOpenOption(const std::string &plugin,
+                            const std::string &optionName) {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetOpenOption(m_handle, plugin.c_str(), optionName.c_str(),
+                               buffer, size, required);
+    });
+  }
+
+  /** Get the names of all open options for a plugin. */
+  std::vector<std::string> GetOpenOptionNames(const std::string &plugin) {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetOpenOptionNames(m_handle, plugin.c_str(), buffers,
+                                        bufferCount, length, count);
+        });
+  }
+
+  /** Removes an open option for a specific plugin. */
+  bool RemoveOpenOption(const std::string &plugin,
+                        const std::string &optionName) {
+    int32_t value = 0;
+    detail::check(JSR_RemoveOpenOption(m_handle, plugin.c_str(),
+                                       optionName.c_str(), &value));
+    return value != 0;
+  }
+
+  // --- Manager ---
+
+  /** Adds a managed plugin by its name. */
+  void AddManagedPlugin(const std::string &pluginName) {
+    detail::check(JSR_AddManagedPlugin(m_handle, pluginName.c_str()));
+  }
+
+  /** Adds an open option for a specific plugin. */
+  void AddPluginOpenOption(const std::string &pluginName,
+                           const std::string &optionName,
+                           const std::string &optionValue) {
+    detail::check(JSR_AddPluginOpenOption(
+        m_handle, pluginName.c_str(), optionName.c_str(), optionValue.c_str()));
+  }
+
+  /** Adds a plugin type to the manager. */
+  void AddPluginType(const std::string &pluginType) {
+    detail::check(JSR_AddPluginType(m_handle, pluginType.c_str()));
+  }
+
+  /** Forces the detachment of all plugins and resources. */
+  void ForceDetach() { detail::check(JSR_ForceDetach(m_handle)); }
+
+  /** Retrieves custom settings available in the manager. */
+  std::vector<std::string> GetCustomSettings() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetCustomSettings(m_handle, buffers, bufferCount, length,
+                                       count);
+        });
+  }
+
+  /** Retrieves the names of all managed plugins. */
+  std::vector<std::string> GetManagedPluginNames() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetManagedPluginNames(m_handle, buffers, bufferCount,
+                                           length, count);
+        });
+  }
+
+  /** Retrieves names of the loaded plugins. */
+  std::vector<std::string> GetPluginNames() {
+    return detail::readStrings([&](char **buffers, size_t bufferCount,
+                                   size_t length, size_t *count) {
+      return JSR_GetPluginNames(m_handle, buffers, bufferCount, length, count);
+    });
+  }
+
+  /** Retrieves the attributes of a specific pulser property. */
+  int GetPulserPropertyAttributes(const std::string &settingName) {
+    int32_t value = 0;
+    detail::check(
+        JSR_GetPulserPropertyAttributes(m_handle, settingName.c_str(), &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the units of a specific pulser property. */
+  JSR_PropertyUnits GetPulserPropertyUnits(const std::string &settingName) {
+    int32_t value = 0;
+    detail::check(
+        JSR_GetPulserPropertyUnits(m_handle, settingName.c_str(), &value));
+    return static_cast<JSR_PropertyUnits>(value);
+  }
+
+  /** Retrieves the units of a specific pulser property as a string. */
+  std::string GetPulserPropertyUnitsAsString(const std::string &settingName,
+                                             bool useShort) {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPulserPropertyUnitsAsString(m_handle, settingName.c_str(),
+                                                useShort ? 1 : 0, buffer, size,
+                                                required);
+    });
+  }
+
+  /** Retrieves information about a pulser receiver identified by model, serial
+   * number and index. */
+  std::vector<std::string> GetPulserReceiverInfo(const std::string &model,
+                                                 const std::string &serialNum,
+                                                 int index) {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetPulserReceiverInfoByModel(
+              m_handle, model.c_str(), serialNum.c_str(),
+              static_cast<int32_t>(index), buffers, bufferCount, length, count);
+        });
+  }
+
+  /** Retrieves information about a pulser receiver identified by its ID. */
+  std::vector<std::string> GetPulserReceiverInfo(const PulserReceiverID &id) {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetPulserReceiverInfoById(m_handle, &id, buffers,
+                                               bufferCount, length, count);
+        });
+  }
+
+  /** Checks if a specific pulser setting is supported. */
+  bool IsPulserSettingSupported(const std::string &settingName) {
+    int32_t value = 0;
+    detail::check(
+        JSR_IsPulserSettingSupported(m_handle, settingName.c_str(), &value));
+    return value != 0;
+  }
+
+  /** Loads plugins from a specified path. */
+  void LoadPlugins(const std::string &pluginPath) {
+    detail::check(JSR_LoadPlugins(m_handle, pluginPath.c_str()));
+  }
+
+  /** Notifies the manager's thread procedure. */
+  void NotifyThreadProc() { detail::check(JSR_NotifyThreadProc(m_handle)); }
+
+  /** Removes all open options for a specific plugin. */
+  void RemoveAllOpenOptions(const std::string &pluginName) {
+    detail::check(JSR_RemoveAllOpenOptions(m_handle, pluginName.c_str()));
+  }
+
+  /** Removes a managed plugin by its name. NULL or "" removes the default
+   * plugin. */
+  void RemoveManagedPlugin(const std::string &pluginName = "") {
+    detail::check(JSR_RemoveManagedPlugin(m_handle, pluginName.c_str()));
+  }
+
+  /** Requests the manager's thread procedure. */
+  void RequestThreadProc() { detail::check(JSR_RequestThreadProc(m_handle)); }
+
+  /** Selects the current pulser receiver by its ID. */
+  void SetCurrentPulserReceiver(const PulserReceiverID &id) {
+    detail::check(JSR_SetCurrentPulserReceiverById(m_handle, &id));
+  }
+
+  /** Selects the current pulser receiver by model, serial number and index. */
+  void SetCurrentPulserReceiver(const std::string &model,
+                                const std::string &serialNum, int index) {
+    detail::check(JSR_SetCurrentPulserReceiverByModel(
+        m_handle, model.c_str(), serialNum.c_str(),
+        static_cast<int32_t>(index)));
+  }
+
+  /** Enables or disables discovery mode. */
+  void SetDiscoveryEnable(bool enable) {
+    detail::check(JSR_SetDiscoveryEnable(m_handle, enable ? 1 : 0));
+  }
+
+  /** Sets the value of a specific pulser property. */
+  void SetPulserPropertyValue(const std::string &property,
+                              const std::string &value) {
+    detail::check(
+        JSR_SetPulserPropertyValue(m_handle, property.c_str(), value.c_str()));
+  }
+
+  /** Sets the value of a pulser property for a specific role. */
+  void SetPulserPropertyValue(const std::string &property,
+                              JSR_PulserPropertyRole role,
+                              const std::string &value) {
+    detail::check(JSR_SetPulserPropertyValueWithRole(
+        m_handle, property.c_str(), static_cast<int32_t>(role), value.c_str()));
+  }
+
+  /** Shuts down the manager and releases all resources. */
+  void Shutdown() { detail::check(JSR_Shutdown(m_handle)); }
+
+  /** Checks if plugins are loaded. */
+  bool getPluginsLoaded() {
+    int32_t value = 0;
+    detail::check(JSR_GetPluginsLoaded(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if plugins are available. */
+  bool getArePluginsAvailable() {
+    int32_t value = 0;
+    detail::check(JSR_GetArePluginsAvailable(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the current state of the manager. */
+  JSR_ManagerState getManagerState() {
+    int32_t value = 0;
+    detail::check(JSR_GetManagerState(m_handle, &value));
+    return static_cast<JSR_ManagerState>(value);
+  }
+
+  /** Retrieves the plugin path. */
+  std::string getPluginPath() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPluginPath(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the plugin path. */
+  void setPluginPath(const std::string &path) {
+    detail::check(JSR_SetPluginPath(m_handle, path.c_str()));
+  }
+
+  /** Checks if a pulser receiver is currently selected. */
+  bool getIsPulserReceiverSelected() {
+    int32_t value = 0;
+    detail::check(JSR_GetIsPulserReceiverSelected(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the context message of the last exception. */
+  std::string getLastExceptionContextMessage() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetLastExceptionContextMessage(m_handle, buffer, size,
+                                                required);
+    });
+  }
+
+  /** Retrieves the message of the SDK's last exception. *required is 0 when
+   * there is none. */
+  std::string getLastExceptionOrNull() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetLastExceptionOrNull(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Retrieves general information about the system. */
+  std::vector<std::string> getInfo() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetInfo(m_handle, buffers, bufferCount, length, count);
+        });
+  }
+
+  // --- Pulse repetition frequency ---
+
+  /** Checks if the pulse repetition frequency index is supported. */
+  bool getPulseRepetitionFrequencyIndexSupported() {
+    int32_t value = 0;
+    detail::check(
+        JSR_GetPulseRepetitionFrequencyIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the numerator of the pulse repetition frequency. */
+  int getPulseRepetitionFrequencyNumerator() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseRepetitionFrequencyNumerator(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the available pulse repetition frequency values. */
+  std::vector<double> getPulseRepetitionFrequencyValues() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetPulseRepetitionFrequencyValues(m_handle, buffer,
+                                                       bufferCount, count);
+        });
+  }
+
+  /** Retrieves the maximum index of the pulse repetition frequency. */
+  int getPulseRepetitionFrequencyIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseRepetitionFrequencyIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the pulse repetition frequency. */
+  int getPulseRepetitionFrequencyIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseRepetitionFrequencyIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the pulse repetition frequency. */
+  void setPulseRepetitionFrequencyIndex(int index) {
+    detail::check(JSR_SetPulseRepetitionFrequencyIndex(
+        m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Retrieves the minimum pulse repetition frequency value. */
+  double getPulseRepetitionFrequencyMin() {
+    double value = 0.0;
+    detail::check(JSR_GetPulseRepetitionFrequencyMin(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the maximum pulse repetition frequency value. */
+  double getPulseRepetitionFrequencyMax() {
+    double value = 0.0;
+    detail::check(JSR_GetPulseRepetitionFrequencyMax(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the current pulse repetition frequency value. */
+  double getPulseRepetitionFrequency() {
+    double value = 0.0;
+    detail::check(JSR_GetPulseRepetitionFrequency(m_handle, &value));
+    return value;
+  }
+
+  /** Sets the pulse repetition frequency value. */
+  void setPulseRepetitionFrequency(double frequency) {
+    detail::check(JSR_SetPulseRepetitionFrequency(m_handle, frequency));
+  }
+
+  /** Retrieves the maximum frequency. */
+  double getMaxFrequency() {
+    double value = 0.0;
+    detail::check(JSR_GetMaxFrequency(m_handle, &value));
+    return value;
+  }
+
+  /** Checks if the maximum PRFs for the pulser are supported. */
+  bool getPulserMaxPRFsSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserMaxPRFsSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the maximum PRFs for the pulser. */
+  std::vector<double> getPulserMaxPRFs() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetPulserMaxPRFs(m_handle, buffer, bufferCount, count);
+        });
+  }
+
+  // --- High voltage supply ---
+
+  /** Retrieves the maximum high voltage supply value. */
+  double getHVSupplyMax() {
+    double value = 0.0;
+    detail::check(JSR_GetHVSupplyMax(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the minimum high voltage supply value. */
+  double getHVSupplyMin() {
+    double value = 0.0;
+    detail::check(JSR_GetHVSupplyMin(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the current high voltage supply value. */
+  double getHVSupply() {
+    double value = 0.0;
+    detail::check(JSR_GetHVSupply(m_handle, &value));
+    return value;
+  }
+
+  /** Sets the high voltage supply value. */
+  void setHVSupply(double supply) {
+    detail::check(JSR_SetHVSupply(m_handle, supply));
+  }
+
+  /** Checks if the high voltage supply is supported. */
+  bool getHVSupplySupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplySupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the available high voltage supply values. */
+  std::vector<double> getHVSupplyValues() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetHVSupplyValues(m_handle, buffer, bufferCount, count);
+        });
+  }
+
+  /** Checks if the high voltage supply index is supported. */
+  bool getHVSupplyIndexSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplyIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the maximum index of high voltage supply values. */
+  int getHVSupplyIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplyIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current high voltage supply index. */
+  int getHVSupplyIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplyIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the high voltage supply index. */
+  void setHVSupplyIndex(int index) {
+    detail::check(JSR_SetHVSupplyIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the high voltage supply is enabled. */
+  bool getHVSupplyEnable() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplyEnable(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Enables or disables the high voltage supply. */
+  void setHVSupplyEnable(bool enable) {
+    detail::check(JSR_SetHVSupplyEnable(m_handle, enable ? 1 : 0));
+  }
+
+  /** Checks if enabling the high voltage supply is supported. */
+  bool getHVSupplyEnableSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVSupplyEnableSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the high voltage measurement value. */
+  double getHVMeasurement() {
+    double value = 0.0;
+    detail::check(JSR_GetHVMeasurement(m_handle, &value));
+    return value;
+  }
+
+  /** Checks if the high voltage measurement is supported. */
+  bool getHVMeasurementSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetHVMeasurementSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  // --- Trigger ---
+
+  /** Retrieves the trigger edge polarity. */
+  JSR_TriggerPolarity getTriggerEdgePolarity() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerEdgePolarity(m_handle, &value));
+    return static_cast<JSR_TriggerPolarity>(value);
+  }
+
+  /** Sets the trigger edge polarity. */
+  void setTriggerEdgePolarity(JSR_TriggerPolarity polarity) {
+    detail::check(
+        JSR_SetTriggerEdgePolarity(m_handle, static_cast<int32_t>(polarity)));
+  }
+
+  /** Checks if the trigger edge polarity is supported. */
+  bool getTriggerEdgePolaritySupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerEdgePolaritySupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the current trigger source. */
+  JSR_TriggerSource getTriggerSource() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerSource(m_handle, &value));
+    return static_cast<JSR_TriggerSource>(value);
+  }
+
+  /** Sets the trigger source. */
+  void setTriggerSource(JSR_TriggerSource source) {
+    detail::check(JSR_SetTriggerSource(m_handle, static_cast<int32_t>(source)));
+  }
+
+  /** Checks if the internal trigger source is supported. */
+  bool getTriggerSourceInternalSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerSourceInternalSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the external trigger source is supported. */
+  bool getTriggerSourceExternalSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerSourceExternalSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the slave trigger source is supported. */
+  bool getTriggerSourceSlaveSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerSourceSlaveSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the names of available pulser trigger source values. */
+  std::vector<std::string> getPulserTriggerSourceValueNames() {
+    return detail::readStrings([&](char **buffers, size_t bufferCount,
+                                   size_t length, size_t *count) {
+      return JSR_GetPulserTriggerSourceValueNames(m_handle, buffers,
+                                                  bufferCount, length, count);
+    });
+  }
+
+  /** Retrieves the maximum index of pulser trigger sources. */
+  int getPulserTriggerSourceIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserTriggerSourceIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the pulser trigger source. */
+  int getPulserTriggerSourceIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserTriggerSourceIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the pulser trigger source. */
+  void setPulserTriggerSourceIndex(int index) {
+    detail::check(
+        JSR_SetPulserTriggerSourceIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the trigger is enabled. */
+  bool getTriggerEnable() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerEnable(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Enables or disables the trigger. */
+  void setTriggerEnable(bool enable) {
+    detail::check(JSR_SetTriggerEnable(m_handle, enable ? 1 : 0));
+  }
+
+  /** Retrieves the trigger impedance. */
+  JSR_TriggerImpedance getTriggerImpedance() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerImpedance(m_handle, &value));
+    return static_cast<JSR_TriggerImpedance>(value);
+  }
+
+  /** Sets the trigger impedance. */
+  void setTriggerImpedance(JSR_TriggerImpedance impedance) {
+    detail::check(
+        JSR_SetTriggerImpedance(m_handle, static_cast<int32_t>(impedance)));
+  }
+
+  /** Checks if the trigger impedance is supported. */
+  bool getTriggerImpedanceSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetTriggerImpedanceSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser trigger count. */
+  int getPulserTriggerCount() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserTriggerCount(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Checks if the pulser trigger count is supported. */
+  bool getPulserTriggerCountSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserTriggerCountSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  // --- Filters ---
+
+  /** Retrieves the available high-pass filter values. */
+  std::vector<double> getHighPassFilterValues() {
+    return detail::readArray<double>([&](double *buffer, size_t bufferCount,
+                                         size_t *count) {
+      return JSR_GetHighPassFilterValues(m_handle, buffer, bufferCount, count);
+    });
+  }
+
+  /** Retrieves the maximum index of the high-pass filter. */
+  int getHighPassFilterIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetHighPassFilterIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the high-pass filter. */
+  int getHighPassFilterIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetHighPassFilterIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the high-pass filter. */
+  void setHighPassFilterIndex(int index) {
+    detail::check(
+        JSR_SetHighPassFilterIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Retrieves the available low-pass filter values. */
+  std::vector<double> getLowPassFilterValues() {
+    return detail::readArray<double>([&](double *buffer, size_t bufferCount,
+                                         size_t *count) {
+      return JSR_GetLowPassFilterValues(m_handle, buffer, bufferCount, count);
+    });
+  }
+
+  /** Retrieves the maximum index of the low-pass filter. */
+  int getLowPassFilterIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetLowPassFilterIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the low-pass filter. */
+  int getLowPassFilterIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetLowPassFilterIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the low-pass filter. */
+  void setLowPassFilterIndex(int index) {
+    detail::check(
+        JSR_SetLowPassFilterIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  // --- Receiver ---
+
+  /** Retrieves the current receiver mode. */
+  JSR_ReceiverMode getReceiverMode() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverMode(m_handle, &value));
+    return static_cast<JSR_ReceiverMode>(value);
+  }
+
+  /** Sets the receiver mode. */
+  void setReceiverMode(JSR_ReceiverMode mode) {
+    detail::check(JSR_SetReceiverMode(m_handle, static_cast<int32_t>(mode)));
+  }
+
+  /** Checks if the "Both" receiver mode is supported. */
+  bool getReceiverModeBothSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverModeBothSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the "Thru" receiver mode is supported. */
+  bool getReceiverModeThruSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverModeThruSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the "Echo" receiver mode is supported. */
+  bool getReceiverModeEchoSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverModeEchoSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the receiver supply voltages. */
+  std::vector<std::string> getReceiverSupplyVoltages() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetReceiverSupplyVoltages(m_handle, buffers, bufferCount,
+                                               length, count);
+        });
+  }
+
+  /** Checks if receiver supply voltages are supported. */
+  bool getReceiverSupplyVoltagesSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverSupplyVoltagesSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  // --- Gain ---
+
+  /** Retrieves the available gain values. */
+  std::vector<double> getGainValues() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetGainValues(m_handle, buffer, bufferCount, count);
+        });
+  }
+
+  /** Retrieves the maximum index of the gain. */
+  int getGainIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetGainIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the gain. */
+  int getGainIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetGainIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the gain. */
+  void setGainIndex(int index) {
+    detail::check(JSR_SetGainIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the gain index is supported. */
+  bool getGainIndexSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetGainIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the gain step size is supported. */
+  bool getGainStepSizeSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetGainStepSizeSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the gain step size. */
+  double getGainStepSize() {
+    double value = 0.0;
+    detail::check(JSR_GetGainStepSize(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the minimum gain value. */
+  double getGainMin() {
+    double value = 0.0;
+    detail::check(JSR_GetGainMin(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the maximum gain value. */
+  double getGainMax() {
+    double value = 0.0;
+    detail::check(JSR_GetGainMax(m_handle, &value));
+    return value;
+  }
+
+  /** Retrieves the current gain value. */
+  double getGain() {
+    double value = 0.0;
+    detail::check(JSR_GetGain(m_handle, &value));
+    return value;
+  }
+
+  /** Sets the gain value. */
+  void setGain(double gain) { detail::check(JSR_SetGain(m_handle, gain)); }
+
+  // --- Pulse energy and damping ---
+
+  /** Retrieves the names of available pulse energy values. */
+  std::vector<std::string> getPulseEnergyValueNames() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetPulseEnergyValueNames(m_handle, buffers, bufferCount,
+                                              length, count);
+        });
+  }
+
+  /** Retrieves the maximum index of pulse energy values. */
+  int getPulseEnergyIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseEnergyIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the pulse energy. */
+  int getPulseEnergyIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseEnergyIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the pulse energy. */
+  void setPulseEnergyIndex(int index) {
+    detail::check(
+        JSR_SetPulseEnergyIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the pulse energy index is supported. */
+  bool getPulseEnergyIndexSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulseEnergyIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the energy per pulse. */
+  double getEnergyPerPulse() {
+    double value = 0.0;
+    detail::check(JSR_GetEnergyPerPulse(m_handle, &value));
+    return value;
+  }
+
+  /** Checks if pulser energy capacitor values are supported. */
+  bool getPulserEnergyCapacitorValuesSupported() {
+    int32_t value = 0;
+    detail::check(
+        JSR_GetPulserEnergyCapacitorValuesSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser energy capacitor values. */
+  std::vector<double> getPulserEnergyCapacitorValues() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetPulserEnergyCapacitorValues(m_handle, buffer,
+                                                    bufferCount, count);
+        });
+  }
+
+  /** Retrieves the available damping values. */
+  std::vector<double> getDampingValues() {
+    return detail::readArray<double>(
+        [&](double *buffer, size_t bufferCount, size_t *count) {
+          return JSR_GetDampingValues(m_handle, buffer, bufferCount, count);
+        });
+  }
+
+  /** Retrieves the maximum index of damping values. */
+  int getDampingIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetDampingIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the damping. */
+  int getDampingIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetDampingIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the damping. */
+  void setDampingIndex(int index) {
+    detail::check(JSR_SetDampingIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the damping index is supported. */
+  bool getDampingIndexSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetDampingIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  // --- Pulser state ---
+
+  /** Retrieves the pulser impedance. */
+  JSR_PulserImpedance getPulserImpedance() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserImpedance(m_handle, &value));
+    return static_cast<JSR_PulserImpedance>(value);
+  }
+
+  /** Sets the pulser impedance. */
+  void setPulserImpedance(JSR_PulserImpedance impedance) {
+    detail::check(
+        JSR_SetPulserImpedance(m_handle, static_cast<int32_t>(impedance)));
+  }
+
+  /** Checks if the pulser impedance is supported. */
+  bool getPulserImpedanceSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserImpedanceSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser's current pulsing state. */
+  JSR_IsPulsing getPulserIsPulsing() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserIsPulsing(m_handle, &value));
+    return static_cast<JSR_IsPulsing>(value);
+  }
+
+  /** Retrieves the pulser's power limit status. */
+  JSR_PowerLimit getPulserPowerLimitStatus() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserPowerLimitStatus(m_handle, &value));
+    return static_cast<JSR_PowerLimit>(value);
+  }
+
+  /** Checks if a pulser is present. */
+  bool getIsPulserPresent() {
+    int32_t value = 0;
+    detail::check(JSR_GetIsPulserPresent(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if the pulser presence is supported. */
+  bool getIsPulserPresentSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetIsPulserPresentSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if manual controls are available. */
+  bool getHasManualControls() {
+    int32_t value = 0;
+    detail::check(JSR_GetHasManualControls(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the available LED blink mode values. */
+  std::vector<std::string> getLEDBlinkModeValues() {
+    return detail::readStrings(
+        [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
+          return JSR_GetLEDBlinkModeValues(m_handle, buffers, bufferCount,
+                                           length, count);
+        });
+  }
+
+  /** Retrieves the maximum index of LED blink modes. */
+  int getLEDBlinkModeIndexMax() {
+    int32_t value = 0;
+    detail::check(JSR_GetLEDBlinkModeIndexMax(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Retrieves the current index of the LED blink mode. */
+  int getLEDBlinkModeIndex() {
+    int32_t value = 0;
+    detail::check(JSR_GetLEDBlinkModeIndex(m_handle, &value));
+    return static_cast<int>(value);
+  }
+
+  /** Sets the index of the LED blink mode. */
+  void setLEDBlinkModeIndex(int index) {
+    detail::check(
+        JSR_SetLEDBlinkModeIndex(m_handle, static_cast<int32_t>(index)));
+  }
+
+  /** Checks if the LED blink mode index is supported. */
+  bool getLEDBlinkModeIndexSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetLEDBlinkModeIndexSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  // --- Unit identification ---
+
+  /** Retrieves the unit model name. */
+  std::string getUnitModelName() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetUnitModelName(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the unit model name. */
+  void setUnitModelName(const std::string &name) {
+    detail::check(JSR_SetUnitModelName(m_handle, name.c_str()));
+  }
+
+  /** Checks if the unit model name is supported. */
+  bool getUnitModelNameSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetUnitModelNameSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the unit serial number. */
+  std::string getUnitSerialNum() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetUnitSerialNum(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the unit serial number. */
+  void setUnitSerialNum(const std::string &serialNum) {
+    detail::check(JSR_SetUnitSerialNum(m_handle, serialNum.c_str()));
+  }
+
+  /** Checks if the unit serial number is supported. */
+  bool getUnitSerialNumSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetUnitSerialNumSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser model name. */
+  std::string getPulserModelName() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPulserModelName(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the pulser model name. */
+  void setPulserModelName(const std::string &name) {
+    detail::check(JSR_SetPulserModelName(m_handle, name.c_str()));
+  }
+
+  /** Checks if the pulser model name is supported. */
+  bool getPulserModelNameSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserModelNameSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser serial number. */
+  std::string getPulserSerialNum() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPulserSerialNum(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the pulser serial number. */
+  void setPulserSerialNum(const std::string &serialNum) {
+    detail::check(JSR_SetPulserSerialNum(m_handle, serialNum.c_str()));
+  }
+
+  /** Checks if the pulser serial number is supported. */
+  bool getPulserSerialNumSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserSerialNumSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser hardware revision. */
+  std::string getPulserHWRev() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPulserHWRev(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the pulser hardware revision. */
+  void setPulserHWRev(const std::string &hwRev) {
+    detail::check(JSR_SetPulserHWRev(m_handle, hwRev.c_str()));
+  }
+
+  /** Checks if the pulser hardware revision is supported. */
+  bool getPulserHWRevSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserHWRevSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the pulser firmware version. */
+  std::string getPulserFirmwareVer() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetPulserFirmwareVer(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Checks if the pulser firmware version is supported. */
+  bool getPulserFirmwareVerSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserFirmwareVerSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if pulser OEM data is supported. */
+  bool getPulserOEMDataSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetPulserOEMDataSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the receiver model name. */
+  std::string getReceiverModelName() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetReceiverModelName(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the receiver model name. */
+  void setReceiverModelName(const std::string &name) {
+    detail::check(JSR_SetReceiverModelName(m_handle, name.c_str()));
+  }
+
+  /** Checks if the receiver model name is supported. */
+  bool getReceiverModelNameSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverModelNameSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the receiver serial number. */
+  std::string getReceiverSerialNum() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetReceiverSerialNum(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the receiver serial number. */
+  void setReceiverSerialNum(const std::string &serialNum) {
+    detail::check(JSR_SetReceiverSerialNum(m_handle, serialNum.c_str()));
+  }
+
+  /** Checks if the receiver serial number is supported. */
+  bool getReceiverSerialNumSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverSerialNumSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the receiver hardware revision. */
+  std::string getReceiverHWRev() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetReceiverHWRev(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Sets the receiver hardware revision. */
+  void setReceiverHWRev(const std::string &hwRev) {
+    detail::check(JSR_SetReceiverHWRev(m_handle, hwRev.c_str()));
+  }
+
+  /** Checks if the receiver hardware revision is supported. */
+  bool getReceiverHWRevSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverHWRevSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Retrieves the receiver firmware version. */
+  std::string getReceiverFirmwareVer() {
+    return detail::readString([&](char *buffer, size_t size, size_t *required) {
+      return JSR_GetReceiverFirmwareVer(m_handle, buffer, size, required);
+    });
+  }
+
+  /** Checks if the receiver firmware version is supported. */
+  bool getReceiverFirmwareVerSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverFirmwareVerSupported(m_handle, &value));
+    return value != 0;
+  }
+
+  /** Checks if receiver OEM data is supported. */
+  bool getReceiverOEMDataSupported() {
+    int32_t value = 0;
+    detail::check(JSR_GetReceiverOEMDataSupported(m_handle, &value));
+    return value != 0;
+  }
+
+private:
+  void reset() noexcept {
+    if (m_handle != nullptr) {
+      JSR_Destroy(m_handle); // Also removes the callbacks.
+      m_handle = nullptr;
+    }
+    m_status.reset();
+    m_notify.reset();
+  }
+
+  static void JSR_CALL onStatusChange(const JSR_StatusChangedEvent *event,
+                                      void *user) {
+    try {
+      (*static_cast<StatusChangeCallback *>(user))(*event);
+    } catch (...) {
+    }
+  }
+
+  static void JSR_CALL onNotify(const JSR_NotifyEvent *event, void *user) {
+    try {
+      (*static_cast<NotifyCallback *>(user))(*event);
+    } catch (...) {
+    }
+  }
+
+  JSR_Manager *m_handle = nullptr;
+  std::unique_ptr<StatusChangeCallback> m_status;
+  std::unique_ptr<NotifyCallback> m_notify;
+};
+
+} // namespace jsr
