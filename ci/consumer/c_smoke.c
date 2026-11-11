@@ -4,12 +4,14 @@
  * Needs no hardware: it starts the .NET runtime inside JSR-SDK.dll, loads the
  * plugins next to the program, reads strings, lists and structs, sets and
  * removes callbacks, and checks that failures come back as error codes with
- * a message.
+ * a message. Then it discovers, selects and configures a simulated
+ * pulser-receiver.
  */
 #include "JSR-SDK/jsr_sdk.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 static int failures = 0;
 
@@ -48,6 +50,103 @@ static void JSR_CALL onNotify(const JSR_NotifyEvent *event, void *user) {
 
 /* About 33 KB, so not on the stack. */
 static JSR_LibMetadata metadata;
+
+/* --- Simulated pulser-receiver ------------------------------------------- */
+
+#define SIM_PLUGIN "JSRDotNET_DiagLib"
+
+static int simUser;
+static volatile int gainEvents = 0;
+static volatile int wrongUser = 0;
+static char lastGainValue[JSR_STRING_LENGTH];
+
+static void JSR_CALL onSimStatus(const JSR_StatusChangedEvent *event,
+                                 void *user) {
+  if (user != &simUser) {
+    ++wrongUser;
+  }
+  if (strcmp(event->pulserProperty, "GainIndex") == 0) {
+    memcpy(lastGainValue, event->newValue, sizeof lastGainValue);
+    ++gainEvents;
+  }
+}
+
+/*
+ * Discovers a pulser-receiver simulated by the SDK's diagnostics plugin,
+ * selects it, configures it and receives the status event: the job of a real
+ * program, with the simulator standing in for hardware. Passes structs,
+ * doubles, enums and long argument lists across the DLL boundary.
+ */
+static void runSimulator(JSR_Manager *manager) {
+  JSR_PulserReceiverID ids[8];
+  char infoStorage[4][128];
+  char *infoBuffers[4];
+  double gains[512];
+  size_t count = 0;
+  size_t infoCount = 0;
+  size_t gainCount = 0;
+  size_t i;
+  int32_t index = -1;
+  int32_t mode = -1;
+  double gain = 0.0;
+  time_t deadline;
+
+  CHECK_OK(JSR_AddManagedPlugin(manager, SIM_PLUGIN));
+  CHECK_OK(JSR_AddPluginOpenOption(manager, SIM_PLUGIN,
+                                   "SHOW_SIMULATOR_WINDOWS", "NO"));
+  CHECK_OK(
+      JSR_AddPluginOpenOption(manager, SIM_PLUGIN, "CONNECT_ON_OPEN", "YES"));
+  CHECK_OK(JSR_SetStatusChangeCallback(manager, onSimStatus, &simUser));
+  CHECK_OK(JSR_SetDiscoveryEnable(manager, 1));
+
+  deadline = time(NULL) + 20;
+  while (count == 0 && time(NULL) < deadline) {
+    JSR_GetPulserReceivers(manager, NULL, 0, &count);
+  }
+  printf("Simulator: %u pulser-receiver(s)\n", (unsigned)count);
+  CHECK(count > 0);
+  if (count == 0) {
+    return;
+  }
+
+  /* A struct list, then a struct passed by pointer. */
+  CHECK_OK(JSR_GetPulserReceivers(manager, ids, 8, &count));
+  CHECK(strcmp(ids[0].InstrumentId.ModelName, "SIM") == 0);
+  CHECK(strcmp(ids[0].InstrumentId.PluginName, SIM_PLUGIN) == 0);
+  CHECK_OK(JSR_SetCurrentPulserReceiverById(manager, &ids[0]));
+
+  /* Eight arguments: on x86 this checks the calling convention. */
+  for (i = 0; i < 4; ++i) {
+    infoBuffers[i] = infoStorage[i];
+  }
+  CHECK_OK(JSR_GetPulserReceiverInfoByModel(
+      manager, ids[0].InstrumentId.ModelName, ids[0].InstrumentId.SerialNum,
+      ids[0].PulserReceiverIndex, infoBuffers, 4, 128, &infoCount));
+  CHECK(infoCount > 0);
+
+  /* Integers and doubles: the gain index selects a value from the list. */
+  CHECK_OK(JSR_SetGainIndex(manager, 4));
+  CHECK_OK(JSR_GetGainIndex(manager, &index));
+  CHECK(index == 4);
+  CHECK_OK(JSR_GetGainValues(manager, gains, 512, &gainCount));
+  CHECK(gainCount > 4);
+  CHECK_OK(JSR_GetGain(manager, &gain));
+  CHECK(gainCount > 4 && gain == gains[4]);
+
+  /* Enums. */
+  CHECK_OK(JSR_SetReceiverMode(manager, JSR_RECEIVER_MODE_THRU));
+  CHECK_OK(JSR_GetReceiverMode(manager, &mode));
+  CHECK(mode == JSR_RECEIVER_MODE_THRU);
+
+  /* The SDK raises status events inside the setter, on this thread. */
+  printf("Simulator: gain index %d (%.2f dB), %d status event(s)\n", (int)index,
+         gain, gainEvents);
+  CHECK(gainEvents > 0);
+  CHECK(strcmp(lastGainValue, "4") == 0);
+  CHECK(wrongUser == 0);
+
+  CHECK_OK(JSR_SetStatusChangeCallback(manager, NULL, NULL));
+}
 
 int main(void) {
   JSR_Manager *manager = NULL;
@@ -132,6 +231,8 @@ int main(void) {
   /* A short buffer is truncated, and the full size still comes back. */
   CHECK(JSR_GetLastErrorMessage(tiny, sizeof tiny) > sizeof tiny);
   CHECK(strlen(tiny) == sizeof tiny - 1);
+
+  runSimulator(manager);
 
   CHECK_OK(JSR_Destroy(manager));
 
