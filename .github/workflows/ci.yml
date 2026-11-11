@@ -1,0 +1,125 @@
+name: CI
+
+# Builds the library, runs the unit tests and then builds and runs small
+# programs against the release layout with every supported compiler.
+# release.yml calls this workflow too, so a release is exactly what CI tested.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build library (MSVC, C++/CLI)
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: msbuild JSR-SDK.sln -t:restore -p:RestorePackagesConfig=true
+
+      # The solution maps dynamic|x64 to the library and the x64 unit tests.
+      - name: Build x64 dynamic library and unit tests
+        run: msbuild JSR-SDK.sln -t:Rebuild -p:Configuration=dynamic -p:Platform=x64
+
+      - name: Build x86 dynamic library
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32
+
+      - name: Build x64 static library
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64
+
+      - name: Build x86 static library
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
+
+      # The unit tests include simulator tests: the SDK's diagnostics plugin
+      # simulates pulser-receivers, so they need no hardware. The integration
+      # tests need a real pulser-receiver attached, so they stay manual.
+      # test.exe is a .NET program: if a manager's threads outlive it, it never
+      # exits, so fail fast instead of waiting for the job's 6-hour limit.
+      - name: Run unit tests
+        timeout-minutes: 10
+        run: x64\Release\test.exe --gtest_filter=-*IntegrationTest.*
+
+      - name: Check DLL exports
+        shell: pwsh
+        run: |
+          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll
+          ./ci/check-exports.ps1 -Dll lib/Win32/dynamic/JSR-SDK.dll
+
+      # Make sure the export check can fail: with one allowed name too few it
+      # must reject the DLL.
+      - name: Check that the export check rejects unexpected exports
+        shell: pwsh
+        run: |
+          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll -Allowed CreateJSRSDKManager
+          if ($LASTEXITCODE -ne 1) { throw "check-exports.ps1 accepted an unexpected export" }
+          exit 0
+
+      - name: Upload release layout
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsr-sdk
+          path: |
+            include/
+            lib/
+            CMakeLists.txt
+            LICENSE
+          if-no-files-found: error
+          retention-days: 7
+
+  consumer:
+    name: Consumer (${{ matrix.name }})
+    needs: build
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: MSVC x64
+            arch: x64
+            cc: cl
+          - name: MSVC x86
+            arch: x86
+            cc: cl
+          - name: clang-cl x64
+            arch: x64
+            cc: clang-cl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release layout
+        uses: actions/download-artifact@v4
+        with:
+          name: jsr-sdk
+          path: jsr-sdk
+
+      - name: Set up the MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Configure
+        run: >
+          cmake -S ci/consumer -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.cc }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cc }}
+          -DJSR_SDK_DIR="${{ github.workspace }}/jsr-sdk"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

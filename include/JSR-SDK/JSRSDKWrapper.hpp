@@ -21,6 +21,12 @@ private:
   StatusChangeCallback *m_nativeStatusCb;
   NotifyCallback *m_nativeNotifyCb;
 
+  // Held while a callback runs and while it is replaced, so that once
+  // Set...Callback() returns, the previous callback is neither running nor
+  // called again, and its owner may free it.
+  System::Object ^ m_statusLock;
+  System::Object ^ m_notifyLock;
+
   // Event handlers
   void OnStatusChangedEvent(System::Object ^ sender,
                             JSRDotNETSDK::EventArgsStatusChange ^ eventData);
@@ -37,7 +43,10 @@ public:
   // Finalizer
   !JSRSDKWrapper();
 
-  // Callback registration methods
+  // Callback registration methods. They wait for a callback that is running
+  // on another thread to return. Exceptions a callback throws are dropped:
+  // the SDK raises events inside its own calls, so they would otherwise make
+  // that call fail.
   void SetStatusChangeCallback(StatusChangeCallback *cb);
   void SetNotifyCallback(NotifyCallback *cb);
 
