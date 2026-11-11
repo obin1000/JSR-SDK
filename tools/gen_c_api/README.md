@@ -9,6 +9,7 @@ generated from a method list rather than written by hand:
 | `src/jsr_sdk_c.cpp` | the enum checks and one implementation per method |
 | `include/JSR-SDK/jsr_sdk.hpp` | one `jsr::Manager` method per method |
 | `test/CApiParityTest.cpp` | one parity test per getter and setter |
+| `test/EnumParityTest.cpp` | one test per enum: the .NET SDK has the same names and values |
 
 Everything else in those files (conventions, structs, callbacks, struct
 conversions, the test fixture) is written by hand in `templates/`.

@@ -179,6 +179,9 @@ static_assert(JSR_POWER_LIMIT_WITHIN_LIMIT ==
 static_assert(JSR_POWER_LIMIT_OVER_LIMIT ==
                   static_cast<int>(C_POWER_LIMIT::OVER_LIMIT),
               "JSR_POWER_LIMIT_OVER_LIMIT");
+static_assert(JSR_POWER_LIMIT_UNKNOWN ==
+                  static_cast<int>(C_POWER_LIMIT::UNKNOWN),
+              "JSR_POWER_LIMIT_UNKNOWN");
 static_assert(JSR_PROPERTY_UNITS_NONE ==
                   static_cast<int>(C_PROPERTY_UNITS::UNIT_NONE),
               "JSR_PROPERTY_UNITS_NONE");

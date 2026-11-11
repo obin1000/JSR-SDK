@@ -6,4 +6,5 @@
 enum class C_POWER_LIMIT {
   WITHIN_LIMIT = 0, // Power is within the limit.
   OVER_LIMIT = 1,   // Power is over the limit.
+  UNKNOWN = 2,      // The device didn't report it: not "within the limit".
 };

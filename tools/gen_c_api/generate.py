@@ -34,6 +34,7 @@ OUTPUTS = {
     'jsr_sdk_c.cpp.in': 'src/jsr_sdk_c.cpp',
     'jsr_sdk.hpp.in': 'include/JSR-SDK/jsr_sdk.hpp',
     'CApiParityTest.cpp.in': 'test/CApiParityTest.cpp',
+    'EnumParityTest.cpp.in': 'test/EnumParityTest.cpp',
 }
 
 
@@ -81,6 +82,29 @@ ENUMS = [
 ]
 RENAME = {'ERRORC': 'ERROR'}
 
+# The .NET SDK enum each C++ enum mirrors (full type name in JSRDotNETSDK.dll).
+# src/marshals/MarshalEnums.h casts between them, so test/EnumParityTest.cpp
+# checks that they have the same names and values.
+MANAGED_ENUMS = {
+    'C_ERROR_CODE': 'JSRDotNETSDK.ERROR_CODE',
+    'C_CONNECTION_TYPE': 'JSRDotNETSDK.CONNECTION_TYPE',
+    'C_DISCOVERY_STATE_FLAGS': 'JSRDotNETSDK.DiscoveryStateFlags',
+    'C_IS_PULSING': 'JSRDotNETSDK.IS_PULSING',
+    'C_MANAGER_STATE': 'JSRDotNETSDK.JSRDotNETManager+MANAGER_STATE',
+    'C_NOTIFY_TYPE': 'JSRDotNETSDK.NOTIFY_TYPE',
+    'C_POWER_LIMIT': 'JSRDotNETSDK.POWER_LIMIT',
+    'C_PROPERTY_UNITS': 'JSRDotNETSDK.PROPERTY_UNITS',
+    'C_PULSER_IMPEDANCE': 'JSRDotNETSDK.PULSER_IMPEDANCE',
+    'C_PULSER_PROPERTY_DATA_TYPE': 'JSRDotNETSDK.PulserPropertyDataType',
+    'C_PULSER_PROPERTY_ROLE': 'JSRDotNETSDK.PulserPropertyRole',
+    'C_PULSER_RECEIVER_STATE': 'JSRDotNETSDK.PulserReceiverState',
+    'C_RECEIVER_MODE': 'JSRDotNETSDK.RECEIVER_MODE',
+    'C_STATUS_CHANGE': 'JSRDotNETSDK.STATUS_CHANGE',
+    'C_TRIGGER_IMPEDANCE': 'JSRDotNETSDK.TRIGGER_IMPEDANCE',
+    'C_TRIGGER_POLARITY': 'JSRDotNETSDK.TRIGGER_POLARITY',
+    'C_TRIGGER_SOURCE': 'JSRDotNETSDK.TRIGGER_SOURCE',
+}
+
 
 def enum_values(cpp, prefix, header):
     body = read('include/JSR-SDK/enums/' + header)
@@ -94,6 +118,20 @@ def enum_values(cpp, prefix, header):
             c_name = c_name[len('UNIT_'):]
         values.append((name, prefix + c_name, int(value)))
     return values
+
+
+def gen_enum_parity_tests():
+    """One test per C++ enum: the SDK enum has exactly its names and values."""
+    tests = []
+    for cpp, _, prefix, header in ENUMS:
+        values = enum_values(cpp, prefix, header)
+        rows = ',\n'.join(
+            f'      {{"{RENAME.get(name, name)}", static_cast<int>({cpp}::{name})}}'
+            for name, _, _ in values)
+        tests.append(f'TEST(EnumParity, {cpp}) {{\n'
+                     f'  expectSameEnum("{MANAGED_ENUMS[cpp]}", {{\n{rows}}});\n'
+                     f'}}\n')
+    return '\n'.join(tests)
 
 
 def gen_enums():
@@ -428,6 +466,8 @@ def render():
             .replace('@METHODS@', '\n'.join(w_funcs).rstrip() + '\n'),
         OUTPUTS['CApiParityTest.cpp.in']: template('CApiParityTest.cpp.in')
             .replace('@TESTS@', '\n'.join(tests)),
+        OUTPUTS['EnumParityTest.cpp.in']: template('EnumParityTest.cpp.in')
+            .replace('@TESTS@', gen_enum_parity_tests()),
     }
 
 
