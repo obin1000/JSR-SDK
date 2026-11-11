@@ -29,7 +29,7 @@
  * This class provides a set of virtual functions to interact with the JSR SDK.
  * The C++/CLI implementation is hidden in the implementation, allowing
  * unmanaged C++ to use this header.
- * 
+ *
  * All functions that return strings or arrays now use caller-allocated buffers.
  * Functions return the number of items/characters written, or the required size
  * if the buffer is too small or null.
@@ -57,7 +57,10 @@ public:
 
   // === Custom functions added ===
   /**
-   * @brief Tries to load plugins from the same directory as the executable.
+   * @brief Loads the plugins from the directory that holds JSR-SDK.dll.
+   *
+   * That is usually the program's own directory, but not when the DLL is
+   * loaded from somewhere else.
    */
   virtual void loadPluginsFromBinaryDir() = 0;
 
@@ -77,7 +80,7 @@ public:
    * @param port The port to add.
    */
   virtual void AddPortToExclude(const char *plugin, const char *port) = 0;
-  
+
   /**
    * @brief Get the list of excluded ports for a plugin.
    * @param plugin The plugin name
@@ -97,7 +100,7 @@ public:
    * @param port The port to add.
    */
   virtual void AddPortToInclude(const char *plugin, const char *port) = 0;
-  
+
   /**
    * @brief Get the list of included ports for a plugin.
    * @param plugin The plugin name
@@ -116,7 +119,7 @@ public:
    * @return True if the option was added successfully, false otherwise.
    */
   virtual bool AddOpenOption(const char *plugin, const char *openOptionName, const char *openOptionValue) = 0;
-  
+
   /**
    * @brief Get an open option value.
    * @param plugin The plugin name
@@ -126,7 +129,7 @@ public:
    * @return The required size (including null terminator)
    */
   virtual size_t GetOpenOption(const char *plugin, const char *openOptionName, char *buffer, size_t bufferSize) = 0;
-  
+
   /**
    * @brief Get the names of all open options for a plugin.
    * @param plugin The plugin name
@@ -136,7 +139,7 @@ public:
    * @return The actual number of option names, or required count if buffer is too small
    */
   virtual size_t GetOpenOptionNames(const char *plugin, char **buffer, size_t bufferCount, size_t stringLength) = 0;
-  
+
   /**
    * @brief Removes an open option for a specific plugin.
    * @param plugin The name of the plugin.
@@ -198,7 +201,7 @@ public:
    * @return The actual number of plugin names, or required count if buffer is too small
    */
   virtual size_t GetManagedPluginNames(char **buffer, size_t bufferCount, size_t stringLength) = 0;
-  
+
   /**
    * @brief Retrieves metadata for a specific plugin library.
    * @param strPluginName The name of the plugin.
