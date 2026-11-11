@@ -1,6 +1,7 @@
 ﻿#include "JSR-SDK/JSRSDKManager.hpp"
 #include "JSR-SDK/JSRSDKWrapper.hpp"
 #include "JSR-SDK/marshals/MarshalTypes.h"
+#include "SdkError.hpp"
 
 #include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
@@ -14,6 +15,45 @@ using namespace System::Reflection;
 using namespace System::IO;
 using namespace System::Collections::Generic;
 
+/**
+ * @brief Picks the error code that best describes a managed exception.
+ *
+ * Exceptions from the JSR SDK carry their own code. For standard .NET
+ * exceptions the closest code is used, and UNKNOWN for everything else.
+ */
+static C_ERROR_CODE errorCodeForManaged(System::Exception ^ exception) {
+  if (auto sdkException = dynamic_cast<ExceptionJSRDotNET ^>(exception)) {
+    return errorCodeFromManaged(sdkException->ErrorCode);
+  }
+  if (dynamic_cast<ArgumentException ^>(exception)) {
+    return C_ERROR_CODE::INVALID_ARGUMENT;
+  }
+  if (dynamic_cast<NullReferenceException ^>(exception)) {
+    return C_ERROR_CODE::NULL_POINTER;
+  }
+  if (dynamic_cast<NotSupportedException ^>(exception) ||
+      dynamic_cast<NotImplementedException ^>(exception)) {
+    return C_ERROR_CODE::OPERATION_NOT_SUPPORTED;
+  }
+  if (dynamic_cast<TimeoutException ^>(exception)) {
+    return C_ERROR_CODE::TIMEOUT;
+  }
+  return C_ERROR_CODE::UNKNOWN;
+}
+
+/**
+ * @brief Turns a managed exception into a native SdkError.
+ *
+ * The message keeps the "<context>: <managed message>" form that callers
+ * already see, and the error code is preserved for the C API.
+ */
+[[noreturn]] static void rethrowManaged(System::Exception ^ exception,
+                                        const char *context) {
+  std::string msg = marshal_as<std::string>(exception->Message);
+  throw jsr::detail::SdkError(errorCodeForManaged(exception),
+                              std::string(context) + ": " + msg);
+}
+
 class JSRSDKManagerAdapter : public JSRSDKManager {
 private:
   gcroot<JSRSDKWrapper ^> m_manager;
@@ -26,9 +66,7 @@ public:
     try {
       m_manager = gcnew JSRSDKWrapper();
     } catch (System::Exception ^ exception) {
-      std::string msg =
-          msclr::interop::marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("Failed creating JSR wrapper object: " + msg);
+      rethrowManaged(exception, "Failed creating JSR wrapper object");
     }
   }
 
@@ -44,15 +82,12 @@ public:
       String ^ executablePath = Assembly::GetExecutingAssembly()->Location;
       binaryDir = Path::GetDirectoryName(executablePath);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("Failed finding the binary directory: " + msg);
+      rethrowManaged(exception, "Failed finding the binary directory");
     }
     try {
       m_manager->dotNETManager->LoadPlugins(binaryDir);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("Failed loading plugins from binary dir: " +
-                               msg);
+      rethrowManaged(exception, "Failed loading plugins from binary dir");
     }
   }
 
@@ -90,8 +125,7 @@ public:
       m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
           ->AddPortToExclude(gcnew String(port));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -103,8 +137,7 @@ public:
               ->PortsToExclude,
           buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -113,8 +146,7 @@ public:
       m_manager->dotNETManager->GetPluginOpenOptions(gcnew String(plugin))
           ->AddPortToInclude(gcnew String(port));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -126,8 +158,7 @@ public:
               ->PortsToInclude,
           buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -139,8 +170,7 @@ public:
           ->AddOpenOption(gcnew String(openOptionName),
                           gcnew String(openOptionValue));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -152,8 +182,7 @@ public:
               ->GetOpenOption(gcnew String(openOptionName));
       return copyManagedStringToBuffer(result, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -165,8 +194,7 @@ public:
               ->GetOpenOptionNames(),
           buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -177,8 +205,7 @@ public:
           ->GetPluginOpenOptions(gcnew String(plugin))
           ->RemoveOpenOption(gcnew String(openOptionName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSRdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -187,8 +214,7 @@ public:
     try {
       m_manager->dotNETManager->AddManagedPlugin(gcnew String(pluginName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -199,8 +225,7 @@ public:
                                                     gcnew String(optionName),
                                                     gcnew String(optionValue));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -208,8 +233,7 @@ public:
     try {
       m_manager->dotNETManager->AddPluginType(gcnew String(pluginType));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -217,8 +241,7 @@ public:
     try {
       m_manager->dotNETManager->ForceDetach();
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -228,8 +251,7 @@ public:
       return copyStringList(m_manager->dotNETManager->GetCustomSettings(),
                             buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -252,8 +274,7 @@ public:
 
       return count;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -263,8 +284,7 @@ public:
       return copyStringList(m_manager->dotNETManager->GetManagedPluginNames(),
                             buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -280,8 +300,7 @@ public:
       *metadata = libMetadataFromManaged(managedMetadata);
       return true;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -291,8 +310,7 @@ public:
       return copyStringList(m_manager->dotNETManager->GetPluginNames(), buffer,
                             bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -301,8 +319,7 @@ public:
       return m_manager->dotNETManager->GetPulserPropertyAttributes(
           gcnew String(settingName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -312,8 +329,7 @@ public:
           m_manager->dotNETManager->GetPulserPropertyUnits(
               gcnew String(settingName)));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -326,8 +342,7 @@ public:
               gcnew String(settingName), useShort);
       return copyManagedStringToBuffer(result, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -340,8 +355,7 @@ public:
               gcnew String(model), gcnew String(serialNum), idxPR),
           buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -371,8 +385,7 @@ public:
 
       return count;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -381,8 +394,7 @@ public:
       return m_manager->dotNETManager->IsPulserSettingSupported(
           gcnew String(settingName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -390,8 +402,7 @@ public:
     try {
       m_manager->dotNETManager->LoadPlugins(gcnew String(pluginPath));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -399,8 +410,7 @@ public:
     try {
       m_manager->dotNETManager->NotifyThreadProc();
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -409,8 +419,7 @@ public:
       m_manager->dotNETManager->RemoveAllOpenOptions(
           gcnew String(strPluginName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -418,8 +427,7 @@ public:
     try {
       m_manager->dotNETManager->RemoveManagedPlugin(gcnew String(pluginName));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -427,8 +435,7 @@ public:
     try {
       m_manager->dotNETManager->RequestThreadProc();
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -444,8 +451,7 @@ public:
       m_manager->dotNETManager->SetCurrentPulserReceiver(
           gcnew String(model), gcnew String(serialNum), idxPR);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -453,9 +459,7 @@ public:
     try {
       m_manager->dotNETManager->SetDiscoveryEnable(bEnable);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK enable produced Exception: " +
-                               msg);
+      rethrowManaged(exception, "JSRdotNETSDK enable produced Exception");
     }
   }
 
@@ -464,8 +468,7 @@ public:
       m_manager->dotNETManager->SetPulserPropertyValue(gcnew String(strProp),
                                                        gcnew String(value));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -477,8 +480,7 @@ public:
           gcnew String(settingName), pulserPropertyRoleToManaged(role),
           gcnew String(value));
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -486,8 +488,7 @@ public:
     try {
       m_manager->dotNETManager->Shutdown();
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -496,8 +497,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -505,8 +505,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -514,8 +513,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupply;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -523,8 +521,7 @@ public:
     try {
       m_manager->dotNETManager->HVSupply = hvSupply;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -532,8 +529,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplySupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -541,8 +537,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyNumerator;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -553,8 +548,7 @@ public:
           m_manager->dotNETManager->PulseRepetitionFrequencyValues, buffer,
           bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -562,8 +556,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -571,8 +564,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -580,8 +572,7 @@ public:
     try {
       m_manager->dotNETManager->PulseRepetitionFrequencyIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -589,8 +580,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyMin;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -598,8 +588,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequencyMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -607,8 +596,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseRepetitionFrequency;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -616,8 +604,7 @@ public:
     try {
       m_manager->dotNETManager->PulseRepetitionFrequency = frequency;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -626,8 +613,7 @@ public:
       return triggerPolarityFromManaged(
           m_manager->dotNETManager->TriggerEdgePolarity);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -636,8 +622,7 @@ public:
       m_manager->dotNETManager->TriggerEdgePolarity =
           triggerPolarityToManaged(polarity);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -645,8 +630,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerEdgePolaritySupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -655,8 +639,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->HighPassFilterValues,
                              buffer, bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -664,8 +647,7 @@ public:
     try {
       return m_manager->dotNETManager->HighPassFilterIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -673,8 +655,7 @@ public:
     try {
       return m_manager->dotNETManager->HighPassFilterIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -682,8 +663,7 @@ public:
     try {
       m_manager->dotNETManager->HighPassFilterIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -691,8 +671,7 @@ public:
     try {
       return m_manager->dotNETManager->LowPassFilterIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -700,8 +679,7 @@ public:
     try {
       return m_manager->dotNETManager->LowPassFilterIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -709,8 +687,7 @@ public:
     try {
       m_manager->dotNETManager->LowPassFilterIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -718,8 +695,7 @@ public:
     try {
       return receiverModeFromManaged(m_manager->dotNETManager->ReceiverMode);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -727,8 +703,7 @@ public:
     try {
       m_manager->dotNETManager->ReceiverMode = receiverModeToManaged(mode);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -736,8 +711,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverModeBothSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -745,8 +719,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverModeThruSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -754,8 +727,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverModeEchoSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -764,8 +736,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->GainValues, buffer,
                              bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -773,8 +744,7 @@ public:
     try {
       return m_manager->dotNETManager->GainIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -782,8 +752,7 @@ public:
     try {
       return m_manager->dotNETManager->GainIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -791,8 +760,7 @@ public:
     try {
       m_manager->dotNETManager->GainIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -801,8 +769,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->LowPassFilterValues,
                              buffer, bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -810,8 +777,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyMin;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -819,8 +785,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -828,8 +793,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -837,8 +801,7 @@ public:
     try {
       m_manager->dotNETManager->HVSupplyIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -846,8 +809,7 @@ public:
     try {
       return m_manager->dotNETManager->HVMeasurement;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -855,8 +817,7 @@ public:
     try {
       return m_manager->dotNETManager->HVMeasurementSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -865,8 +826,7 @@ public:
       return copyManagedStringToBuffer(m_manager->dotNETManager->UnitModelName,
                                        buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -874,8 +834,7 @@ public:
     try {
       m_manager->dotNETManager->UnitModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -884,8 +843,7 @@ public:
       return copyManagedStringToBuffer(m_manager->dotNETManager->UnitSerialNum,
                                        buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -893,8 +851,7 @@ public:
     try {
       m_manager->dotNETManager->UnitSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -902,8 +859,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserOEMDataSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -911,8 +867,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverOEMDataSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -920,8 +875,7 @@ public:
     try {
       return m_manager->dotNETManager->UnitModelNameSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -929,8 +883,7 @@ public:
     try {
       return m_manager->dotNETManager->UnitSerialNumSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -938,8 +891,7 @@ public:
     try {
       return triggerSourceFromManaged(m_manager->dotNETManager->TriggerSource);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -947,8 +899,7 @@ public:
     try {
       m_manager->dotNETManager->TriggerSource = triggerSourceToManaged(source);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -959,8 +910,7 @@ public:
           m_manager->dotNETManager->PulserTriggerSourceValueNames, buffer,
           bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -968,8 +918,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserTriggerSourceIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -977,8 +926,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserTriggerSourceIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -986,8 +934,7 @@ public:
     try {
       m_manager->dotNETManager->PulserTriggerSourceIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -995,8 +942,7 @@ public:
     try {
       return m_manager->dotNETManager->GainIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1004,8 +950,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerSourceSlaveSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1013,8 +958,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerSourceExternalSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1022,8 +966,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerEnable;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1031,8 +974,7 @@ public:
     try {
       m_manager->dotNETManager->TriggerEnable = enable;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1042,8 +984,7 @@ public:
       return copyStringList(m_manager->dotNETManager->PulseEnergyValueNames,
                             buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1051,8 +992,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseEnergyIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1060,8 +1000,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseEnergyIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1069,8 +1008,7 @@ public:
     try {
       m_manager->dotNETManager->PulseEnergyIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1078,8 +1016,7 @@ public:
     try {
       return m_manager->dotNETManager->PulseEnergyIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1088,8 +1025,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->DampingValues, buffer,
                              bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1097,8 +1033,7 @@ public:
     try {
       return m_manager->dotNETManager->DampingIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1106,8 +1041,7 @@ public:
     try {
       return m_manager->dotNETManager->DampingIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1115,8 +1049,7 @@ public:
     try {
       m_manager->dotNETManager->DampingIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1124,8 +1057,7 @@ public:
     try {
       return m_manager->dotNETManager->DampingIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1134,8 +1066,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->HVSupplyValues, buffer,
                              bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1143,8 +1074,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1152,8 +1082,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerSourceInternalSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1161,8 +1090,7 @@ public:
     try {
       return m_manager->dotNETManager->GainStepSizeSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1170,8 +1098,7 @@ public:
     try {
       return m_manager->dotNETManager->GainStepSize;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1179,8 +1106,7 @@ public:
     try {
       return m_manager->dotNETManager->GainMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1189,8 +1115,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->PulserSerialNum, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1198,8 +1123,7 @@ public:
     try {
       m_manager->dotNETManager->PulserSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1207,8 +1131,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserSerialNumSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1216,8 +1139,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverHWRevSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1226,8 +1148,7 @@ public:
       return copyManagedStringToBuffer(m_manager->dotNETManager->ReceiverHWRev,
                                        buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1235,8 +1156,7 @@ public:
     try {
       m_manager->dotNETManager->ReceiverHWRev = gcnew String(hwRev);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1244,8 +1164,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserHWRevSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1254,8 +1173,7 @@ public:
       return copyManagedStringToBuffer(m_manager->dotNETManager->PulserHWRev,
                                        buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1263,8 +1181,7 @@ public:
     try {
       m_manager->dotNETManager->PulserHWRev = gcnew String(hwRev);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1272,8 +1189,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverFirmwareVerSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1282,8 +1198,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->ReceiverFirmwareVer, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1291,8 +1206,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserFirmwareVerSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1301,8 +1215,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->PulserFirmwareVer, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1310,8 +1223,7 @@ public:
     try {
       return m_manager->dotNETManager->MaxFrequency;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1320,8 +1232,7 @@ public:
       return triggerImpedanceFromManaged(
           m_manager->dotNETManager->TriggerImpedance);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1330,8 +1241,7 @@ public:
       m_manager->dotNETManager->TriggerImpedance =
           triggerImpedanceToManaged(impedance);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1339,8 +1249,7 @@ public:
     try {
       return m_manager->dotNETManager->TriggerImpedanceSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1349,8 +1258,7 @@ public:
       return pulserImpedanceFromManaged(
           m_manager->dotNETManager->PulserImpedance);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1359,8 +1267,7 @@ public:
       m_manager->dotNETManager->PulserImpedance =
           pulserImpedanceToManaged(impedance);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1368,8 +1275,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserImpedanceSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1377,8 +1283,7 @@ public:
     try {
       return m_manager->dotNETManager->EnergyPerPulse;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1388,8 +1293,7 @@ public:
       return copyStringList(m_manager->dotNETManager->Info, buffer, bufferCount,
                             stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1397,8 +1301,7 @@ public:
     try {
       return isPulsingFromManaged(m_manager->dotNETManager->PulserIsPulsing);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1407,8 +1310,7 @@ public:
       return powerLimitFromManaged(
           m_manager->dotNETManager->PulserPowerLimitStatus);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1416,8 +1318,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserTriggerCount;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1425,8 +1326,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserTriggerCountSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1434,8 +1334,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyEnable;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1443,8 +1342,7 @@ public:
     try {
       m_manager->dotNETManager->HVSupplyEnable = enable;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1452,8 +1350,7 @@ public:
     try {
       return m_manager->dotNETManager->HVSupplyEnableSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1461,8 +1358,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverSerialNumSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1470,8 +1366,7 @@ public:
     try {
       return m_manager->dotNETManager->IsPulserPresentSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1480,8 +1375,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->ReceiverSerialNum, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1489,8 +1383,7 @@ public:
     try {
       m_manager->dotNETManager->ReceiverSerialNum = gcnew String(serialNum);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1498,8 +1391,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserModelNameSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1507,8 +1399,7 @@ public:
     try {
       return m_manager->dotNETManager->GainMin;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1516,8 +1407,7 @@ public:
     try {
       return m_manager->dotNETManager->Gain;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1525,8 +1415,7 @@ public:
     try {
       m_manager->dotNETManager->Gain = gain;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1534,8 +1423,7 @@ public:
     try {
       return m_manager->dotNETManager->HasManualControls;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1545,8 +1433,7 @@ public:
       return copyStringList(m_manager->dotNETManager->LEDBlinkModeValues,
                             buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1554,8 +1441,7 @@ public:
     try {
       return m_manager->dotNETManager->LEDBlinkModeIndexMax;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1563,8 +1449,7 @@ public:
     try {
       return m_manager->dotNETManager->LEDBlinkModeIndex;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1572,8 +1457,7 @@ public:
     try {
       m_manager->dotNETManager->LEDBlinkModeIndex = index;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1581,8 +1465,7 @@ public:
     try {
       return m_manager->dotNETManager->LEDBlinkModeIndexSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1590,8 +1473,7 @@ public:
     try {
       return pulsereceiverFromManaged(m_manager->dotNETManager->Id);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1599,8 +1481,7 @@ public:
     try {
       return m_manager->dotNETManager->IsPulserReceiverSelected;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1611,8 +1492,7 @@ public:
           m_manager->dotNETManager->LastExceptionContextMessage, buffer,
           bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1627,8 +1507,7 @@ public:
       }
       return copyManagedStringToBuffer(exception->Message, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1637,8 +1516,7 @@ public:
       return copyManagedStringToBuffer(m_manager->dotNETManager->PluginPath,
                                        buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1646,8 +1524,7 @@ public:
     try {
       m_manager->dotNETManager->PluginPath = gcnew String(path);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1656,8 +1533,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->PulserModelName, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1665,8 +1541,7 @@ public:
     try {
       m_manager->dotNETManager->PulserModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1674,8 +1549,7 @@ public:
     try {
       return m_manager->dotNETManager->PluginsLoaded;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1683,8 +1557,7 @@ public:
     try {
       return managerStateFromManaged(m_manager->dotNETManager->ManagerState);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1692,8 +1565,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserMaxPRFsSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1702,8 +1574,7 @@ public:
       return copyDoubleArray(m_manager->dotNETManager->PulserMaxPRFs, buffer,
                              bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1711,8 +1582,7 @@ public:
     try {
       return m_manager->dotNETManager->PulserEnergyCapacitorValuesSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1723,8 +1593,7 @@ public:
           m_manager->dotNETManager->PulserEnergyCapacitorValues, buffer,
           bufferCount);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1734,8 +1603,7 @@ public:
       return copyStringList(m_manager->dotNETManager->ReceiverSupplyVoltages,
                             buffer, bufferCount, stringLength);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1743,8 +1611,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverSupplyVoltagesSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1752,8 +1619,7 @@ public:
     try {
       return m_manager->dotNETManager->ReceiverModelNameSupported;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1762,8 +1628,7 @@ public:
       return copyManagedStringToBuffer(
           m_manager->dotNETManager->ReceiverModelName, buffer, bufferSize);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1771,8 +1636,7 @@ public:
     try {
       m_manager->dotNETManager->ReceiverModelName = gcnew String(name);
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1780,8 +1644,7 @@ public:
     try {
       return m_manager->dotNETManager->ArePluginsAvailable;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 
@@ -1789,8 +1652,7 @@ public:
     try {
       return m_manager->dotNETManager->IsPulserPresent;
     } catch (System::Exception ^ exception) {
-      std::string msg = marshal_as<std::string>(exception->Message);
-      throw std::runtime_error("JSTdotNETSDK produced Exception: " + msg);
+      rethrowManaged(exception, "JSRdotNETSDK produced Exception");
     }
   }
 };
@@ -1801,9 +1663,7 @@ __declspec(dllexport) JSRSDKManager *CreateJSRSDKManager() {
   try {
     return new JSRSDKManagerAdapter();
   } catch (System::Exception ^ exception) {
-    std::string msg =
-        msclr::interop::marshal_as<std::string>(exception->Message);
-    throw std::runtime_error("Failed creating JSR adapter object: " + msg);
+    rethrowManaged(exception, "Failed creating JSR adapter object");
   }
 }
 

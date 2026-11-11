@@ -6,29 +6,27 @@ on:
       - "v*.*.*"
 
 jobs:
-  build:
+  # Build and test exactly what gets released.
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: ci
     runs-on: windows-2025
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-      - name: Build x64 dynamic library
-        run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=x64
-      - name: Build x86 dynamic library
-        run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32
-      - name: Build x64 static library
-        run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64
-      - name: Build x86 static library
-        run: msbuild ${{github.workspace}}\JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
+      - name: Download release layout
+        uses: actions/download-artifact@v4
+        with:
+          name: jsr-sdk
+          path: package
       - name: Write version to file
         shell: pwsh
-        run: Set-Content -Path "${{github.workspace}}\VERSION" -Value "${{github.ref_name}}" -Encoding ASCII
+        run: Set-Content -Path "${{github.workspace}}\package\VERSION" -Value "${{github.ref_name}}" -Encoding ASCII
       - name: Zip release
         shell: pwsh
-        run: Compress-Archive -Path '${{github.workspace}}\include','${{github.workspace}}\lib', '${{github.workspace}}\CMakeLists.txt', '${{github.workspace}}\LICENSE', '${{github.workspace}}\VERSION' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
+        run: Compress-Archive -Path '${{github.workspace}}\package\include','${{github.workspace}}\package\lib', '${{github.workspace}}\package\CMakeLists.txt', '${{github.workspace}}\package\LICENSE', '${{github.workspace}}\package\VERSION' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
       - name: Generate hash
         shell: pwsh
         run: |
@@ -42,4 +40,3 @@ jobs:
           files: |
             ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip
             ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip.sha256
-             

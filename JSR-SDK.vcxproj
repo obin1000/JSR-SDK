@@ -51,6 +51,7 @@
     <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
     <ClInclude Include="include\JSR-SDK\JSRSDKManager.hpp" />
     <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
+    <ClInclude Include="src\SdkError.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JSRDotNETSDK">

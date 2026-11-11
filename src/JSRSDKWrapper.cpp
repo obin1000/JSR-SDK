@@ -48,9 +48,7 @@ JSRSDKWrapper::!JSRSDKWrapper() {
 void JSRSDKWrapper::OnStatusChangedEvent(Object ^ sender,
                                          EventArgsStatusChange ^ eventData) {
   if (m_nativeStatusCb != nullptr) {
-    StatusChangedEvent nativeEvt;
-    // Marshal managed event data to native if needed
-    // TODO: Populate nativeEvt from eventData
+    StatusChangedEvent nativeEvt = statusChangedEventFromManaged(eventData);
     (*m_nativeStatusCb)(nativeEvt);
   }
 }
