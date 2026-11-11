@@ -17,9 +17,10 @@
  *
  * This structure is used in notification callbacks to inform about various events
  * such as device discovery, property changes, errors, and state changes.
- * All string fields are fixed-size character arrays to ensure ABI stability.
+ * All string fields are fixed-size character arrays.
  *
- * @note This is a POD (Plain Old Data) structure suitable for C interop.
+ * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
+ * only). From C or other compilers, use JSR_NotifyEvent in jsr_sdk.h.
  */
 struct NotifyEvent {
   /// Maximum length for string fields (including null terminator)
@@ -103,8 +104,8 @@ struct NotifyEvent {
    * Boolean fields are initialized to false.
    */
   NotifyEvent()
-      : state{}, wasSelected(false), maxFrequency(0.0), infoCount(0),
-        prIndex(0), discoverState{}, notifyType{}, dataType{} {
+      : prIndex(0), state{}, notifyType{}, discoverState{},
+        wasSelected(false), dataType{}, maxFrequency(0.0), infoCount(0) {
     model[0] = '\0';
     newValue[0] = '\0';
     propertyName[0] = '\0';
