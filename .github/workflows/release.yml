@@ -17,7 +17,7 @@ jobs:
       contents: write
     steps:
       - name: Download release layout
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: jsr-sdk
           path: package
@@ -33,7 +33,7 @@ jobs:
             $hash = (Get-FileHash -Path ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip -Algorithm SHA256).Hash
             $hash | Out-File -Encoding ascii "${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip.sha256"
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
