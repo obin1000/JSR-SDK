@@ -1448,6 +1448,12 @@ public:
 
   PulserReceiverID getId() override {
     try {
+      // Without this check the SDK's null ID surfaced as "Object reference
+      // not set to an instance of an object" (#17).
+      if (!m_manager->dotNETManager->IsPulserReceiverSelected) {
+        throw gcnew ExceptionJSRDotNET(ERROR_CODE::NO_PULSER_RCVR_SELECTED,
+                                       "No pulser-receiver is selected");
+      }
       return pulsereceiverFromManaged(m_manager->dotNETManager->Id);
     } catch (System::Exception ^ exception) {
       rethrowManaged(exception, "JSRdotNETSDK produced Exception");

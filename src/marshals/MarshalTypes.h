@@ -47,6 +47,17 @@ inline void copyManagedString(System::String ^ src, char *dest, size_t destSize)
 }
 
 /**
+ * @brief Formats an event value the same way on every machine.
+ *
+ * Object::ToString() uses the current culture, so a gain of -9.5 would read
+ * "-9,5" on a Dutch Windows. The invariant culture always gives "-9.5".
+ */
+inline System::String ^ invariantText(System::Object ^ value) {
+  return System::Convert::ToString(
+      value, System::Globalization::CultureInfo::InvariantCulture);
+}
+
+/**
  * @brief Helper to copy std::string to caller-provided buffer.
  * @return The required size (including null terminator)
  */
@@ -201,6 +212,8 @@ inline InstrumentID instrumentFromManaged(IInstrumentIdentity ^
 inline PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
                                                  instrumentIdentity) {
   PulserReceiverID unmanaged;
+  if (instrumentIdentity == nullptr)
+    return unmanaged; // An empty ID, like instrumentFromManaged().
   unmanaged.InstrumentId =
       instrumentFromManaged(instrumentIdentity->InstrumentId);
   unmanaged.PulserReceiverIndex = instrumentIdentity->PulserReceiverIndex;
@@ -272,7 +285,7 @@ inline StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
       pulserReceiverStateFromManaged(managedEvent->PulserState);
 
   if (managedEvent->NewValue != nullptr) {
-    copyManagedString(managedEvent->NewValue->ToString(), unmanagedEvent.newValue, StatusChangedEvent::MAX_STRING_LENGTH);
+    copyManagedString(invariantText(managedEvent->NewValue), unmanagedEvent.newValue, StatusChangedEvent::MAX_STRING_LENGTH);
   }
 
   unmanagedEvent.dataType =
@@ -307,7 +320,7 @@ inline NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
   unmanagedEvent.state = pulserReceiverStateFromManaged(managedEvent->State);
 
   if (managedEvent->NewValue != nullptr) {
-    copyManagedString(managedEvent->NewValue->ToString(), unmanagedEvent.newValue, NotifyEvent::MAX_STRING_LENGTH);
+    copyManagedString(invariantText(managedEvent->NewValue), unmanagedEvent.newValue, NotifyEvent::MAX_STRING_LENGTH);
   }
 
   copyManagedString(managedEvent->PropertyName, unmanagedEvent.propertyName, NotifyEvent::MAX_STRING_LENGTH);
