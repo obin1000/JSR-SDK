@@ -213,7 +213,10 @@
   </ImportGroup>
   <Target Name="CopyPluginsIfChanged" AfterTargets="Build">
     <ItemGroup>
-      <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*" />
+      <!-- The plugin DLLs, and the import libraries CMake links so that
+           $<TARGET_RUNTIME_DLLS> lists the DLLs; the .def and .exp files
+           aren't needed. -->
+      <PluginSourceFiles Include="external\JSRDotNETSDK_1.2.14\Plugins\*.dll;external\JSRDotNETSDK_1.2.14\Plugins\*.lib" />
     </ItemGroup>
     <Message Importance="high" Text="Checking for plugin changes in external\jsr\plugins..." />
     <Copy SourceFiles="@(PluginSourceFiles)" DestinationFiles="@(PluginSourceFiles->'lib\plugins\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />

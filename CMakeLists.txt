@@ -40,23 +40,20 @@ endif()
 set(JSR_SDK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(JSR_SDK_PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/plugins")
 
-# The .NET assemblies are only loaded at run time. MSVC builds link their
-# import libraries as before; MinGW builds don't link them at all.
-if(MINGW)
-    set(JSR_SDK_LINK_ASSEMBLIES OFF)
-else()
-    set(JSR_SDK_LINK_ASSEMBLIES ON)
-endif()
+# The .NET assemblies (JSRDotNETSDK.dll and the plugins) are only loaded at
+# run time, and no program calls into them. They are still linked, through
+# their import libraries in lib/plugins, for every compiler: that adds no
+# import to the program (MSVC and GNU ld both drop them), but it makes them
+# runtime dependencies of JSR-SDK, so $<TARGET_RUNTIME_DLLS:app> lists them
+# and a program can copy every DLL it needs with one command.
 
 # DLLs a program needs next to it at run time; see jsr_sdk_copy_runtime().
 set_property(GLOBAL PROPERTY JSR_SDK_RUNTIME_TARGETS JSR-SDK JSRDotNETSDK)
 
 add_library(JSR-SDK SHARED IMPORTED GLOBAL)
 add_library(JSRDotNETSDK SHARED IMPORTED GLOBAL)
-if(JSR_SDK_LINK_ASSEMBLIES)
-    set_target_properties(JSRDotNETSDK PROPERTIES IMPORTED_IMPLIB "${JSR_SDK_PLUGINS_DIR}/JSRDotNETSDK.lib")
-    target_link_libraries(JSR-SDK INTERFACE JSRDotNETSDK)
-endif()
+set_target_properties(JSRDotNETSDK PROPERTIES IMPORTED_IMPLIB "${JSR_SDK_PLUGINS_DIR}/JSRDotNETSDK.lib")
+target_link_libraries(JSR-SDK INTERFACE JSRDotNETSDK)
 
 
 if(JSR_SDK_USE_DYNAMIC_LIB)
@@ -95,13 +92,10 @@ install(IMPORTED_RUNTIME_ARTIFACTS JSRDotNETSDK DESTINATION ${CMAKE_INSTALL_BIND
 function(register_jsr_dll dll_name)
     add_library(${dll_name} SHARED IMPORTED GLOBAL)
     set_target_properties(${dll_name} PROPERTIES
-        IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/${dll_name}.dll")
-
-    if(JSR_SDK_LINK_ASSEMBLIES)
-      set_target_properties(${dll_name} PROPERTIES
+        IMPORTED_LOCATION "${JSR_SDK_PLUGINS_DIR}/${dll_name}.dll"
         IMPORTED_IMPLIB   "${JSR_SDK_PLUGINS_DIR}/${dll_name}.lib")
-      target_link_libraries(JSR-SDK INTERFACE ${dll_name})
-    endif()
+    # Linked only so $<TARGET_RUNTIME_DLLS> includes it; see above.
+    target_link_libraries(JSR-SDK INTERFACE ${dll_name})
     set_property(GLOBAL APPEND PROPERTY JSR_SDK_RUNTIME_TARGETS ${dll_name})
     install(IMPORTED_RUNTIME_ARTIFACTS
       ${dll_name}
