@@ -2,11 +2,12 @@
 #include "pch.h"
 #include <gtest/gtest.h>
 
-#include "JSR-SDK/marshals/MarshalTypes.h"
+#include "marshals/MarshalTypes.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace JSRDotNETSDK;
+using namespace jsr::detail;
 
 //--------------------------------------------------------------------------
 //  Managed *stub* implementations

@@ -1,8 +1,8 @@
 #pragma once
 
+// Private to the DLL (C++/CLI only).
 #include "JSR-SDK/events/NotifyEvent.h"
 #include "JSR-SDK/events/StatusChangedEvent.h"
-#include "JSR-SDK/marshals/MarshalTypes.h"
 
 namespace JSRDotNETSDK {
 ref class JSRDotNETManager;

@@ -22,11 +22,16 @@
 #include <stdexcept>
 #include <iostream> // Include iostream for std::cerr
 
-using namespace JSRDotNETSDK;
 #undef ERROR
 
+// Conversions between the C++ enums and the .NET SDK enums. Private to the
+// DLL (C++/CLI only); tests reach them through src/ on the include path.
+namespace jsr::detail {
+
+using namespace JSRDotNETSDK;
+
 // RECEIVER_MODE <-> C_RECEIVER_MODE
-inline constexpr static C_RECEIVER_MODE
+inline constexpr C_RECEIVER_MODE
 receiverModeFromManaged(const RECEIVER_MODE &mode) {
   switch (mode) {
   case RECEIVER_MODE::BOTH:
@@ -42,7 +47,7 @@ receiverModeFromManaged(const RECEIVER_MODE &mode) {
     return C_RECEIVER_MODE::BOTH;
   }
 }
-inline constexpr static RECEIVER_MODE
+inline constexpr RECEIVER_MODE
 receiverModeToManaged(const C_RECEIVER_MODE &mode) {
   switch (mode) {
   case C_RECEIVER_MODE::BOTH:
@@ -60,7 +65,7 @@ receiverModeToManaged(const C_RECEIVER_MODE &mode) {
 }
 
 // converting JSRDotNETSDK::TRIGGER_SOURCE <-> C_TRIGGER_SOURCE
-inline constexpr static C_TRIGGER_SOURCE
+inline constexpr C_TRIGGER_SOURCE
 triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
   switch (source) {
   case TRIGGER_SOURCE::INTERNAL:
@@ -76,7 +81,7 @@ triggerSourceFromManaged(const TRIGGER_SOURCE &source) {
     return C_TRIGGER_SOURCE::INTERNAL;
   }
 }
-inline constexpr static TRIGGER_SOURCE
+inline constexpr TRIGGER_SOURCE
 triggerSourceToManaged(const C_TRIGGER_SOURCE &source) {
   switch (source) {
   case C_TRIGGER_SOURCE::INTERNAL:
@@ -94,7 +99,7 @@ triggerSourceToManaged(const C_TRIGGER_SOURCE &source) {
 }
 
 // converting JSRDotNETSDK::TRIGGER_POLARITY <-> C_TRIGGER_POLARITY
-inline constexpr static C_TRIGGER_POLARITY
+inline constexpr C_TRIGGER_POLARITY
 triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
   switch (source) {
   case TRIGGER_POLARITY::FALLING:
@@ -108,7 +113,7 @@ triggerPolarityFromManaged(const TRIGGER_POLARITY &source) {
     return C_TRIGGER_POLARITY::FALLING;
   }
 }
-inline constexpr static TRIGGER_POLARITY
+inline constexpr TRIGGER_POLARITY
 triggerPolarityToManaged(const C_TRIGGER_POLARITY &source) {
   switch (source) {
   case C_TRIGGER_POLARITY::FALLING:
@@ -124,7 +129,7 @@ triggerPolarityToManaged(const C_TRIGGER_POLARITY &source) {
 }
 
 // converting JSRDotNETSDK::TRIGGER_IMPEDANCE <-> C_TRIGGER_IMPEDANCE
-inline constexpr static C_TRIGGER_IMPEDANCE
+inline constexpr C_TRIGGER_IMPEDANCE
 triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
   switch (source) {
   case TRIGGER_IMPEDANCE::HIGH_Z:
@@ -138,7 +143,7 @@ triggerImpedanceFromManaged(const TRIGGER_IMPEDANCE &source) {
     return C_TRIGGER_IMPEDANCE::HIGH_Z;
   }
 }
-inline constexpr static TRIGGER_IMPEDANCE
+inline constexpr TRIGGER_IMPEDANCE
 triggerImpedanceToManaged(const C_TRIGGER_IMPEDANCE &source) {
   switch (source) {
   case C_TRIGGER_IMPEDANCE::HIGH_Z:
@@ -154,7 +159,7 @@ triggerImpedanceToManaged(const C_TRIGGER_IMPEDANCE &source) {
 }
 
 // converting JSRDotNETSDK::PULSER_IMPEDANCE <-> C_PULSER_IMPEDANCE
-inline constexpr static C_PULSER_IMPEDANCE
+inline constexpr C_PULSER_IMPEDANCE
 pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
   switch (source) {
   case PULSER_IMPEDANCE::HIGH_Z:
@@ -168,7 +173,7 @@ pulserImpedanceFromManaged(const PULSER_IMPEDANCE &source) {
     return C_PULSER_IMPEDANCE::HIGH_Z;
   }
 }
-inline constexpr static PULSER_IMPEDANCE
+inline constexpr PULSER_IMPEDANCE
 pulserImpedanceToManaged(const C_PULSER_IMPEDANCE &source) {
   switch (source) {
   case C_PULSER_IMPEDANCE::HIGH_Z:
@@ -184,7 +189,7 @@ pulserImpedanceToManaged(const C_PULSER_IMPEDANCE &source) {
 }
 
 // converting JSRDotNETSDK::IS_PULSING <-> C_IS_PULSING
-inline constexpr static C_IS_PULSING
+inline constexpr C_IS_PULSING
 isPulsingFromManaged(const IS_PULSING &source) {
   switch (source) {
   case IS_PULSING::ACTIVE:
@@ -198,7 +203,7 @@ isPulsingFromManaged(const IS_PULSING &source) {
     return C_IS_PULSING::ACTIVE;
   }
 }
-inline constexpr static IS_PULSING
+inline constexpr IS_PULSING
 isPulsingToManaged(const C_IS_PULSING &source) {
   switch (source) {
   case C_IS_PULSING::ACTIVE:
@@ -214,7 +219,7 @@ isPulsingToManaged(const C_IS_PULSING &source) {
 }
 
 // converting JSRDotNETSDK::POWER_LIMIT <-> C_POWER_LIMIT
-inline constexpr static C_POWER_LIMIT
+inline constexpr C_POWER_LIMIT
 powerLimitFromManaged(const POWER_LIMIT &source) {
   switch (source) {
   case POWER_LIMIT::OVER_LIMIT:
@@ -226,7 +231,7 @@ powerLimitFromManaged(const POWER_LIMIT &source) {
     return C_POWER_LIMIT::WITHIN_LIMIT;
   }
 }
-inline constexpr static POWER_LIMIT
+inline constexpr POWER_LIMIT
 powerLimitToManaged(const C_POWER_LIMIT &source) {
   switch (source) {
   case C_POWER_LIMIT::OVER_LIMIT:
@@ -240,7 +245,7 @@ powerLimitToManaged(const C_POWER_LIMIT &source) {
 }
 
 // converting JSRDotNETSDK::MANAGER_STATE <-> C_MANAGER_STATE
-inline constexpr static C_MANAGER_STATE
+inline constexpr C_MANAGER_STATE
 managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
   switch (state) {
   case JSRDotNETManager::MANAGER_STATE::NOT_STARTED:
@@ -256,7 +261,7 @@ managerStateFromManaged(const JSRDotNETManager::MANAGER_STATE &state) {
     return C_MANAGER_STATE::NOT_STARTED;
   }
 }
-inline constexpr static JSRDotNETManager::MANAGER_STATE
+inline constexpr JSRDotNETManager::MANAGER_STATE
 managerStateToManaged(const C_MANAGER_STATE &state) {
   switch (state) {
   case C_MANAGER_STATE::NOT_STARTED:
@@ -274,7 +279,7 @@ managerStateToManaged(const C_MANAGER_STATE &state) {
 }
 
 // converting JSRDotNETSDK::CONNECTION_TYPE <-> C_CONNECTION_TYPE
-inline constexpr static C_CONNECTION_TYPE
+inline constexpr C_CONNECTION_TYPE
 connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
   switch (connection) {
   case CONNECTION_TYPE::SOFTWARE:
@@ -296,7 +301,7 @@ connectionTypeFromManaged(const CONNECTION_TYPE &connection) {
     return C_CONNECTION_TYPE::SOFTWARE;
   }
 }
-inline constexpr static CONNECTION_TYPE
+inline constexpr CONNECTION_TYPE
 connectionTypeToManaged(const C_CONNECTION_TYPE &connection) {
   switch (connection) {
   case C_CONNECTION_TYPE::SOFTWARE:
@@ -320,7 +325,7 @@ connectionTypeToManaged(const C_CONNECTION_TYPE &connection) {
 }
 
 // converting JSRDotNETSDK::PROPERTY_UNITS <-> C_PROPERTY_UNITS
-inline constexpr static C_PROPERTY_UNITS
+inline constexpr C_PROPERTY_UNITS
 propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
   switch (units) {
   case PROPERTY_UNITS::UNIT_NONE:
@@ -350,7 +355,7 @@ propertyUnitsFromManaged(const PROPERTY_UNITS &units) {
     return C_PROPERTY_UNITS::UNIT_NONE;
   }
 }
-inline constexpr static PROPERTY_UNITS
+inline constexpr PROPERTY_UNITS
 propertyUnitsToManaged(const C_PROPERTY_UNITS &units) {
   switch (units) {
   case C_PROPERTY_UNITS::UNIT_NONE:
@@ -382,7 +387,7 @@ propertyUnitsToManaged(const C_PROPERTY_UNITS &units) {
 }
 
 // PulserPropertyRole <-> C_PULSER_PROPERTY_ROLE
-inline constexpr static C_PULSER_PROPERTY_ROLE
+inline constexpr C_PULSER_PROPERTY_ROLE
 pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
   switch (role) {
   case PulserPropertyRole::DIRECT:
@@ -418,7 +423,7 @@ pulserPropertyRoleFromManaged(const PulserPropertyRole &role) {
     return C_PULSER_PROPERTY_ROLE::DIRECT;
   }
 }
-inline constexpr static PulserPropertyRole
+inline constexpr PulserPropertyRole
 pulserPropertyRoleToManaged(const C_PULSER_PROPERTY_ROLE &role) {
   switch (role) {
   case C_PULSER_PROPERTY_ROLE::DIRECT:
@@ -456,7 +461,7 @@ pulserPropertyRoleToManaged(const C_PULSER_PROPERTY_ROLE &role) {
 }
 
 // STATUS_CHANGE <-> C_STATUS_CHANGE
-inline constexpr static C_STATUS_CHANGE
+inline constexpr C_STATUS_CHANGE
 statusChangeFromManaged(const STATUS_CHANGE &change) {
   switch (change) {
   case STATUS_CHANGE::INSTRUMENT_DISCONNECT:
@@ -472,7 +477,7 @@ statusChangeFromManaged(const STATUS_CHANGE &change) {
     return C_STATUS_CHANGE::INSTRUMENT_DISCONNECT;
   }
 }
-inline constexpr static STATUS_CHANGE
+inline constexpr STATUS_CHANGE
 statusChangeToManaged(const C_STATUS_CHANGE &change) {
   switch (change) {
   case C_STATUS_CHANGE::INSTRUMENT_DISCONNECT:
@@ -490,7 +495,7 @@ statusChangeToManaged(const C_STATUS_CHANGE &change) {
 }
 
 // PulserReceiverState <-> C_PULSER_RECEIVER_STATE
-inline constexpr static C_PULSER_RECEIVER_STATE
+inline constexpr C_PULSER_RECEIVER_STATE
 pulserReceiverStateFromManaged(const PulserReceiverState &state) {
   switch (state) {
   case PulserReceiverState::DETECTED:
@@ -510,7 +515,7 @@ pulserReceiverStateFromManaged(const PulserReceiverState &state) {
     return C_PULSER_RECEIVER_STATE::DETECTED;
   }
 }
-inline constexpr static PulserReceiverState
+inline constexpr PulserReceiverState
 pulserReceiverStateToManaged(const C_PULSER_RECEIVER_STATE &state) {
   switch (state) {
   case C_PULSER_RECEIVER_STATE::DETECTED:
@@ -532,7 +537,7 @@ pulserReceiverStateToManaged(const C_PULSER_RECEIVER_STATE &state) {
 }
 
 // PulserPropertyDataType <-> C_PULSER_PROPERTY_DATA_TYPE
-inline constexpr static C_PULSER_PROPERTY_DATA_TYPE
+inline constexpr C_PULSER_PROPERTY_DATA_TYPE
 pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
   switch (type) {
   case PulserPropertyDataType::INTEGER:
@@ -566,7 +571,7 @@ pulserPropertyDataTypeFromManaged(const PulserPropertyDataType &type) {
     return C_PULSER_PROPERTY_DATA_TYPE::INTEGER;
   }
 }
-inline constexpr static PulserPropertyDataType
+inline constexpr PulserPropertyDataType
 pulserPropertyDataTypeToManaged(const C_PULSER_PROPERTY_DATA_TYPE &type) {
   switch (type) {
   case C_PULSER_PROPERTY_DATA_TYPE::INTEGER:
@@ -602,7 +607,7 @@ pulserPropertyDataTypeToManaged(const C_PULSER_PROPERTY_DATA_TYPE &type) {
 }
 
 // ErrorCode <-> C_ERROR_CODE
-inline constexpr static C_ERROR_CODE
+inline constexpr C_ERROR_CODE
 errorCodeFromManaged(const ERROR_CODE &code) {
   switch (code) {
   case ERROR_CODE::UNKNOWN:
@@ -656,7 +661,7 @@ errorCodeFromManaged(const ERROR_CODE &code) {
     return C_ERROR_CODE::UNKNOWN;
   }
 }
-inline constexpr static ERROR_CODE
+inline constexpr ERROR_CODE
 errorCodeToManaged(const C_ERROR_CODE &code) {
   switch (code) {
   case C_ERROR_CODE::UNKNOWN:
@@ -712,7 +717,7 @@ errorCodeToManaged(const C_ERROR_CODE &code) {
 }
 
 // DiscoveryStateFlags <-> C_DISCOVERY_STATE_FLAGS
-inline constexpr static C_DISCOVERY_STATE_FLAGS
+inline constexpr C_DISCOVERY_STATE_FLAGS
 discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
   switch (flags) {
   case DiscoveryStateFlags::NONE:
@@ -728,7 +733,7 @@ discoveryStateFlagsFromManaged(const DiscoveryStateFlags &flags) {
     return C_DISCOVERY_STATE_FLAGS::NONE;
   }
 }
-inline constexpr static DiscoveryStateFlags
+inline constexpr DiscoveryStateFlags
 discoveryStateFlagsToManaged(const C_DISCOVERY_STATE_FLAGS &flags) {
   switch (flags) {
   case C_DISCOVERY_STATE_FLAGS::NONE:
@@ -746,7 +751,7 @@ discoveryStateFlagsToManaged(const C_DISCOVERY_STATE_FLAGS &flags) {
 }
 
 // NotifyType <-> C_NOTIFY_TYPE
-inline constexpr static C_NOTIFY_TYPE
+inline constexpr C_NOTIFY_TYPE
 notifyTypeFromManaged(const JSRDotNETSDK::NOTIFY_TYPE &type) {
   switch (type) {
   case JSRDotNETSDK::NOTIFY_TYPE::PULSER_RCVR_DISCOVERED:
@@ -770,7 +775,7 @@ notifyTypeFromManaged(const JSRDotNETSDK::NOTIFY_TYPE &type) {
     return C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED;
   }
 }
-inline constexpr static JSRDotNETSDK::NOTIFY_TYPE
+inline constexpr JSRDotNETSDK::NOTIFY_TYPE
 notifyTypeToManaged(const C_NOTIFY_TYPE &type) {
   switch (type) {
   case C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED:
@@ -795,220 +800,4 @@ notifyTypeToManaged(const C_NOTIFY_TYPE &type) {
   }
 }
 
-namespace msclr::interop {
-
-// RecieverMode marshals
-template <>
-inline C_RECEIVER_MODE
-marshal_as<C_RECEIVER_MODE, RECEIVER_MODE>(const RECEIVER_MODE &from) {
-  return receiverModeFromManaged(from);
-}
-template <>
-inline RECEIVER_MODE
-marshal_as<RECEIVER_MODE, C_RECEIVER_MODE>(const C_RECEIVER_MODE &from) {
-  return receiverModeToManaged(from);
-}
-
-// ManagerState marshals
-template <>
-inline C_MANAGER_STATE
-marshal_as<C_MANAGER_STATE, JSRDotNETManager::MANAGER_STATE>(
-    const JSRDotNETManager::MANAGER_STATE &from) {
-  return managerStateFromManaged(from);
-}
-template <>
-inline JSRDotNETManager::MANAGER_STATE
-marshal_as<JSRDotNETManager::MANAGER_STATE, C_MANAGER_STATE>(
-    const C_MANAGER_STATE &from) {
-  return managerStateToManaged(from);
-}
-
-// TriggerSource marshals
-template <>
-inline C_TRIGGER_SOURCE
-marshal_as<C_TRIGGER_SOURCE, TRIGGER_SOURCE>(const TRIGGER_SOURCE &from) {
-  return triggerSourceFromManaged(from);
-}
-template <>
-inline TRIGGER_SOURCE
-marshal_as<TRIGGER_SOURCE, C_TRIGGER_SOURCE>(const C_TRIGGER_SOURCE &from) {
-  return triggerSourceToManaged(from);
-}
-
-// TriggerPolarity marshals
-template <>
-inline C_TRIGGER_POLARITY
-marshal_as<C_TRIGGER_POLARITY, TRIGGER_POLARITY>(const TRIGGER_POLARITY &from) {
-  return triggerPolarityFromManaged(from);
-}
-template <>
-inline TRIGGER_POLARITY marshal_as<TRIGGER_POLARITY, C_TRIGGER_POLARITY>(
-    const C_TRIGGER_POLARITY &from) {
-  return triggerPolarityToManaged(from);
-}
-
-// TriggerImpedance marshals
-template <>
-inline C_TRIGGER_IMPEDANCE marshal_as<C_TRIGGER_IMPEDANCE, TRIGGER_IMPEDANCE>(
-    const TRIGGER_IMPEDANCE &from) {
-  return triggerImpedanceFromManaged(from);
-}
-template <>
-inline TRIGGER_IMPEDANCE marshal_as<TRIGGER_IMPEDANCE, C_TRIGGER_IMPEDANCE>(
-    const C_TRIGGER_IMPEDANCE &from) {
-  return triggerImpedanceToManaged(from);
-}
-
-// PulserImpedance marshals
-template <>
-inline C_PULSER_IMPEDANCE
-marshal_as<C_PULSER_IMPEDANCE, PULSER_IMPEDANCE>(const PULSER_IMPEDANCE &from) {
-  return pulserImpedanceFromManaged(from);
-}
-template <>
-inline PULSER_IMPEDANCE marshal_as<PULSER_IMPEDANCE, C_PULSER_IMPEDANCE>(
-    const C_PULSER_IMPEDANCE &from) {
-  return pulserImpedanceToManaged(from);
-}
-
-// IsPulsing marshals
-template <>
-inline C_IS_PULSING
-marshal_as<C_IS_PULSING, IS_PULSING>(const IS_PULSING &from) {
-  return isPulsingFromManaged(from);
-}
-template <>
-inline IS_PULSING
-marshal_as<IS_PULSING, C_IS_PULSING>(const C_IS_PULSING &from) {
-  return isPulsingToManaged(from);
-}
-
-// PowerLimit marshals
-template <>
-inline C_POWER_LIMIT
-marshal_as<C_POWER_LIMIT, POWER_LIMIT>(const POWER_LIMIT &from) {
-  return powerLimitFromManaged(from);
-}
-template <>
-inline POWER_LIMIT
-marshal_as<POWER_LIMIT, C_POWER_LIMIT>(const C_POWER_LIMIT &from) {
-  return powerLimitToManaged(from);
-}
-
-// ConnectionType marshals
-template <>
-inline C_CONNECTION_TYPE
-marshal_as<C_CONNECTION_TYPE, CONNECTION_TYPE>(const CONNECTION_TYPE &from) {
-  return connectionTypeFromManaged(from);
-}
-template <>
-inline CONNECTION_TYPE
-marshal_as<CONNECTION_TYPE, C_CONNECTION_TYPE>(const C_CONNECTION_TYPE &from) {
-  return connectionTypeToManaged(from);
-}
-
-// PropertyUnits marshals
-template <>
-inline C_PROPERTY_UNITS
-marshal_as<C_PROPERTY_UNITS, PROPERTY_UNITS>(const PROPERTY_UNITS &from) {
-  return propertyUnitsFromManaged(from);
-}
-template <>
-inline PROPERTY_UNITS
-marshal_as<PROPERTY_UNITS, C_PROPERTY_UNITS>(const C_PROPERTY_UNITS &from) {
-  return propertyUnitsToManaged(from);
-}
-
-// PulserPropertyRoles marshals
-template <>
-inline C_PULSER_PROPERTY_ROLE
-marshal_as<C_PULSER_PROPERTY_ROLE, PulserPropertyRole>(
-    const PulserPropertyRole &from) {
-  return pulserPropertyRoleFromManaged(from);
-}
-template <>
-inline PulserPropertyRole
-marshal_as<PulserPropertyRole, C_PULSER_PROPERTY_ROLE>(
-    const C_PULSER_PROPERTY_ROLE &from) {
-  return pulserPropertyRoleToManaged(from);
-}
-
-// StatusChange marshals
-template <>
-inline C_STATUS_CHANGE
-marshal_as<C_STATUS_CHANGE, STATUS_CHANGE>(const STATUS_CHANGE &from) {
-  return statusChangeFromManaged(from);
-}
-template <>
-inline STATUS_CHANGE
-marshal_as<STATUS_CHANGE, C_STATUS_CHANGE>(const C_STATUS_CHANGE &from) {
-  return statusChangeToManaged(from);
-}
-
-// PulserReceiverState marshals
-template <>
-inline C_PULSER_RECEIVER_STATE
-marshal_as<C_PULSER_RECEIVER_STATE, PulserReceiverState>(
-    const PulserReceiverState &from) {
-  return pulserReceiverStateFromManaged(from);
-}
-template <>
-inline PulserReceiverState
-marshal_as<PulserReceiverState, C_PULSER_RECEIVER_STATE>(
-    const C_PULSER_RECEIVER_STATE &from) {
-  return pulserReceiverStateToManaged(from);
-}
-
-// PulserPropertyDataType marshals
-template <>
-inline C_PULSER_PROPERTY_DATA_TYPE
-marshal_as<C_PULSER_PROPERTY_DATA_TYPE, PulserPropertyDataType>(
-    const PulserPropertyDataType &from) {
-  return pulserPropertyDataTypeFromManaged(from);
-}
-template <>
-inline PulserPropertyDataType
-marshal_as<PulserPropertyDataType, C_PULSER_PROPERTY_DATA_TYPE>(
-    const C_PULSER_PROPERTY_DATA_TYPE &from) {
-  return pulserPropertyDataTypeToManaged(from);
-}
-
-// ErrorCode marshals
-template <>
-inline C_ERROR_CODE
-marshal_as<C_ERROR_CODE, ERROR_CODE>(const ERROR_CODE &from) {
-  return errorCodeFromManaged(from);
-}
-template <>
-inline ERROR_CODE
-marshal_as<ERROR_CODE, C_ERROR_CODE>(const C_ERROR_CODE &from) {
-  return errorCodeToManaged(from);
-}
-
-// DiscoveryStateFlags marshals
-template <>
-inline C_DISCOVERY_STATE_FLAGS
-marshal_as<C_DISCOVERY_STATE_FLAGS, DiscoveryStateFlags>(
-    const DiscoveryStateFlags &from) {
-  return discoveryStateFlagsFromManaged(from);
-}
-template <>
-inline DiscoveryStateFlags
-marshal_as<DiscoveryStateFlags, C_DISCOVERY_STATE_FLAGS>(
-    const C_DISCOVERY_STATE_FLAGS &from) {
-  return discoveryStateFlagsToManaged(from);
-}
-
-// NotifyType marshals
-template <>
-inline C_NOTIFY_TYPE
-marshal_as<C_NOTIFY_TYPE, NOTIFY_TYPE>(const NOTIFY_TYPE &from) {
-  return notifyTypeFromManaged(from);
-}
-template <>
-inline NOTIFY_TYPE
-marshal_as<NOTIFY_TYPE, C_NOTIFY_TYPE>(const C_NOTIFY_TYPE &from) {
-  return notifyTypeToManaged(from);
-}
-
-} // namespace msclr::interop
+} // namespace jsr::detail
