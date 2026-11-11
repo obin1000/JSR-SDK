@@ -17,6 +17,7 @@ jobs:
   build:
     name: Build library (MSVC, C++/CLI)
     runs-on: windows-2025
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,7 +42,10 @@ jobs:
         run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
 
       # The integration tests need a pulser-receiver attached, so they stay manual.
+      # test.exe is a .NET program: if a manager's threads outlive it, it never
+      # exits, so fail fast instead of waiting for the job's 6-hour limit.
       - name: Run unit tests
+        timeout-minutes: 10
         run: x64\Release\test.exe --gtest_filter=-*IntegrationTest.*
 
       - name: Check that the C API covers JSRSDKManager
@@ -82,6 +86,7 @@ jobs:
     name: Consumer (${{ matrix.name }})
     needs: build
     runs-on: windows-2025
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -129,6 +134,7 @@ jobs:
     name: Consumer (${{ matrix.name }})
     needs: build
     runs-on: windows-2025
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
