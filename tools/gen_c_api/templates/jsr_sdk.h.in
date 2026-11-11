@@ -32,11 +32,18 @@
  *     points to a buffer of stringLength bytes, and longer strings are
  *     truncated.
  *   - required and count may be NULL when the caller doesn't need them.
- * - Callbacks run on a thread owned by the library (a .NET thread), not on
- *   the thread that registered them. They must be thread-safe, return
- *   quickly and never throw or longjmp out.
  * - Calls on one JSR_Manager are not synchronized: don't call it from
  *   several threads at the same time.
+ * - Events can arrive inside your own calls: the SDK raises the event for a
+ *   change inside the call that made it (JSR_SetGainIndex() calls the
+ *   status-change callback on your thread before it returns). Other events,
+ *   such as discovery, arrive on threads owned by the .NET runtime.
+ * - Callbacks must be thread-safe, return quickly and never throw or longjmp
+ *   out. Callbacks of one kind never overlap.
+ * - Replacing or removing a callback waits for a running one to return;
+ *   after that the old callback is never called again, so its user data
+ *   may be freed. A callback must therefore not block on a thread that is
+ *   replacing callbacks.
  *
  * Machine requirements: .NET Framework 4.8, the Microsoft Visual C++
  * runtime, and the plugin DLLs from the release next to JSR-SDK.dll.
@@ -159,11 +166,11 @@ typedef struct JSR_NotifyEvent {
 /** Opaque handle to a manager. */
 typedef struct JSR_Manager JSR_Manager;
 
-/** Receives status changes. Runs on a library thread; see the conventions. */
+/** Receives status changes. See the conventions for which thread. */
 typedef void(JSR_CALL *JSR_StatusChangeCallback)(
     const JSR_StatusChangedEvent *event, void *user);
 
-/** Receives manager notifications. Runs on a library thread. */
+/** Receives manager notifications. See the conventions for which thread. */
 typedef void(JSR_CALL *JSR_NotifyCallback)(const JSR_NotifyEvent *event,
                                            void *user);
 

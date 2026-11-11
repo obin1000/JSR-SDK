@@ -39,9 +39,9 @@ using LibMetadata = JSR_LibMetadata;
 using StatusChangedEvent = JSR_StatusChangedEvent;
 using NotifyEvent = JSR_NotifyEvent;
 
-/// Called on a library thread for every status change; see jsr_sdk.h.
+/// Called for every status change; see jsr_sdk.h for which thread.
 using StatusChangeCallback = std::function<void(const StatusChangedEvent &)>;
-/// Called on a library thread for every manager notification.
+/// Called for every manager notification; see jsr_sdk.h for which thread.
 using NotifyCallback = std::function<void(const NotifyEvent &)>;
 
 /// Thrown when a call fails. code() is one of the JSR_ERROR_* values.
@@ -160,8 +160,9 @@ public:
   JSR_Manager *handle() const noexcept { return m_handle; }
 
   // --- Callbacks ---
-  // A callback runs on a library thread. Exceptions it throws are ignored,
-  // because they can't be passed back to anyone.
+  // A callback can run inside one of your own calls (a setter raises its
+  // status event before returning) or on a library thread; see jsr_sdk.h.
+  // Exceptions it throws are ignored, because they can't be passed back.
 
   /// Sets the status-change callback, replacing any previous one.
   void replaceStatusChangeEventHandler(StatusChangeCallback callback) {
