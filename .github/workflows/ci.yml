@@ -41,7 +41,9 @@ jobs:
       - name: Build x86 static library
         run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
 
-      # The integration tests need a pulser-receiver attached, so they stay manual.
+      # The unit tests include simulator tests: the SDK's diagnostics plugin
+      # simulates pulser-receivers, so they need no hardware. The integration
+      # tests need a real pulser-receiver attached, so they stay manual.
       # test.exe is a .NET program: if a manager's threads outlive it, it never
       # exits, so fail fast instead of waiting for the job's 6-hour limit.
       - name: Run unit tests
@@ -69,6 +71,15 @@ jobs:
         run: |
           bash ci/make-mingw-implib.sh lib/x64/dynamic/JSR-SDK.dll x64
           bash ci/make-mingw-implib.sh lib/Win32/dynamic/JSR-SDK.dll Win32
+
+      # Make sure the export check can fail: with one allowed name too few it
+      # must reject the DLL.
+      - name: Check that the export check rejects unexpected exports
+        shell: pwsh
+        run: |
+          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll -Allowed CreateJSRSDKManager
+          if ($LASTEXITCODE -ne 1) { throw "check-exports.ps1 accepted an unexpected export" }
+          exit 0
 
       - name: Upload release layout
         uses: actions/upload-artifact@v4

@@ -32,10 +32,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\..\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\..\include;$(ProjectDir)\..\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\..\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\..\include;$(ProjectDir)\..\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,11 +76,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="SimulatorSupport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CApiTest.cpp" />
     <ClCompile Include="JSRSDKManagerIntegrationTest.cpp" />
     <ClCompile Include="JsrManagerIntegrationTest.cpp" />
+    <ClCompile Include="ManagedErrorsTest.cpp" />
+    <ClCompile Include="SimulatorTest.cpp" />
     <ClCompile Include="MarshalEnumsTest.cpp" />
     <ClCompile Include="MarshallTypesTest.cpp" />
     <ClCompile Include="pch.cpp">

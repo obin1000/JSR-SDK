@@ -60,6 +60,7 @@
     <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
     <ClInclude Include="include\JSR-SDK\jsr_sdk.h" />
     <ClInclude Include="include\JSR-SDK\jsr_sdk.hpp" />
+    <ClInclude Include="src\ManagedErrors.hpp" />
     <ClInclude Include="src\SdkError.hpp" />
   </ItemGroup>
   <ItemGroup>
