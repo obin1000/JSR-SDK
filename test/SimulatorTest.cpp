@@ -9,7 +9,10 @@
 #include "SdkError.hpp"
 #include "SimulatorSupport.h"
 
+#include <atomic>
 #include <cstring>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -209,6 +212,64 @@ TEST_F(SimulatorTest, GainIndex_SelectsValueFromGainValues) {
     EXPECT_DOUBLE_EQ(manager->getGain(), values[index]) << "index " << index;
   }
   manager->setGainIndex(original);
+}
+
+TEST_F(SimulatorTest, ReplacingCallbackWhileEventsFire_NeverCallsOldOne) {
+  // Each callback gets a probe. Once replace...() returns, the old callback
+  // must neither be running nor be called again: it may capture things the
+  // caller frees right after. The probes all stay alive, so a late call is
+  // counted instead of touching freed memory.
+  struct Probe {
+    std::atomic<bool> retired{false};
+  };
+  std::vector<std::unique_ptr<Probe>> probes;
+  std::atomic<int> calls{0};
+  std::atomic<int> lateCalls{0};
+  const int original = manager->getGainIndex();
+
+  for (int i = 0; i < 200; ++i) {
+    probes.push_back(std::make_unique<Probe>());
+    Probe *probe = probes.back().get();
+    manager->replaceStatusChangeEventHandler(
+        [probe, &calls, &lateCalls](const StatusChangedEvent &) {
+          ++calls;
+          if (probe->retired) {
+            ++lateCalls;
+          }
+          // Stay in the callback a little, as a real one might.
+          std::this_thread::sleep_for(std::chrono::microseconds(200));
+        });
+    if (probes.size() > 1) {
+      probes[probes.size() - 2]->retired = true;
+    }
+    manager->setGainIndex(i % 10);
+  }
+  manager->removeStatusChangeEventHandler();
+  probes.back()->retired = true;
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+
+  EXPECT_GT(calls.load(), 0);
+  EXPECT_EQ(lateCalls.load(), 0);
+
+  // Restore the suite's logging callback.
+  manager->replaceStatusChangeEventHandler(
+      [](const StatusChangedEvent &e) { statusEvents->add(e); });
+  manager->setGainIndex(original);
+}
+
+TEST_F(SimulatorTest, ThrowingCallback_DoesNotStopEvents) {
+  std::atomic<int> calls{0};
+  manager->replaceStatusChangeEventHandler([&](const StatusChangedEvent &) {
+    ++calls;
+    throw std::runtime_error("callback failure");
+  });
+  const int original = manager->getGainIndex();
+  manager->setGainIndex(original == 1 ? 2 : 1);
+  manager->setGainIndex(original);
+  EXPECT_TRUE(sim::waitFor([&] { return calls.load() >= 2; }));
+
+  manager->replaceStatusChangeEventHandler(
+      [](const StatusChangedEvent &e) { statusEvents->add(e); });
 }
 
 TEST_F(SimulatorTest, ReceiverMode_RoundTrips) {
