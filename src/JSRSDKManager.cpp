@@ -73,6 +73,18 @@ public:
   ~JSRSDKManagerAdapter() override {
     removeStatusChangeEventHandler();
     removeNotifyEventHandler();
+
+    // A gcroot doesn't dispose what it holds, so dispose the wrapper here:
+    // that unsubscribes from the SDK's events and shuts the .NET manager
+    // down. Without it the manager's threads outlive it, and a .NET (/clr)
+    // program waits for them forever when it exits.
+    try {
+      JSRSDKWrapper ^ wrapper = m_manager;
+      m_manager = nullptr;
+      delete wrapper;
+    } catch (...) {
+      // A destructor must not throw; the manager is gone either way.
+    }
   }
 
   // === Custom functions added ===
