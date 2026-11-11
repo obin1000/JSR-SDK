@@ -1,0 +1,1177 @@
+/*
+ * jsr_sdk.h - C API of JSR-SDK.
+ *
+ * Works with every compiler that can call a Windows DLL: MSVC, clang-cl,
+ * MinGW-w64 GCC and MinGW clang. C++ programs can use the RAII wrapper in
+ * jsr_sdk.hpp instead.
+ *
+ * Conventions
+ * -----------
+ * - Every function returns an int32_t error code: JSR_OK (0) on success or
+ *   one of the negative JSR_ERROR_* values. JSR_GetLastErrorMessage() then
+ *   returns the message of the last failed call on the same thread.
+ * - No exception ever crosses this API.
+ * - Booleans are int32_t: 0 is false, anything else is true.
+ * - Enums are passed as int32_t; the JSR_* enum constants below name the
+ *   values.
+ * - Strings are UTF-8 and NUL-terminated. A NULL string argument is an
+ *   error (JSR_ERROR_NULL_POINTER) unless the function says otherwise.
+ * - Results are written into buffers the caller owns. The library never
+ *   returns memory the caller has to free.
+ *   - A string result takes (char *buffer, size_t bufferSize,
+ *     size_t *required). *required receives the size the full string needs,
+ *     including the terminating NUL. A longer string is truncated. Pass
+ *     buffer = NULL to only query the size.
+ *   - A list result takes (buffers, bufferCount, ..., size_t *count). *count
+ *     receives the number of items available, which can be larger than
+ *     bufferCount; only the first bufferCount items are written. Pass
+ *     buffers = NULL to only query the count. In a string list each entry
+ *     points to a buffer of stringLength bytes, and longer strings are
+ *     truncated.
+ *   - required and count may be NULL when the caller doesn't need them.
+ * - Callbacks run on a thread owned by the library (a .NET thread), not on
+ *   the thread that registered them. They must be thread-safe, return
+ *   quickly and never throw or longjmp out.
+ * - Calls on one JSR_Manager are not synchronized: don't call it from
+ *   several threads at the same time.
+ *
+ * Machine requirements: .NET Framework 4.8, the Microsoft Visual C++
+ * runtime, and the plugin DLLs from the release next to JSR-SDK.dll.
+ */
+#ifndef JSR_SDK_H
+#define JSR_SDK_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+#ifndef _WIN32
+#error "JSR-SDK is Windows-only."
+#endif
+
+/* Calling convention of every function and callback, so x86 builds agree. */
+#define JSR_CALL __cdecl
+
+#if defined(JSR_SDK_BUILDING)
+#define JSR_API __declspec(dllexport)
+#elif defined(JSR_SDK_STATIC)
+#define JSR_API
+#else
+#define JSR_API __declspec(dllimport)
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Length of the string fields in the structs below, including the NUL. */
+#define JSR_STRING_LENGTH 256
+/* Capacity of the array fields in JSR_LibMetadata. */
+#define JSR_MAX_ARRAY_SIZE 64
+/* Capacity of JSR_NotifyEvent.info. */
+#define JSR_MAX_INFO_COUNT 32
+/* Length of the exception messages in JSR_StatusChangedEvent. */
+#define JSR_EXCEPTION_STRING_LENGTH 512
+
+/* ========================================================================== */
+/* Enums                                                                      */
+/* ========================================================================== */
+
+/** Mirrors C_ERROR_CODE. */
+typedef enum JSR_ErrorCode {
+  JSR_ERROR_UNKNOWN = -1000,
+  JSR_ERROR_DEVICE_NOT_FOUND = -999,
+  JSR_ERROR_PLUGINS_NOT_LOADED = -998,
+  JSR_ERROR_NOT_FOUND = -997,
+  JSR_ERROR_COMMUNICATION_FAILURE = -996,
+  JSR_ERROR_RESP_ADDRESS_MISMATCH = -995,
+  JSR_ERROR_RESP_INVALID_LENGTH = -994,
+  JSR_ERROR_PORT_OPEN_FAILED = -993,
+  JSR_ERROR_TIMEOUT = -992,
+  JSR_ERROR_VALUE_OUT_RANGE = -991,
+  JSR_ERROR_OPERATION_NOT_SUPPORTED = -990,
+  JSR_ERROR_HARDWARE_FAILURE = -989,
+  JSR_ERROR_INTERNAL_SOFTWARE_FAULT = -988,
+  JSR_ERROR_PROPERTY_WRITE_NOT_FINISHED_YET = -987,
+  JSR_ERROR_NO_PULSER_RCVR_SELECTED = -986,
+  JSR_ERROR_INVALID_ARGUMENT = -985,
+  JSR_ERROR_NULL_POINTER = -984,
+  JSR_ERROR_OPERATION_FAILED = -983,
+  JSR_ERROR_VERSION_MISMATCH = -982,
+  JSR_ERROR_PLUGIN_LOAD_ERROR = -981,
+  JSR_ERROR_DEVICE_DISCOVERY_ERROR = -980,
+  JSR_ERROR_DEVICE_NOT_READY = -979,
+  JSR_OK = 0
+} JSR_ErrorCode;
+
+/** Mirrors C_CONNECTION_TYPE. */
+typedef enum JSR_ConnectionType {
+  JSR_CONNECTION_TYPE_SOFTWARE = 0,
+  JSR_CONNECTION_TYPE_SERIALPORT = 1,
+  JSR_CONNECTION_TYPE_PCI = 2,
+  JSR_CONNECTION_TYPE_USB = 3,
+  JSR_CONNECTION_TYPE_ETHERNET = 4,
+  JSR_CONNECTION_TYPE_FIREWIRE = 5,
+  JSR_CONNECTION_TYPE_BLUETOOTH = 6
+} JSR_ConnectionType;
+
+/** Mirrors C_DISCOVERY_STATE_FLAGS. */
+typedef enum JSR_DiscoveryStateFlags {
+  JSR_DISCOVERY_STATE_NONE = 0,
+  JSR_DISCOVERY_STATE_ACTIVE = 1,
+  JSR_DISCOVERY_STATE_PENDING = 2,
+  JSR_DISCOVERY_STATE_STOPPED_ON_ERR = 4
+} JSR_DiscoveryStateFlags;
+
+/** Mirrors C_IS_PULSING. */
+typedef enum JSR_IsPulsing {
+  JSR_IS_PULSING_INACTIVE = 0,
+  JSR_IS_PULSING_ACTIVE = 1,
+  JSR_IS_PULSING_UNKNOWN = 2
+} JSR_IsPulsing;
+
+/** Mirrors C_MANAGER_STATE. */
+typedef enum JSR_ManagerState {
+  JSR_MANAGER_STATE_NOT_STARTED = 0,
+  JSR_MANAGER_STATE_PLUGINS_LOADED = 1,
+  JSR_MANAGER_STATE_RUNNING = 2,
+  JSR_MANAGER_STATE_SHUTTING_DOWN = 3
+} JSR_ManagerState;
+
+/** Mirrors C_NOTIFY_TYPE. */
+typedef enum JSR_NotifyType {
+  JSR_NOTIFY_TYPE_PULSER_RCVR_DISCOVERED = 0,
+  JSR_NOTIFY_TYPE_CURRENT_PULSER_RCVR_CHANGED = 1,
+  JSR_NOTIFY_TYPE_PULSER_RCVR_DETACH = 2,
+  JSR_NOTIFY_TYPE_DISCOVERY_STARTED = 3,
+  JSR_NOTIFY_TYPE_DISCOVERY_COMPLETE = 4,
+  JSR_NOTIFY_TYPE_PROPERTY_CHANGE = 5,
+  JSR_NOTIFY_TYPE_STATE_CHANGE = 6,
+  JSR_NOTIFY_TYPE_ERROR = 7
+} JSR_NotifyType;
+
+/** Mirrors C_POWER_LIMIT. */
+typedef enum JSR_PowerLimit {
+  JSR_POWER_LIMIT_WITHIN_LIMIT = 0,
+  JSR_POWER_LIMIT_OVER_LIMIT = 1
+} JSR_PowerLimit;
+
+/** Mirrors C_PROPERTY_UNITS. */
+typedef enum JSR_PropertyUnits {
+  JSR_PROPERTY_UNITS_NONE = 0,
+  JSR_PROPERTY_UNITS_HERTZ = 1,
+  JSR_PROPERTY_UNITS_KILOHERTZ = 2,
+  JSR_PROPERTY_UNITS_MEGAHERTZ = 3,
+  JSR_PROPERTY_UNITS_MICROJOULES = 4,
+  JSR_PROPERTY_UNITS_JOULES = 5,
+  JSR_PROPERTY_UNITS_WATTS = 6,
+  JSR_PROPERTY_UNITS_DB = 7,
+  JSR_PROPERTY_UNITS_VOLTS = 8,
+  JSR_PROPERTY_UNITS_OHMS = 9,
+  JSR_PROPERTY_UNITS_PICOFARADS = 10
+} JSR_PropertyUnits;
+
+/** Mirrors C_PULSER_IMPEDANCE. */
+typedef enum JSR_PulserImpedance {
+  JSR_PULSER_IMPEDANCE_LOW_Z = 0,
+  JSR_PULSER_IMPEDANCE_HIGH_Z = 1,
+  JSR_PULSER_IMPEDANCE_LAST_VAL = 2
+} JSR_PulserImpedance;
+
+/** Mirrors C_PULSER_PROPERTY_DATA_TYPE. */
+typedef enum JSR_PulserPropertyDataType {
+  JSR_DATA_TYPE_INTEGER = 0,
+  JSR_DATA_TYPE_BYTE = 1,
+  JSR_DATA_TYPE_DOUBLE = 2,
+  JSR_DATA_TYPE_BOOLEAN = 3,
+  JSR_DATA_TYPE_STRING = 4,
+  JSR_DATA_TYPE_BYTE_ARRAY = 5,
+  JSR_DATA_TYPE_INTEGER_ARRAY = 6,
+  JSR_DATA_TYPE_DOUBLE_ARRAY = 7,
+  JSR_DATA_TYPE_BOOLEAN_ARRAY = 8,
+  JSR_DATA_TYPE_STRING_ARRAY = 9,
+  JSR_DATA_TYPE_ENUM = 10,
+  JSR_DATA_TYPE_ID = 11,
+  JSR_DATA_TYPE_OTHER = 12
+} JSR_PulserPropertyDataType;
+
+/** Mirrors C_PULSER_PROPERTY_ROLE. */
+typedef enum JSR_PulserPropertyRole {
+  JSR_PROPERTY_ROLE_DIRECT = 0,
+  JSR_PROPERTY_ROLE_DIRECTSUPPORTED = 1,
+  JSR_PROPERTY_ROLE_SPECIFICVALUESUPPORTED = 2,
+  JSR_PROPERTY_ROLE_DIRECTVALUES = 3,
+  JSR_PROPERTY_ROLE_STEPSIZE = 4,
+  JSR_PROPERTY_ROLE_STEPSIZESUPPORTED = 5,
+  JSR_PROPERTY_ROLE_INDEX = 6,
+  JSR_PROPERTY_ROLE_INDEXMAX = 7,
+  JSR_PROPERTY_ROLE_INDEXSUPPORTED = 8,
+  JSR_PROPERTY_ROLE_MAX = 9,
+  JSR_PROPERTY_ROLE_MIN = 10,
+  JSR_PROPERTY_ROLE_INDEXVALUES = 11,
+  JSR_PROPERTY_ROLE_NUMERATOR = 12,
+  JSR_PROPERTY_ROLE_OTHER = 13
+} JSR_PulserPropertyRole;
+
+/** Mirrors C_PULSER_RECEIVER_STATE. */
+typedef enum JSR_PulserReceiverState {
+  JSR_PULSER_RECEIVER_STATE_DETECTED = 0,
+  JSR_PULSER_RECEIVER_STATE_INITIALIZING = 1,
+  JSR_PULSER_RECEIVER_STATE_READY = 2,
+  JSR_PULSER_RECEIVER_STATE_ERROR = 3,
+  JSR_PULSER_RECEIVER_STATE_NO_PULSER = 4,
+  JSR_PULSER_RECEIVER_STATE_DETACHED = 5
+} JSR_PulserReceiverState;
+
+/** Mirrors C_RECEIVER_MODE. */
+typedef enum JSR_ReceiverMode {
+  JSR_RECEIVER_MODE_ECHO = 0,
+  JSR_RECEIVER_MODE_THRU = 1,
+  JSR_RECEIVER_MODE_BOTH = 2,
+  JSR_RECEIVER_MODE_LAST_VAL = 3
+} JSR_ReceiverMode;
+
+/** Mirrors C_STATUS_CHANGE. */
+typedef enum JSR_StatusChange {
+  JSR_STATUS_CHANGE_INSTRUMENT_DISCONNECT = 0,
+  JSR_STATUS_CHANGE_PROPERTY_CHANGE = 1,
+  JSR_STATUS_CHANGE_OPERATIONAL_FAULT = 2,
+  JSR_STATUS_CHANGE_STATE_CHANGE = 3
+} JSR_StatusChange;
+
+/** Mirrors C_TRIGGER_IMPEDANCE. */
+typedef enum JSR_TriggerImpedance {
+  JSR_TRIGGER_IMPEDANCE_LOW_Z = 0,
+  JSR_TRIGGER_IMPEDANCE_HIGH_Z = 1,
+  JSR_TRIGGER_IMPEDANCE_LAST_VAL = 2
+} JSR_TriggerImpedance;
+
+/** Mirrors C_TRIGGER_POLARITY. */
+typedef enum JSR_TriggerPolarity {
+  JSR_TRIGGER_POLARITY_RISING = 0,
+  JSR_TRIGGER_POLARITY_FALLING = 1,
+  JSR_TRIGGER_POLARITY_LAST_VAL = 2
+} JSR_TriggerPolarity;
+
+/** Mirrors C_TRIGGER_SOURCE. */
+typedef enum JSR_TriggerSource {
+  JSR_TRIGGER_SOURCE_INTERNAL = 0,
+  JSR_TRIGGER_SOURCE_EXTERNAL = 1,
+  JSR_TRIGGER_SOURCE_SLAVE = 2,
+  JSR_TRIGGER_SOURCE_LAST_VAL = 3
+} JSR_TriggerSource;
+
+/* ========================================================================== */
+/* Structs                                                                    */
+/* ========================================================================== */
+
+/** Identifies an instrument. Mirrors InstrumentID. */
+typedef struct JSR_InstrumentID {
+  char ModelName[JSR_STRING_LENGTH];  /**< e.g. "JSR-DPR300" */
+  char SerialNum[JSR_STRING_LENGTH];  /**< e.g. "JB0104" */
+  char Port[JSR_STRING_LENGTH];       /**< e.g. "COM3" */
+  char PluginName[JSR_STRING_LENGTH]; /**< Plugin that manages the device. */
+} JSR_InstrumentID;
+
+/** Identifies one pulser/receiver channel. Mirrors PulserReceiverID. */
+typedef struct JSR_PulserReceiverID {
+  JSR_InstrumentID InstrumentId;
+  int32_t PulserReceiverIndex; /**< Zero-based channel index. */
+} JSR_PulserReceiverID;
+
+/** Describes a plugin library. Mirrors JSRLibMetadata. */
+typedef struct JSR_LibMetadata {
+  char Name[JSR_STRING_LENGTH];
+  char GUID[JSR_STRING_LENGTH];
+  char FriendlyName[JSR_STRING_LENGTH];
+  char Version[JSR_STRING_LENGTH];
+  int32_t InterfaceVersion;
+  int32_t ConnectionType[JSR_MAX_ARRAY_SIZE]; /**< JSR_CONNECTION_TYPE_* */
+  size_t ConnectionTypeCount;
+  char SupportedModels[JSR_MAX_ARRAY_SIZE][JSR_STRING_LENGTH];
+  size_t SupportedModelsCount;
+  char OpenOptions[JSR_MAX_ARRAY_SIZE][JSR_STRING_LENGTH];
+  size_t OpenOptionsCount;
+} JSR_LibMetadata;
+
+/** Data of a status change. Mirrors StatusChangedEvent. */
+typedef struct JSR_StatusChangedEvent {
+  char pulserProperty[JSR_STRING_LENGTH]; /**< Property that changed. */
+  char newValue[JSR_STRING_LENGTH];       /**< New value, as text. */
+  int32_t dataType;                       /**< JSR_DATA_TYPE_* */
+  int32_t pulserState;                    /**< JSR_PULSER_RECEIVER_STATE_* */
+  int32_t changeType;                     /**< JSR_STATUS_CHANGE_* */
+  JSR_PulserReceiverID pulserReceiverId;
+  char errorMessage[JSR_STRING_LENGTH];
+  int32_t errorCode; /**< JSR_ERROR_* or JSR_OK */
+  /** The exception the SDK attached to the event, if any. */
+  int32_t exceptionErrorCode;
+  char exceptionMessage[JSR_EXCEPTION_STRING_LENGTH];
+  char exceptionInnerMessage[JSR_EXCEPTION_STRING_LENGTH];
+} JSR_StatusChangedEvent;
+
+/** Data of a manager notification. Mirrors NotifyEvent. */
+typedef struct JSR_NotifyEvent {
+  char model[JSR_STRING_LENGTH];
+  char serial[JSR_STRING_LENGTH];
+  char pluginName[JSR_STRING_LENGTH];
+  int32_t prIndex;
+  JSR_PulserReceiverID pulserReceiverId;
+  JSR_InstrumentID instrumentId;
+  int32_t state;         /**< JSR_PULSER_RECEIVER_STATE_* */
+  int32_t notifyType;    /**< JSR_NOTIFY_TYPE_* */
+  int32_t discoverState; /**< JSR_DISCOVERY_STATE_* flags */
+  int32_t wasSelected;   /**< 0 or 1 */
+  char propertyName[JSR_STRING_LENGTH];
+  char newValue[JSR_STRING_LENGTH];
+  int32_t dataType; /**< JSR_DATA_TYPE_* */
+  double maxFrequency;
+  char info[JSR_MAX_INFO_COUNT][JSR_STRING_LENGTH];
+  size_t infoCount;
+  char exceptionTypeInfo[JSR_STRING_LENGTH];
+  char errorMsg[JSR_STRING_LENGTH];
+  char errorText[JSR_STRING_LENGTH];
+} JSR_NotifyEvent;
+
+/* ========================================================================== */
+/* Manager                                                                    */
+/* ========================================================================== */
+
+/** Opaque handle to a manager. */
+typedef struct JSR_Manager JSR_Manager;
+
+/** Receives status changes. Runs on a library thread; see the conventions. */
+typedef void(JSR_CALL *JSR_StatusChangeCallback)(
+    const JSR_StatusChangedEvent *event, void *user);
+
+/** Receives manager notifications. Runs on a library thread. */
+typedef void(JSR_CALL *JSR_NotifyCallback)(const JSR_NotifyEvent *event,
+                                           void *user);
+
+/**
+ * Copies the message of the last failed call on this thread into buffer and
+ * returns the size it needs, including the NUL. Returns 1 (an empty string)
+ * when no call has failed yet.
+ */
+JSR_API size_t JSR_CALL JSR_GetLastErrorMessage(char *buffer,
+                                                size_t bufferSize);
+
+/**
+ * Creates a manager and stores it in *manager. The first call starts the .NET
+ * runtime inside JSR-SDK.dll. Free the manager with JSR_Destroy().
+ */
+JSR_API int32_t JSR_CALL JSR_Create(JSR_Manager **manager);
+
+/** Removes the callbacks and frees the manager. NULL is allowed. */
+JSR_API int32_t JSR_CALL JSR_Destroy(JSR_Manager *manager);
+
+/**
+ * Sets the status-change callback, replacing any previous one. Pass
+ * callback = NULL to remove it. user is passed back to every call.
+ */
+JSR_API int32_t JSR_CALL JSR_SetStatusChangeCallback(
+    JSR_Manager *manager, JSR_StatusChangeCallback callback, void *user);
+
+/**
+ * Sets the notify callback, replacing any previous one. Pass callback = NULL
+ * to remove it. user is passed back to every call.
+ */
+JSR_API int32_t JSR_CALL JSR_SetNotifyCallback(JSR_Manager *manager,
+                                               JSR_NotifyCallback callback,
+                                               void *user);
+
+/** Retrieves the instruments a plugin found. A list result. */
+JSR_API int32_t JSR_CALL JSR_GetInstruments(JSR_Manager *manager,
+                                            const char *pluginName,
+                                            JSR_InstrumentID *buffer,
+                                            size_t bufferCount, size_t *count);
+
+/** Retrieves all pulser receivers the SDK detected. A list result. */
+JSR_API int32_t JSR_CALL JSR_GetPulserReceivers(JSR_Manager *manager,
+                                                JSR_PulserReceiverID *buffer,
+                                                size_t bufferCount,
+                                                size_t *count);
+
+/** Retrieves the metadata of a plugin library. */
+JSR_API int32_t JSR_CALL JSR_GetPluginLibraryMetadata(
+    JSR_Manager *manager, const char *pluginName, JSR_LibMetadata *metadata);
+
+/** Retrieves the ID of the current pulser receiver. */
+JSR_API int32_t JSR_CALL JSR_GetId(JSR_Manager *manager,
+                                   JSR_PulserReceiverID *id);
+
+/* --- Plugins --- */
+
+/** Loads the plugins from the directory that holds JSR-SDK.dll. */
+JSR_API int32_t JSR_CALL JSR_LoadPluginsFromBinaryDir(JSR_Manager *manager);
+
+/* --- Instrument open criteria --- */
+
+/** Adds a port to exclude when the plugin will search for instruments. If this
+ * list is empty, then all ports will be searched. The "port string" is specific
+ * to the method used for searching for instruments: e.g. COM port for SERIAL,
+ * IP Address for ETHERNET, etc. */
+JSR_API int32_t JSR_CALL JSR_AddPortToExclude(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *port);
+
+/** Get the list of excluded ports for a plugin. */
+JSR_API int32_t JSR_CALL
+JSR_GetPortsToExclude(JSR_Manager *manager, const char *plugin, char **buffers,
+                      size_t bufferCount, size_t stringLength, size_t *count);
+
+/** Adds a port to include when the plugin will search for instruments. If this
+ * list is empty, then all ports will be searched. The "port string" is specific
+ * to the method used for searching for instruments: e.g. COM port for SERIAL,
+ * IP Address for ETHERNET, etc. */
+JSR_API int32_t JSR_CALL JSR_AddPortToInclude(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *port);
+
+/** Get the list of included ports for a plugin. */
+JSR_API int32_t JSR_CALL
+JSR_GetPortsToInclude(JSR_Manager *manager, const char *plugin, char **buffers,
+                      size_t bufferCount, size_t stringLength, size_t *count);
+
+/** Adds an open option for a specific plugin. */
+JSR_API int32_t JSR_CALL JSR_AddOpenOption(JSR_Manager *manager,
+                                           const char *plugin,
+                                           const char *optionName,
+                                           const char *optionValue,
+                                           int32_t *added);
+
+/** Get an open option value. */
+JSR_API int32_t JSR_CALL JSR_GetOpenOption(JSR_Manager *manager,
+                                           const char *plugin,
+                                           const char *optionName, char *buffer,
+                                           size_t bufferSize, size_t *required);
+
+/** Get the names of all open options for a plugin. */
+JSR_API int32_t JSR_CALL
+JSR_GetOpenOptionNames(JSR_Manager *manager, const char *plugin, char **buffers,
+                       size_t bufferCount, size_t stringLength, size_t *count);
+
+/** Removes an open option for a specific plugin. */
+JSR_API int32_t JSR_CALL JSR_RemoveOpenOption(JSR_Manager *manager,
+                                              const char *plugin,
+                                              const char *optionName,
+                                              int32_t *removed);
+
+/* --- Manager --- */
+
+/** Adds a managed plugin by its name. */
+JSR_API int32_t JSR_CALL JSR_AddManagedPlugin(JSR_Manager *manager,
+                                              const char *pluginName);
+
+/** Adds an open option for a specific plugin. */
+JSR_API int32_t JSR_CALL JSR_AddPluginOpenOption(JSR_Manager *manager,
+                                                 const char *pluginName,
+                                                 const char *optionName,
+                                                 const char *optionValue);
+
+/** Adds a plugin type to the manager. */
+JSR_API int32_t JSR_CALL JSR_AddPluginType(JSR_Manager *manager,
+                                           const char *pluginType);
+
+/** Forces the detachment of all plugins and resources. */
+JSR_API int32_t JSR_CALL JSR_ForceDetach(JSR_Manager *manager);
+
+/** Retrieves custom settings available in the manager. */
+JSR_API int32_t JSR_CALL JSR_GetCustomSettings(JSR_Manager *manager,
+                                               char **buffers,
+                                               size_t bufferCount,
+                                               size_t stringLength,
+                                               size_t *count);
+
+/** Retrieves the names of all managed plugins. */
+JSR_API int32_t JSR_CALL JSR_GetManagedPluginNames(JSR_Manager *manager,
+                                                   char **buffers,
+                                                   size_t bufferCount,
+                                                   size_t stringLength,
+                                                   size_t *count);
+
+/** Retrieves names of the loaded plugins. */
+JSR_API int32_t JSR_CALL JSR_GetPluginNames(JSR_Manager *manager,
+                                            char **buffers, size_t bufferCount,
+                                            size_t stringLength, size_t *count);
+
+/** Retrieves the attributes of a specific pulser property. */
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyAttributes(
+    JSR_Manager *manager, const char *settingName, int32_t *value);
+
+/** Retrieves the units of a specific pulser property. */
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyUnits(JSR_Manager *manager,
+                                                    const char *settingName,
+                                                    int32_t *value);
+
+/** Retrieves the units of a specific pulser property as a string. */
+JSR_API int32_t JSR_CALL JSR_GetPulserPropertyUnitsAsString(
+    JSR_Manager *manager, const char *settingName, int32_t useShort,
+    char *buffer, size_t bufferSize, size_t *required);
+
+/** Retrieves information about a pulser receiver identified by model, serial
+ * number and index. */
+JSR_API int32_t JSR_CALL JSR_GetPulserReceiverInfoByModel(
+    JSR_Manager *manager, const char *model, const char *serialNum,
+    int32_t index, char **buffers, size_t bufferCount, size_t stringLength,
+    size_t *count);
+
+/** Retrieves information about a pulser receiver identified by its ID. */
+JSR_API int32_t JSR_CALL JSR_GetPulserReceiverInfoById(
+    JSR_Manager *manager, const JSR_PulserReceiverID *id, char **buffers,
+    size_t bufferCount, size_t stringLength, size_t *count);
+
+/** Checks if a specific pulser setting is supported. */
+JSR_API int32_t JSR_CALL JSR_IsPulserSettingSupported(JSR_Manager *manager,
+                                                      const char *settingName,
+                                                      int32_t *value);
+
+/** Loads plugins from a specified path. */
+JSR_API int32_t JSR_CALL JSR_LoadPlugins(JSR_Manager *manager,
+                                         const char *pluginPath);
+
+/** Notifies the manager's thread procedure. */
+JSR_API int32_t JSR_CALL JSR_NotifyThreadProc(JSR_Manager *manager);
+
+/** Removes all open options for a specific plugin. */
+JSR_API int32_t JSR_CALL JSR_RemoveAllOpenOptions(JSR_Manager *manager,
+                                                  const char *pluginName);
+
+/** Removes a managed plugin by its name. NULL or "" removes the default plugin.
+ */
+JSR_API int32_t JSR_CALL JSR_RemoveManagedPlugin(JSR_Manager *manager,
+                                                 const char *pluginName);
+
+/** Requests the manager's thread procedure. */
+JSR_API int32_t JSR_CALL JSR_RequestThreadProc(JSR_Manager *manager);
+
+/** Selects the current pulser receiver by its ID. */
+JSR_API int32_t JSR_CALL JSR_SetCurrentPulserReceiverById(
+    JSR_Manager *manager, const JSR_PulserReceiverID *id);
+
+/** Selects the current pulser receiver by model, serial number and index. */
+JSR_API int32_t JSR_CALL
+JSR_SetCurrentPulserReceiverByModel(JSR_Manager *manager, const char *model,
+                                    const char *serialNum, int32_t index);
+
+/** Enables or disables discovery mode. */
+JSR_API int32_t JSR_CALL JSR_SetDiscoveryEnable(JSR_Manager *manager,
+                                                int32_t enable);
+
+/** Sets the value of a specific pulser property. */
+JSR_API int32_t JSR_CALL JSR_SetPulserPropertyValue(JSR_Manager *manager,
+                                                    const char *property,
+                                                    const char *value);
+
+/** Sets the value of a pulser property for a specific role. */
+JSR_API int32_t JSR_CALL
+JSR_SetPulserPropertyValueWithRole(JSR_Manager *manager, const char *property,
+                                   int32_t role, const char *value);
+
+/** Shuts down the manager and releases all resources. */
+JSR_API int32_t JSR_CALL JSR_Shutdown(JSR_Manager *manager);
+
+/** Checks if plugins are loaded. */
+JSR_API int32_t JSR_CALL JSR_GetPluginsLoaded(JSR_Manager *manager,
+                                              int32_t *value);
+
+/** Checks if plugins are available. */
+JSR_API int32_t JSR_CALL JSR_GetArePluginsAvailable(JSR_Manager *manager,
+                                                    int32_t *value);
+
+/** Retrieves the current state of the manager. */
+JSR_API int32_t JSR_CALL JSR_GetManagerState(JSR_Manager *manager,
+                                             int32_t *value);
+
+/** Retrieves the plugin path. */
+JSR_API int32_t JSR_CALL JSR_GetPluginPath(JSR_Manager *manager, char *buffer,
+                                           size_t bufferSize, size_t *required);
+
+/** Sets the plugin path. */
+JSR_API int32_t JSR_CALL JSR_SetPluginPath(JSR_Manager *manager,
+                                           const char *path);
+
+/** Checks if a pulser receiver is currently selected. */
+JSR_API int32_t JSR_CALL JSR_GetIsPulserReceiverSelected(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Retrieves the context message of the last exception. */
+JSR_API int32_t JSR_CALL JSR_GetLastExceptionContextMessage(
+    JSR_Manager *manager, char *buffer, size_t bufferSize, size_t *required);
+
+/** Retrieves the message of the SDK's last exception. *required is 0 when there
+ * is none. */
+JSR_API int32_t JSR_CALL JSR_GetLastExceptionOrNull(JSR_Manager *manager,
+                                                    char *buffer,
+                                                    size_t bufferSize,
+                                                    size_t *required);
+
+/** Retrieves general information about the system. */
+JSR_API int32_t JSR_CALL JSR_GetInfo(JSR_Manager *manager, char **buffers,
+                                     size_t bufferCount, size_t stringLength,
+                                     size_t *count);
+
+/* --- Pulse repetition frequency --- */
+
+/** Checks if the pulse repetition frequency index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequencyIndexSupported(
+    JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the numerator of the pulse repetition frequency. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyNumerator(JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the available pulse repetition frequency values. */
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequencyValues(
+    JSR_Manager *manager, double *buffer, size_t bufferCount, size_t *count);
+
+/** Retrieves the maximum index of the pulse repetition frequency. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyIndexMax(JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the current index of the pulse repetition frequency. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyIndex(JSR_Manager *manager, int32_t *value);
+
+/** Sets the index of the pulse repetition frequency. */
+JSR_API int32_t JSR_CALL
+JSR_SetPulseRepetitionFrequencyIndex(JSR_Manager *manager, int32_t index);
+
+/** Retrieves the minimum pulse repetition frequency value. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyMin(JSR_Manager *manager, double *value);
+
+/** Retrieves the maximum pulse repetition frequency value. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulseRepetitionFrequencyMax(JSR_Manager *manager, double *value);
+
+/** Retrieves the current pulse repetition frequency value. */
+JSR_API int32_t JSR_CALL JSR_GetPulseRepetitionFrequency(JSR_Manager *manager,
+                                                         double *value);
+
+/** Sets the pulse repetition frequency value. */
+JSR_API int32_t JSR_CALL JSR_SetPulseRepetitionFrequency(JSR_Manager *manager,
+                                                         double frequency);
+
+/** Retrieves the maximum frequency. */
+JSR_API int32_t JSR_CALL JSR_GetMaxFrequency(JSR_Manager *manager,
+                                             double *value);
+
+/** Checks if the maximum PRFs for the pulser are supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserMaxPRFsSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the maximum PRFs for the pulser. */
+JSR_API int32_t JSR_CALL JSR_GetPulserMaxPRFs(JSR_Manager *manager,
+                                              double *buffer,
+                                              size_t bufferCount,
+                                              size_t *count);
+
+/* --- High voltage supply --- */
+
+/** Retrieves the maximum high voltage supply value. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyMax(JSR_Manager *manager,
+                                            double *value);
+
+/** Retrieves the minimum high voltage supply value. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyMin(JSR_Manager *manager,
+                                            double *value);
+
+/** Retrieves the current high voltage supply value. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupply(JSR_Manager *manager, double *value);
+
+/** Sets the high voltage supply value. */
+JSR_API int32_t JSR_CALL JSR_SetHVSupply(JSR_Manager *manager, double supply);
+
+/** Checks if the high voltage supply is supported. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplySupported(JSR_Manager *manager,
+                                                  int32_t *value);
+
+/** Retrieves the available high voltage supply values. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyValues(JSR_Manager *manager,
+                                               double *buffer,
+                                               size_t bufferCount,
+                                               size_t *count);
+
+/** Checks if the high voltage supply index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndexSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the maximum index of high voltage supply values. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndexMax(JSR_Manager *manager,
+                                                 int32_t *value);
+
+/** Retrieves the current high voltage supply index. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyIndex(JSR_Manager *manager,
+                                              int32_t *value);
+
+/** Sets the high voltage supply index. */
+JSR_API int32_t JSR_CALL JSR_SetHVSupplyIndex(JSR_Manager *manager,
+                                              int32_t index);
+
+/** Checks if the high voltage supply is enabled. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyEnable(JSR_Manager *manager,
+                                               int32_t *value);
+
+/** Enables or disables the high voltage supply. */
+JSR_API int32_t JSR_CALL JSR_SetHVSupplyEnable(JSR_Manager *manager,
+                                               int32_t enable);
+
+/** Checks if enabling the high voltage supply is supported. */
+JSR_API int32_t JSR_CALL JSR_GetHVSupplyEnableSupported(JSR_Manager *manager,
+                                                        int32_t *value);
+
+/** Retrieves the high voltage measurement value. */
+JSR_API int32_t JSR_CALL JSR_GetHVMeasurement(JSR_Manager *manager,
+                                              double *value);
+
+/** Checks if the high voltage measurement is supported. */
+JSR_API int32_t JSR_CALL JSR_GetHVMeasurementSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/* --- Trigger --- */
+
+/** Retrieves the trigger edge polarity. */
+JSR_API int32_t JSR_CALL JSR_GetTriggerEdgePolarity(JSR_Manager *manager,
+                                                    int32_t *value);
+
+/** Sets the trigger edge polarity. */
+JSR_API int32_t JSR_CALL JSR_SetTriggerEdgePolarity(JSR_Manager *manager,
+                                                    int32_t polarity);
+
+/** Checks if the trigger edge polarity is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerEdgePolaritySupported(JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the current trigger source. */
+JSR_API int32_t JSR_CALL JSR_GetTriggerSource(JSR_Manager *manager,
+                                              int32_t *value);
+
+/** Sets the trigger source. */
+JSR_API int32_t JSR_CALL JSR_SetTriggerSource(JSR_Manager *manager,
+                                              int32_t source);
+
+/** Checks if the internal trigger source is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceInternalSupported(JSR_Manager *manager, int32_t *value);
+
+/** Checks if the external trigger source is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceExternalSupported(JSR_Manager *manager, int32_t *value);
+
+/** Checks if the slave trigger source is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetTriggerSourceSlaveSupported(JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the names of available pulser trigger source values. */
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerSourceValueNames(
+    JSR_Manager *manager, char **buffers, size_t bufferCount,
+    size_t stringLength, size_t *count);
+
+/** Retrieves the maximum index of pulser trigger sources. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulserTriggerSourceIndexMax(JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the current index of the pulser trigger source. */
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerSourceIndex(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Sets the index of the pulser trigger source. */
+JSR_API int32_t JSR_CALL JSR_SetPulserTriggerSourceIndex(JSR_Manager *manager,
+                                                         int32_t index);
+
+/** Checks if the trigger is enabled. */
+JSR_API int32_t JSR_CALL JSR_GetTriggerEnable(JSR_Manager *manager,
+                                              int32_t *value);
+
+/** Enables or disables the trigger. */
+JSR_API int32_t JSR_CALL JSR_SetTriggerEnable(JSR_Manager *manager,
+                                              int32_t enable);
+
+/** Retrieves the trigger impedance. */
+JSR_API int32_t JSR_CALL JSR_GetTriggerImpedance(JSR_Manager *manager,
+                                                 int32_t *value);
+
+/** Sets the trigger impedance. */
+JSR_API int32_t JSR_CALL JSR_SetTriggerImpedance(JSR_Manager *manager,
+                                                 int32_t impedance);
+
+/** Checks if the trigger impedance is supported. */
+JSR_API int32_t JSR_CALL JSR_GetTriggerImpedanceSupported(JSR_Manager *manager,
+                                                          int32_t *value);
+
+/** Retrieves the pulser trigger count. */
+JSR_API int32_t JSR_CALL JSR_GetPulserTriggerCount(JSR_Manager *manager,
+                                                   int32_t *value);
+
+/** Checks if the pulser trigger count is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetPulserTriggerCountSupported(JSR_Manager *manager, int32_t *value);
+
+/* --- Filters --- */
+
+/** Retrieves the available high-pass filter values. */
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterValues(JSR_Manager *manager,
+                                                     double *buffer,
+                                                     size_t bufferCount,
+                                                     size_t *count);
+
+/** Retrieves the maximum index of the high-pass filter. */
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterIndexMax(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the current index of the high-pass filter. */
+JSR_API int32_t JSR_CALL JSR_GetHighPassFilterIndex(JSR_Manager *manager,
+                                                    int32_t *value);
+
+/** Sets the index of the high-pass filter. */
+JSR_API int32_t JSR_CALL JSR_SetHighPassFilterIndex(JSR_Manager *manager,
+                                                    int32_t index);
+
+/** Retrieves the available low-pass filter values. */
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterValues(JSR_Manager *manager,
+                                                    double *buffer,
+                                                    size_t bufferCount,
+                                                    size_t *count);
+
+/** Retrieves the maximum index of the low-pass filter. */
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterIndexMax(JSR_Manager *manager,
+                                                      int32_t *value);
+
+/** Retrieves the current index of the low-pass filter. */
+JSR_API int32_t JSR_CALL JSR_GetLowPassFilterIndex(JSR_Manager *manager,
+                                                   int32_t *value);
+
+/** Sets the index of the low-pass filter. */
+JSR_API int32_t JSR_CALL JSR_SetLowPassFilterIndex(JSR_Manager *manager,
+                                                   int32_t index);
+
+/* --- Receiver --- */
+
+/** Retrieves the current receiver mode. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverMode(JSR_Manager *manager,
+                                             int32_t *value);
+
+/** Sets the receiver mode. */
+JSR_API int32_t JSR_CALL JSR_SetReceiverMode(JSR_Manager *manager,
+                                             int32_t mode);
+
+/** Checks if the "Both" receiver mode is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeBothSupported(JSR_Manager *manager,
+                                                          int32_t *value);
+
+/** Checks if the "Thru" receiver mode is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeThruSupported(JSR_Manager *manager,
+                                                          int32_t *value);
+
+/** Checks if the "Echo" receiver mode is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverModeEchoSupported(JSR_Manager *manager,
+                                                          int32_t *value);
+
+/** Retrieves the receiver supply voltages. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverSupplyVoltages(JSR_Manager *manager,
+                                                       char **buffers,
+                                                       size_t bufferCount,
+                                                       size_t stringLength,
+                                                       size_t *count);
+
+/** Checks if receiver supply voltages are supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetReceiverSupplyVoltagesSupported(JSR_Manager *manager, int32_t *value);
+
+/* --- Gain --- */
+
+/** Retrieves the available gain values. */
+JSR_API int32_t JSR_CALL JSR_GetGainValues(JSR_Manager *manager, double *buffer,
+                                           size_t bufferCount, size_t *count);
+
+/** Retrieves the maximum index of the gain. */
+JSR_API int32_t JSR_CALL JSR_GetGainIndexMax(JSR_Manager *manager,
+                                             int32_t *value);
+
+/** Retrieves the current index of the gain. */
+JSR_API int32_t JSR_CALL JSR_GetGainIndex(JSR_Manager *manager, int32_t *value);
+
+/** Sets the index of the gain. */
+JSR_API int32_t JSR_CALL JSR_SetGainIndex(JSR_Manager *manager, int32_t index);
+
+/** Checks if the gain index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetGainIndexSupported(JSR_Manager *manager,
+                                                   int32_t *value);
+
+/** Checks if the gain step size is supported. */
+JSR_API int32_t JSR_CALL JSR_GetGainStepSizeSupported(JSR_Manager *manager,
+                                                      int32_t *value);
+
+/** Retrieves the gain step size. */
+JSR_API int32_t JSR_CALL JSR_GetGainStepSize(JSR_Manager *manager,
+                                             double *value);
+
+/** Retrieves the minimum gain value. */
+JSR_API int32_t JSR_CALL JSR_GetGainMin(JSR_Manager *manager, double *value);
+
+/** Retrieves the maximum gain value. */
+JSR_API int32_t JSR_CALL JSR_GetGainMax(JSR_Manager *manager, double *value);
+
+/** Retrieves the current gain value. */
+JSR_API int32_t JSR_CALL JSR_GetGain(JSR_Manager *manager, double *value);
+
+/** Sets the gain value. */
+JSR_API int32_t JSR_CALL JSR_SetGain(JSR_Manager *manager, double gain);
+
+/* --- Pulse energy and damping --- */
+
+/** Retrieves the names of available pulse energy values. */
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyValueNames(JSR_Manager *manager,
+                                                      char **buffers,
+                                                      size_t bufferCount,
+                                                      size_t stringLength,
+                                                      size_t *count);
+
+/** Retrieves the maximum index of pulse energy values. */
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndexMax(JSR_Manager *manager,
+                                                    int32_t *value);
+
+/** Retrieves the current index of the pulse energy. */
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndex(JSR_Manager *manager,
+                                                 int32_t *value);
+
+/** Sets the index of the pulse energy. */
+JSR_API int32_t JSR_CALL JSR_SetPulseEnergyIndex(JSR_Manager *manager,
+                                                 int32_t index);
+
+/** Checks if the pulse energy index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulseEnergyIndexSupported(JSR_Manager *manager,
+                                                          int32_t *value);
+
+/** Retrieves the energy per pulse. */
+JSR_API int32_t JSR_CALL JSR_GetEnergyPerPulse(JSR_Manager *manager,
+                                               double *value);
+
+/** Checks if pulser energy capacitor values are supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserEnergyCapacitorValuesSupported(
+    JSR_Manager *manager, int32_t *value);
+
+/** Retrieves the pulser energy capacitor values. */
+JSR_API int32_t JSR_CALL JSR_GetPulserEnergyCapacitorValues(
+    JSR_Manager *manager, double *buffer, size_t bufferCount, size_t *count);
+
+/** Retrieves the available damping values. */
+JSR_API int32_t JSR_CALL JSR_GetDampingValues(JSR_Manager *manager,
+                                              double *buffer,
+                                              size_t bufferCount,
+                                              size_t *count);
+
+/** Retrieves the maximum index of damping values. */
+JSR_API int32_t JSR_CALL JSR_GetDampingIndexMax(JSR_Manager *manager,
+                                                int32_t *value);
+
+/** Retrieves the current index of the damping. */
+JSR_API int32_t JSR_CALL JSR_GetDampingIndex(JSR_Manager *manager,
+                                             int32_t *value);
+
+/** Sets the index of the damping. */
+JSR_API int32_t JSR_CALL JSR_SetDampingIndex(JSR_Manager *manager,
+                                             int32_t index);
+
+/** Checks if the damping index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetDampingIndexSupported(JSR_Manager *manager,
+                                                      int32_t *value);
+
+/* --- Pulser state --- */
+
+/** Retrieves the pulser impedance. */
+JSR_API int32_t JSR_CALL JSR_GetPulserImpedance(JSR_Manager *manager,
+                                                int32_t *value);
+
+/** Sets the pulser impedance. */
+JSR_API int32_t JSR_CALL JSR_SetPulserImpedance(JSR_Manager *manager,
+                                                int32_t impedance);
+
+/** Checks if the pulser impedance is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserImpedanceSupported(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Retrieves the pulser's current pulsing state. */
+JSR_API int32_t JSR_CALL JSR_GetPulserIsPulsing(JSR_Manager *manager,
+                                                int32_t *value);
+
+/** Retrieves the pulser's power limit status. */
+JSR_API int32_t JSR_CALL JSR_GetPulserPowerLimitStatus(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Checks if a pulser is present. */
+JSR_API int32_t JSR_CALL JSR_GetIsPulserPresent(JSR_Manager *manager,
+                                                int32_t *value);
+
+/** Checks if the pulser presence is supported. */
+JSR_API int32_t JSR_CALL JSR_GetIsPulserPresentSupported(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Checks if manual controls are available. */
+JSR_API int32_t JSR_CALL JSR_GetHasManualControls(JSR_Manager *manager,
+                                                  int32_t *value);
+
+/** Retrieves the available LED blink mode values. */
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeValues(JSR_Manager *manager,
+                                                   char **buffers,
+                                                   size_t bufferCount,
+                                                   size_t stringLength,
+                                                   size_t *count);
+
+/** Retrieves the maximum index of LED blink modes. */
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndexMax(JSR_Manager *manager,
+                                                     int32_t *value);
+
+/** Retrieves the current index of the LED blink mode. */
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndex(JSR_Manager *manager,
+                                                  int32_t *value);
+
+/** Sets the index of the LED blink mode. */
+JSR_API int32_t JSR_CALL JSR_SetLEDBlinkModeIndex(JSR_Manager *manager,
+                                                  int32_t index);
+
+/** Checks if the LED blink mode index is supported. */
+JSR_API int32_t JSR_CALL JSR_GetLEDBlinkModeIndexSupported(JSR_Manager *manager,
+                                                           int32_t *value);
+
+/* --- Unit identification --- */
+
+/** Retrieves the unit model name. */
+JSR_API int32_t JSR_CALL JSR_GetUnitModelName(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required);
+
+/** Sets the unit model name. */
+JSR_API int32_t JSR_CALL JSR_SetUnitModelName(JSR_Manager *manager,
+                                              const char *name);
+
+/** Checks if the unit model name is supported. */
+JSR_API int32_t JSR_CALL JSR_GetUnitModelNameSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the unit serial number. */
+JSR_API int32_t JSR_CALL JSR_GetUnitSerialNum(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required);
+
+/** Sets the unit serial number. */
+JSR_API int32_t JSR_CALL JSR_SetUnitSerialNum(JSR_Manager *manager,
+                                              const char *serialNum);
+
+/** Checks if the unit serial number is supported. */
+JSR_API int32_t JSR_CALL JSR_GetUnitSerialNumSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the pulser model name. */
+JSR_API int32_t JSR_CALL JSR_GetPulserModelName(JSR_Manager *manager,
+                                                char *buffer, size_t bufferSize,
+                                                size_t *required);
+
+/** Sets the pulser model name. */
+JSR_API int32_t JSR_CALL JSR_SetPulserModelName(JSR_Manager *manager,
+                                                const char *name);
+
+/** Checks if the pulser model name is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserModelNameSupported(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Retrieves the pulser serial number. */
+JSR_API int32_t JSR_CALL JSR_GetPulserSerialNum(JSR_Manager *manager,
+                                                char *buffer, size_t bufferSize,
+                                                size_t *required);
+
+/** Sets the pulser serial number. */
+JSR_API int32_t JSR_CALL JSR_SetPulserSerialNum(JSR_Manager *manager,
+                                                const char *serialNum);
+
+/** Checks if the pulser serial number is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserSerialNumSupported(JSR_Manager *manager,
+                                                         int32_t *value);
+
+/** Retrieves the pulser hardware revision. */
+JSR_API int32_t JSR_CALL JSR_GetPulserHWRev(JSR_Manager *manager, char *buffer,
+                                            size_t bufferSize,
+                                            size_t *required);
+
+/** Sets the pulser hardware revision. */
+JSR_API int32_t JSR_CALL JSR_SetPulserHWRev(JSR_Manager *manager,
+                                            const char *hwRev);
+
+/** Checks if the pulser hardware revision is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserHWRevSupported(JSR_Manager *manager,
+                                                     int32_t *value);
+
+/** Retrieves the pulser firmware version. */
+JSR_API int32_t JSR_CALL JSR_GetPulserFirmwareVer(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required);
+
+/** Checks if the pulser firmware version is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserFirmwareVerSupported(JSR_Manager *manager,
+                                                           int32_t *value);
+
+/** Checks if pulser OEM data is supported. */
+JSR_API int32_t JSR_CALL JSR_GetPulserOEMDataSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the receiver model name. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverModelName(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required);
+
+/** Sets the receiver model name. */
+JSR_API int32_t JSR_CALL JSR_SetReceiverModelName(JSR_Manager *manager,
+                                                  const char *name);
+
+/** Checks if the receiver model name is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverModelNameSupported(JSR_Manager *manager,
+                                                           int32_t *value);
+
+/** Retrieves the receiver serial number. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverSerialNum(JSR_Manager *manager,
+                                                  char *buffer,
+                                                  size_t bufferSize,
+                                                  size_t *required);
+
+/** Sets the receiver serial number. */
+JSR_API int32_t JSR_CALL JSR_SetReceiverSerialNum(JSR_Manager *manager,
+                                                  const char *serialNum);
+
+/** Checks if the receiver serial number is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverSerialNumSupported(JSR_Manager *manager,
+                                                           int32_t *value);
+
+/** Retrieves the receiver hardware revision. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverHWRev(JSR_Manager *manager,
+                                              char *buffer, size_t bufferSize,
+                                              size_t *required);
+
+/** Sets the receiver hardware revision. */
+JSR_API int32_t JSR_CALL JSR_SetReceiverHWRev(JSR_Manager *manager,
+                                              const char *hwRev);
+
+/** Checks if the receiver hardware revision is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverHWRevSupported(JSR_Manager *manager,
+                                                       int32_t *value);
+
+/** Retrieves the receiver firmware version. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverFirmwareVer(JSR_Manager *manager,
+                                                    char *buffer,
+                                                    size_t bufferSize,
+                                                    size_t *required);
+
+/** Checks if the receiver firmware version is supported. */
+JSR_API int32_t JSR_CALL
+JSR_GetReceiverFirmwareVerSupported(JSR_Manager *manager, int32_t *value);
+
+/** Checks if receiver OEM data is supported. */
+JSR_API int32_t JSR_CALL JSR_GetReceiverOEMDataSupported(JSR_Manager *manager,
+                                                         int32_t *value);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* JSR_SDK_H */

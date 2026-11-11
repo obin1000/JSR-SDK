@@ -107,6 +107,12 @@
     <ClInclude Include="src\SdkError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\JSR-SDK\jsr_sdk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\JSR-SDK\jsr_sdk.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
 
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\JSRSDKWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\jsr_sdk_c.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

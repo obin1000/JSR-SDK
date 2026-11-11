@@ -78,7 +78,9 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CApiTest.cpp" />
     <ClCompile Include="JSRSDKManagerIntegrationTest.cpp" />
+    <ClCompile Include="JsrManagerIntegrationTest.cpp" />
     <ClCompile Include="MarshalEnumsTest.cpp" />
     <ClCompile Include="MarshallTypesTest.cpp" />
     <ClCompile Include="pch.cpp">
