@@ -1,7 +1,10 @@
-#include "JSR-SDK/JSRSDKWrapper.hpp"
+#include "JSRSDKWrapper.hpp"
+#include "marshals/MarshalTypes.h"
 
 #include <msclr/lock.h>
 
+using jsr::detail::notifyEventFromManaged;
+using jsr::detail::statusChangedEventFromManaged;
 using namespace JSRDotNETSDK;
 using namespace System;
 using namespace System::Runtime::InteropServices;

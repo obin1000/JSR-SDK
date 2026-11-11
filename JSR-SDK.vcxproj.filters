@@ -44,10 +44,10 @@
     <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\marshals\MarshalEnums.h">
+    <ClInclude Include="src\marshals\MarshalEnums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\marshals\MarshalTypes.h">
+    <ClInclude Include="src\marshals\MarshalTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\JSR-SDK\enums\C_DISCOVERY_STATE_FLAGS.h">
@@ -101,7 +101,7 @@
     <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\JSR-SDK\JSRSDKWrapper.hpp">
+    <ClInclude Include="src\JSRSDKWrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SdkError.hpp">

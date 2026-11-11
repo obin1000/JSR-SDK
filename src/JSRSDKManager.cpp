@@ -1,7 +1,7 @@
 ﻿#include "JSR-SDK/JSRSDKManager.hpp"
-#include "JSR-SDK/JSRSDKWrapper.hpp"
-#include "JSR-SDK/marshals/MarshalTypes.h"
+#include "JSRSDKWrapper.hpp"
 #include "ManagedErrors.hpp"
+#include "marshals/MarshalTypes.h"
 #include "SdkError.hpp"
 
 #include <msclr/marshal.h>
@@ -16,7 +16,8 @@ using namespace System::Reflection;
 using namespace System::IO;
 using namespace System::Collections::Generic;
 
-using jsr::detail::rethrowManaged;
+// The conversions (marshals/) and rethrowManaged() (ManagedErrors.hpp).
+using namespace jsr::detail;
 
 class JSRSDKManagerAdapter : public JSRSDKManager {
 private:

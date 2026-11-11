@@ -11,9 +11,6 @@
 #include <msclr/marshal_cppstd.h>
 #include <cstring>
 
-using namespace JSRDotNETSDK;
-using namespace System::Collections::Generic;
-using namespace msclr::interop;
 
 /**
  * @file MarshalTypes.h
@@ -23,10 +20,16 @@ using namespace msclr::interop;
  * managed objects.
  **/
 
+namespace jsr::detail {
+
+using namespace JSRDotNETSDK;
+using namespace System::Collections::Generic;
+using namespace msclr::interop;
+
 /**
  * @brief Helper to safely copy a managed string to a fixed-size buffer.
  */
-static void copyManagedString(System::String ^ src, char *dest, size_t destSize) {
+inline void copyManagedString(System::String ^ src, char *dest, size_t destSize) {
   if (System::String::IsNullOrEmpty(src) || dest == nullptr || destSize == 0) {
     if (dest != nullptr && destSize > 0) {
       dest[0] = '\0';
@@ -47,7 +50,7 @@ static void copyManagedString(System::String ^ src, char *dest, size_t destSize)
  * @brief Helper to copy std::string to caller-provided buffer.
  * @return The required size (including null terminator)
  */
-static size_t copyStringToBuffer(const std::string& src, char *buffer, size_t bufferSize) {
+inline size_t copyStringToBuffer(const std::string& src, char *buffer, size_t bufferSize) {
   if (buffer == nullptr || bufferSize == 0) {
     return src.size() + 1;
   }
@@ -66,7 +69,7 @@ static size_t copyStringToBuffer(const std::string& src, char *buffer, size_t bu
  * @brief Helper to copy managed string to caller-provided buffer.
  * @return The required size (including null terminator)
  */
-static size_t copyManagedStringToBuffer(System::String^ src, char *buffer, size_t bufferSize) {
+inline size_t copyManagedStringToBuffer(System::String^ src, char *buffer, size_t bufferSize) {
   if (System::String::IsNullOrEmpty(src)) {
     if (buffer != nullptr && bufferSize > 0) {
       buffer[0] = '\0';
@@ -82,7 +85,7 @@ static size_t copyManagedStringToBuffer(System::String^ src, char *buffer, size_
  * @brief Helper to copy managed string list to caller buffer.
  * @return The actual number of strings
  */
-static size_t copyStringList(System::Collections::Generic::IEnumerable<System::String^>^ list,
+inline size_t copyStringList(System::Collections::Generic::IEnumerable<System::String^>^ list,
                              char **buffer, size_t bufferCount, size_t stringLength) {
   if (list == nullptr) return 0;
   
@@ -107,7 +110,7 @@ static size_t copyStringList(System::Collections::Generic::IEnumerable<System::S
  * @brief Helper to copy double array to caller buffer.
  * @return The actual number of values
  */
-static size_t copyDoubleArray(cli::array<System::Double>^ src, double *buffer, size_t bufferCount) {
+inline size_t copyDoubleArray(cli::array<System::Double>^ src, double *buffer, size_t bufferCount) {
   if (src == nullptr) return 0;
   
   size_t count = static_cast<size_t>(src->Length);
@@ -129,7 +132,7 @@ static size_t copyDoubleArray(cli::array<System::Double>^ src, double *buffer, s
  *conversions.
  **/
 template <typename managedType, typename unmanagedType>
-static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
+inline std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
                                                list) {
   std::vector<unmanagedType> vec;
   if (list == nullptr)
@@ -146,7 +149,7 @@ static std::vector<unmanagedType> listToVector(IEnumerable<managedType> ^
  * marshal_as.
  **/
 template <typename managedType, typename unmanagedType>
-static std::vector<unmanagedType>
+inline std::vector<unmanagedType>
 listToVectorMarshall(IEnumerable<managedType> ^ list) {
   std::vector<unmanagedType> vec;
   if (list == nullptr)
@@ -159,7 +162,7 @@ listToVectorMarshall(IEnumerable<managedType> ^ list) {
 }
 
 // converting JSR-SDK::ExceptionJSRSDK <-> JSRDotNETSDK::ExceptionJSRDotNET
-static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
+inline ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
                                             managedException) {
   if (managedException == nullptr) {
     return ExceptionJSRSDK();
@@ -178,7 +181,7 @@ static ExceptionJSRSDK exceptionFromManaged(ExceptionJSRDotNET ^
 }
 
 // Converting JSR-SDK::InstrumentID <-> JSRDotNETSDK::IInstrumentIdentity^
-static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
+inline InstrumentID instrumentFromManaged(IInstrumentIdentity ^
                                           instrumentIdentity) {
   InstrumentID unmanaged{};
 
@@ -195,7 +198,7 @@ static InstrumentID instrumentFromManaged(IInstrumentIdentity ^
 
 // Converting JSR-SDK::PulserReceiverID <->
 // JSRDotNETSDK::IPulserReceiverIdentity^
-static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
+inline PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
                                                  instrumentIdentity) {
   PulserReceiverID unmanaged;
   unmanaged.InstrumentId =
@@ -205,7 +208,7 @@ static PulserReceiverID pulsereceiverFromManaged(IPulserReceiverIdentity ^
 }
 
 // Converting JSR-SDK::JSRLibMetadata <-> JSRDotNETSDK::IJSRDotNETLibMetadata^
-static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
+inline JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
   JSRLibMetadata unmanaged;
   if (metadata == nullptr) {
     return unmanaged;
@@ -256,7 +259,7 @@ static JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
 
 // Converting JSR-SDK::StatusChangedEvent <->
 // JSRDotNETSDK::EventArgsStatusChange
-static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
+inline StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
                                                         managedEvent) {
   StatusChangedEvent unmanagedEvent{};
 
@@ -292,7 +295,7 @@ static StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
 }
 
 // Converting JSR-SDK::NotifyEvent <-> JSRDotNETSDK::EventArgsManagerNotify
-static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
+inline NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
                                           managedEvent) {
   NotifyEvent unmanagedEvent;
   if (managedEvent == nullptr) {
@@ -352,51 +355,4 @@ static NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
   return unmanagedEvent;
 }
 
-// Marshal template specializations for complex types
-namespace msclr::interop {
-
-// ExceptionJSRSDK marshals
-template <>
-inline ExceptionJSRSDK
-marshal_as<ExceptionJSRSDK, ExceptionJSRDotNET^>(ExceptionJSRDotNET^ const& from) {
-  return exceptionFromManaged(from);
-}
-
-// InstrumentID marshals
-template <>
-inline InstrumentID
-marshal_as<InstrumentID, IInstrumentIdentity^>(IInstrumentIdentity^ const& from) {
-  return instrumentFromManaged(from);
-}
-
-// PulserReceiverID marshals
-template <>
-inline PulserReceiverID
-marshal_as<PulserReceiverID, IPulserReceiverIdentity^>(IPulserReceiverIdentity^ const& from) {
-  return pulsereceiverFromManaged(from);
-}
-
-// JSRLibMetadata marshals
-template <>
-inline JSRLibMetadata
-marshal_as<JSRLibMetadata, IJSRDotNETLibMetadata^>(IJSRDotNETLibMetadata^ const& from) {
-  return libMetadataFromManaged(from);
-}
-
-// StatusChangedEvent marshals
-template <>
-inline StatusChangedEvent
-marshal_as<StatusChangedEvent, EventArgsStatusChange^>(EventArgsStatusChange^ const& from) {
-  return statusChangedEventFromManaged(from);
-}
-
-// NotifyEvent marshals
-template <>
-inline NotifyEvent
-marshal_as<NotifyEvent, EventArgsManagerNotify^>(EventArgsManagerNotify^ const& from) {
-  return notifyEventFromManaged(from);
-}
-
-} // namespace msclr::interop
-
-
+} // namespace jsr::detail

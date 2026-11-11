@@ -1,8 +1,9 @@
-#include "JSR-SDK/marshals/MarshalEnums.h"
+#include "marshals/MarshalEnums.h"
 #include "pch.h"
 #include <gtest/gtest.h>
 
 using namespace JSRDotNETSDK;
+using namespace jsr::detail;
 
 TEST(EnumConversionTest, ReceiverMode_RoundTrip) {
   RECEIVER_MODE values[] = {RECEIVER_MODE::BOTH, RECEIVER_MODE::ECHO,
