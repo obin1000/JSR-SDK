@@ -26,6 +26,17 @@ target_link_libraries(my_app PRIVATE JSR-SDK)
 jsr_sdk_copy_runtime(my_app)
 ```
 
+#### Or with find_package
+Unpack the release zip and point CMake at it, for example with `-DCMAKE_PREFIX_PATH=C:/libs/JSR-SDK-v<version>`:
+```CMake
+find_package(JSR-SDK 0.14 CONFIG REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE JSR-SDK::JSR-SDK)
+jsr_sdk_copy_runtime(my_app)
+```
+A version request accepts releases with the same major version that aren't older. Before 1.0 the minor version has to match too, because a 0.x minor release may break the API. Set `JSR_SDK_USE_DYNAMIC_LIB` and the `JSR_SDK_INCLUDE_*` plugin options before `find_package()` to change them.
+
 ### Supported compilers
 | Compiler | `jsr_sdk.hpp` (C++) | `jsr_sdk.h` (C) | `JSRSDKManager.hpp` (old C++ interface) |
 |---|---|---|---|

@@ -70,6 +70,28 @@ set_target_properties(cpp_smoke PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED
 add_consumer_test(cpp_smoke_runtime_dlls cpp_smoke.cpp STRICT RUNTIME_DLLS)
 set_target_properties(cpp_smoke_runtime_dlls PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 
+# The same release through find_package(JSR-SDK) instead of add_subdirectory():
+# a separate project, configured, built and run by CTest with this compiler.
+set(_find_package_options
+  "-DJSR_SDK_DIR=${JSR_SDK_DIR}"
+  "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+if(CMAKE_BUILD_TYPE)
+  list(APPEND _find_package_options "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+endif()
+if(CMAKE_TLS_CAINFO)
+  list(APPEND _find_package_options "-DCMAKE_TLS_CAINFO=${CMAKE_TLS_CAINFO}")
+endif()
+add_test(NAME find_package
+  COMMAND ${CMAKE_CTEST_COMMAND} --build-and-test
+          "${CMAKE_CURRENT_SOURCE_DIR}/find_package"
+          "${CMAKE_CURRENT_BINARY_DIR}/find_package"
+          --build-generator "${CMAKE_GENERATOR}"
+          --build-config $<CONFIG>
+          --build-options ${_find_package_options}
+          --test-command find_package_check)
+set_tests_properties(find_package PROPERTIES TIMEOUT 300)
+
 # JSRSDKManager.hpp is a C++ class interface, so it only works with compilers
 # that share MSVC's C++ ABI: MSVC itself and clang-cl.
 if(MSVC)
