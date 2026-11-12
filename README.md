@@ -150,6 +150,8 @@ build/test-x64/capi/Release/capi_tests.exe --gtest_filter=*IntegrationTest.*
 
 Code that is generated from `tools/gen_c_api` (the per-method parts of the C API and the parity tests) is regenerated with `python tools/gen_c_api/generate.py`; see [its README](tools/gen_c_api/README.md).
 
+The C and C++ code follows `.clang-format`, and CI checks it. Format with `python tools/format.py`, or check with `python tools/format.py --check`. CI uses clang-format 23.1.4 (`pip install clang-format==23.1.4`); other versions may format a few lines differently.
+
 
 ## Disclaimer
 
