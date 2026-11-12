@@ -36,8 +36,9 @@
  *   several threads at the same time.
  * - Events can arrive inside your own calls: the SDK raises the event for a
  *   change inside the call that made it (JSR_SetGainIndex() calls the
- *   status-change callback on your thread before it returns). Other events,
- *   such as discovery, arrive on threads owned by the .NET runtime.
+ *   status-change callback before it returns), but not necessarily on your
+ *   thread. Other events, such as discovery, arrive on threads owned by the
+ *   .NET runtime.
  * - Callbacks must be thread-safe, return quickly and never throw or longjmp
  *   out. Callbacks of one kind never overlap.
  * - Replacing or removing a callback waits for a running one to return;
