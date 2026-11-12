@@ -33,7 +33,6 @@ endif()
 
 # The SDK's own CMakeLists.txt describes the built DLL in lib/, exactly as a
 # consumer of the release zip sees it.
-set(JSR_SDK_USE_DYNAMIC_LIB ON CACHE BOOL "" FORCE)
 add_subdirectory("${JSR_SDK_ROOT}" jsr-sdk)
 
 include(googletest.cmake)

@@ -13,7 +13,6 @@ if(NOT EXISTS "${JSR_SDK_DIR}/CMakeLists.txt")
   message(FATAL_ERROR "Set JSR_SDK_DIR to an unpacked JSR-SDK release (got '${JSR_SDK_DIR}').")
 endif()
 
-set(JSR_SDK_USE_DYNAMIC_LIB ON CACHE BOOL "" FORCE)
 add_subdirectory("${JSR_SDK_DIR}" jsr-sdk)
 
 enable_testing()

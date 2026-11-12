@@ -10,8 +10,8 @@
 #   jsr_sdk_copy_runtime(<target>)
 #               copies the DLLs a program needs next to it after each build.
 #
-# Options (set them before including): JSR_SDK_USE_DYNAMIC_LIB and the
-# JSR_SDK_INCLUDE_* switches for the plugin DLLs.
+# Options (set them before including): the JSR_SDK_INCLUDE_* switches for
+# the plugin DLLs.
 if(TARGET JSR-SDK)
     return()
 endif()
@@ -22,7 +22,14 @@ endif()
 
 get_filename_component(JSR_SDK_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 
-option(JSR_SDK_USE_DYNAMIC_LIB "Use the dynamic library instead of the static" ON)
+# Releases before 1.0 also had a static library, chosen with
+# JSR_SDK_USE_DYNAMIC_LIB OFF. 1.0 ships only the DLL, and still accepts the
+# option.
+if(DEFINED JSR_SDK_USE_DYNAMIC_LIB AND NOT JSR_SDK_USE_DYNAMIC_LIB)
+    message(WARNING
+        "JSR-SDK: the static library was removed in 1.0, so JSR-SDK.dll is "
+        "used. Remove JSR_SDK_USE_DYNAMIC_LIB from your project.")
+endif()
 
 # Options to selectively include DLL dependencies
 option(JSR_SDK_INCLUDE_CYUSB "Include CyUSB DLL" ON)
@@ -33,15 +40,6 @@ option(JSR_SDK_INCLUDE_USB_PUREVIEWHID "Include JSRDotNET_USB_PureViewHid DLL" O
 option(JSR_SDK_INCLUDE_DOTNETDPR "Include JSRDotNETDPR DLL" ON)
 option(JSR_SDK_INCLUDE_NEWTONSOFT_JSON "Include Newtonsoft.json DLL" ON)
 option(JSR_SDK_INCLUDE_SIMPLEHID "Include SimpleHID DLL" ON)
-
-# MinGW-w64 GCC and MinGW clang can only use the C API (jsr_sdk.h) and the C++
-# wrapper (jsr_sdk.hpp) through the DLL. The static library holds MSVC /clr
-# objects, which they can't link.
-if(MINGW AND NOT JSR_SDK_USE_DYNAMIC_LIB)
-    message(FATAL_ERROR
-        "JSR-SDK: MinGW builds need the dynamic library. "
-        "Set JSR_SDK_USE_DYNAMIC_LIB to ON.")
-endif()
 
 # Detect if compiling for x64 or x86
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -69,32 +67,19 @@ add_library(JSRDotNETSDK SHARED IMPORTED GLOBAL)
 set_target_properties(JSRDotNETSDK PROPERTIES IMPORTED_IMPLIB "${JSR_SDK_PLUGINS_DIR}/JSRDotNETSDK.lib")
 target_link_libraries(JSR-SDK INTERFACE JSRDotNETSDK)
 
-if(JSR_SDK_USE_DYNAMIC_LIB)
-    message(STATUS "Adding JSR-SDK dynamic library ${_jsr_sdk_arch}")
-    set(_jsr_sdk_lib_dir "${JSR_SDK_ROOT_DIR}/lib/${_jsr_sdk_arch}/dynamic")
-    if(MINGW)
-        set(_jsr_sdk_implib "${_jsr_sdk_lib_dir}/libJSR-SDK.dll.a")
-    else()
-        set(_jsr_sdk_implib "${_jsr_sdk_lib_dir}/JSR-SDK.lib")
-    endif()
-    set_target_properties(JSR-SDK PROPERTIES
-        IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSR-SDK.dll"
-        IMPORTED_IMPLIB "${_jsr_sdk_implib}"
-        INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}")
-    set_target_properties(JSRDotNETSDK PROPERTIES
-        IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSRDotNETSDK.dll")
+message(STATUS "Adding JSR-SDK ${_jsr_sdk_arch}")
+set(_jsr_sdk_lib_dir "${JSR_SDK_ROOT_DIR}/lib/${_jsr_sdk_arch}/dynamic")
+if(MINGW)
+    set(_jsr_sdk_implib "${_jsr_sdk_lib_dir}/libJSR-SDK.dll.a")
 else()
-    message(STATUS "Adding JSR-SDK static library ${_jsr_sdk_arch}")
-    set(_jsr_sdk_lib_dir "${JSR_SDK_ROOT_DIR}/lib/${_jsr_sdk_arch}/static")
-    set_target_properties(JSR-SDK PROPERTIES
-        IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSR-SDK.lib"
-        IMPORTED_IMPLIB "${_jsr_sdk_lib_dir}/JSR-SDK.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}"
-        # jsr_sdk.h declares its functions without __declspec(dllimport).
-        INTERFACE_COMPILE_DEFINITIONS "JSR_SDK_STATIC")
-    set_target_properties(JSRDotNETSDK PROPERTIES
-        IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSRDotNETSDK.dll")
+    set(_jsr_sdk_implib "${_jsr_sdk_lib_dir}/JSR-SDK.lib")
 endif()
+set_target_properties(JSR-SDK PROPERTIES
+    IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSR-SDK.dll"
+    IMPORTED_IMPLIB "${_jsr_sdk_implib}"
+    INTERFACE_INCLUDE_DIRECTORIES "${JSR_SDK_INCLUDE_DIR}")
+set_target_properties(JSRDotNETSDK PROPERTIES
+    IMPORTED_LOCATION "${_jsr_sdk_lib_dir}/JSRDotNETSDK.dll")
 
 target_include_directories(JSR-SDK INTERFACE "${JSR_SDK_INCLUDE_DIR}")
 

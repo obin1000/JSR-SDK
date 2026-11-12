@@ -65,12 +65,6 @@ jobs:
       - name: Build x86 dynamic library
         run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
 
-      - name: Build x64 static library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
-
-      - name: Build x86 static library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
-
       # The unit tests (test/CMakeLists.txt), for x64 and x86: clr_tests (C++/CLI,
       # the DLL's internals and the C API against the C++ interface) and
       # capi_tests (portable; the consumer jobs also run them with every
