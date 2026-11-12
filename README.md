@@ -107,6 +107,13 @@ int main(void) {
 - .NET Framework 4.8 and the Microsoft Visual C++ runtime (x64 or x86).
 - `JSR-SDK.dll`, `JSRDotNETSDK.dll` and the plugin DLLs next to the program; `jsr_sdk_copy_runtime(<target>)` copies them after each build.
 
+### Versions
+A program loads whichever `JSR-SDK.dll` sits next to it, so the DLL can come from another release than the headers the program was built with.
+- `JSR_API_VERSION` in `jsr_sdk.h` is the API version of the headers, and `JSR_GetApiVersion()` returns the one of the loaded DLL. `jsr::Manager` compares them and throws a `jsr::Error` with `JSR_ERROR_VERSION_MISMATCH` when they differ. C programs should make the same check before `JSR_Create()`.
+- `JSR_GetLibraryVersion()` (`jsr::libraryVersion()`) returns the release, such as `0.13.0`, for messages and logs.
+- The API version only goes up for an incompatible change. New functions and enum values keep it, so a newer DLL runs programs built for an older release with the same API version.
+- Releases before 0.13.0 don't have these functions. A program built with 0.13.0 or later won't start with such a DLL: Windows reports that `JSR_GetApiVersion` is missing.
+
 ### Threading and events
 These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKManager.hpp`).
 - **One thread at a time per manager.** A manager's calls are not synchronized: use it from one thread, or serialize the calls yourself. Separate managers are independent.

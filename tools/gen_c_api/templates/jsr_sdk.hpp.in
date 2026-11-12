@@ -130,11 +130,51 @@ template <class T, class Fill> std::vector<T> readArray(Fill fill) {
 
 } // namespace detail
 
+/// The API version the loaded JSR-SDK.dll implements; compare JSR_API_VERSION.
+inline int32_t apiVersion() {
+  int32_t version = 0;
+  detail::check(JSR_GetApiVersion(&version));
+  return version;
+}
+
+/// The release of the loaded JSR-SDK.dll, such as "0.13.0".
+inline std::string libraryVersion() {
+  return detail::readString([](char *buffer, size_t size, size_t *required) {
+    return JSR_GetLibraryVersion(buffer, size, required);
+  });
+}
+
+namespace detail {
+
+/// Throws JSR_ERROR_VERSION_MISMATCH unless the DLL implements the API
+/// version this header was written for.
+inline void checkApiVersion(int32_t loaded, const std::string &release) {
+  if (loaded != JSR_API_VERSION) {
+    throw Error(JSR_ERROR_VERSION_MISMATCH,
+                "JSR-SDK.dll " + release + " implements API version " +
+                    std::to_string(loaded) + ", but this program was built " +
+                    "with the headers of API version " +
+                    std::to_string(JSR_API_VERSION) +
+                    ". Use the JSR-SDK.dll of the release whose headers it " +
+                    "was built with.");
+  }
+}
+
+} // namespace detail
+
 /// Owns a JSR_Manager. Movable, not copyable.
 class Manager {
 public:
-  /// Creates the manager; the first one starts the .NET runtime.
-  Manager() { detail::check(JSR_Create(&m_handle)); }
+  /// Creates the manager; the first one starts the .NET runtime. Throws
+  /// JSR_ERROR_VERSION_MISMATCH when the loaded JSR-SDK.dll implements a
+  /// different API version than this header.
+  Manager() {
+    const int32_t loaded = apiVersion();
+    if (loaded != JSR_API_VERSION) {
+      detail::checkApiVersion(loaded, libraryVersion());
+    }
+    detail::check(JSR_Create(&m_handle));
+  }
 
   ~Manager() { reset(); }
 
