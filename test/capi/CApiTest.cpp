@@ -261,10 +261,10 @@ TEST_F(CApiTest, Callbacks_CanBeSetAndRemoved) {
 TEST(CppWrapper, ReturnsStringsAndVectors) {
   jsr::Manager manager;
   manager.loadPluginsFromBinaryDir();
-  const auto names = manager.GetPluginNames();
+  const auto names = manager.getPluginNames();
   ASSERT_FALSE(names.empty());
   EXPECT_FALSE(manager.getPluginPath().empty());
-  EXPECT_STREQ(manager.GetPluginLibraryMetadata(names[0])->Name,
+  EXPECT_STREQ(manager.getPluginLibraryMetadata(names[0])->Name,
                names[0].c_str());
 }
 
@@ -272,13 +272,42 @@ TEST(CppWrapper, Failure_ThrowsErrorWithCode) {
   jsr::Manager manager;
   manager.loadPluginsFromBinaryDir();
   try {
-    manager.SetCurrentPulserReceiver("NO-SUCH-MODEL", "NO-SUCH-SERIAL", 0);
+    manager.setCurrentPulserReceiver("NO-SUCH-MODEL", "NO-SUCH-SERIAL", 0);
     FAIL() << "expected jsr::Error";
   } catch (const jsr::Error &e) {
     EXPECT_EQ(e.code(), JSR_ERROR_NOT_FOUND);
     EXPECT_NE(std::string(e.what()).find("NO-SUCH-MODEL"), std::string::npos);
   }
 }
+
+// The PascalCase names of 0.x still work through 1.x, as deprecated aliases
+// of the camelCase methods. This test uses them on purpose.
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+TEST(CppWrapper, DeprecatedPascalCaseNames_StillWork) {
+  jsr::Manager manager;
+  manager.loadPluginsFromBinaryDir();
+  const auto names = manager.GetPluginNames();
+  EXPECT_EQ(names, manager.getPluginNames());
+  ASSERT_FALSE(names.empty());
+  EXPECT_EQ(manager.GetManagedPluginNames(), manager.getManagedPluginNames());
+  EXPECT_EQ(manager.GetPulserReceivers().size(),
+            manager.getPulserReceivers().size());
+  EXPECT_STREQ(manager.GetPluginLibraryMetadata(names[0])->Name,
+               names[0].c_str());
+  EXPECT_THROW(manager.SetCurrentPulserReceiver("NO-SUCH-MODEL", "NO", 0),
+               jsr::Error);
+}
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
 
 TEST(CppWrapper, Move_TransfersOwnership) {
   jsr::Manager first;

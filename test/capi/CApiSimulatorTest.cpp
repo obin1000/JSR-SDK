@@ -411,9 +411,9 @@ TEST_F(CApiSimulatorTest, UnsupportedProperty_IsAnError) {
 TEST(JsrManagerSimulatorTest, DiscoversConfiguresAndReceivesEvents) {
   jsr::Manager manager;
   manager.loadPluginsFromBinaryDir();
-  manager.AddManagedPlugin(sim::kPlugin);
-  manager.AddPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
-  manager.AddPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
+  manager.addManagedPlugin(sim::kPlugin);
+  manager.addPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.addPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
 
   sim::EventLog<jsr::StatusChangedEvent> events;
   std::atomic<int> thrown{0};
@@ -425,16 +425,16 @@ TEST(JsrManagerSimulatorTest, DiscoversConfiguresAndReceivesEvents) {
         throw std::runtime_error("callback failure");
       });
 
-  manager.SetDiscoveryEnable(true);
+  manager.setDiscoveryEnable(true);
   ASSERT_TRUE(
-      sim::waitFor([&] { return !manager.GetPulserReceivers().empty(); }));
-  const auto ids = manager.GetPulserReceivers();
+      sim::waitFor([&] { return !manager.getPulserReceivers().empty(); }));
+  const auto ids = manager.getPulserReceivers();
   for (const auto &id : ids) {
     EXPECT_STREQ(id.InstrumentId.ModelName, sim::kModel);
   }
-  EXPECT_FALSE(manager.GetInstruments(sim::kPlugin).empty());
+  EXPECT_FALSE(manager.getInstruments(sim::kPlugin).empty());
 
-  manager.SetCurrentPulserReceiver(ids.front());
+  manager.setCurrentPulserReceiver(ids.front());
   EXPECT_STREQ(manager.getId().InstrumentId.SerialNum,
                ids.front().InstrumentId.SerialNum);
 
@@ -460,13 +460,13 @@ TEST(JsrManagerSimulatorTest, DiscoversConfiguresAndReceivesEvents) {
 TEST(JsrManagerSimulatorTest, UnsupportedProperty_ThrowsError) {
   jsr::Manager manager;
   manager.loadPluginsFromBinaryDir();
-  manager.AddManagedPlugin(sim::kPlugin);
-  manager.AddPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
-  manager.AddPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
-  manager.SetDiscoveryEnable(true);
+  manager.addManagedPlugin(sim::kPlugin);
+  manager.addPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.addPluginOpenOption(sim::kPlugin, "CONNECT_ON_OPEN", "YES");
+  manager.setDiscoveryEnable(true);
   ASSERT_TRUE(
-      sim::waitFor([&] { return !manager.GetPulserReceivers().empty(); }));
-  manager.SetCurrentPulserReceiver(manager.GetPulserReceivers().front());
+      sim::waitFor([&] { return !manager.getPulserReceivers().empty(); }));
+  manager.setCurrentPulserReceiver(manager.getPulserReceivers().front());
 
   try {
     manager.getPulserFirmwareVer();

@@ -34,7 +34,7 @@ void run() {
   manager.loadPluginsFromBinaryDir();
   CHECK(manager.getPluginsLoaded());
 
-  const auto names = manager.GetPluginNames();
+  const auto names = manager.getPluginNames();
   std::printf("Loaded %zu plugin(s)\n", names.size());
   CHECK(!names.empty());
   for (const auto &name : names) {
@@ -43,7 +43,7 @@ void run() {
   }
 
   if (!names.empty()) {
-    const auto metadata = manager.GetPluginLibraryMetadata(names.front());
+    const auto metadata = manager.getPluginLibraryMetadata(names.front());
     std::printf("Metadata of %s: name '%s', version '%s'\n",
                 names.front().c_str(), metadata->Name, metadata->Version);
     CHECK(metadata->Name[0] != '\0');
@@ -65,7 +65,7 @@ void run() {
   // An SDK failure throws jsr::Error with a code and the SDK's message.
   bool threw = false;
   try {
-    manager.SetCurrentPulserReceiver("NO-SUCH-MODEL", "NO-SUCH-SERIAL", 0);
+    manager.setCurrentPulserReceiver("NO-SUCH-MODEL", "NO-SUCH-SERIAL", 0);
   } catch (const jsr::Error &e) {
     threw = true;
     std::printf("Expected error %d: %s\n", static_cast<int>(e.code()),
@@ -78,7 +78,7 @@ void run() {
   // A moved-to manager keeps working; the moved-from one is empty.
   jsr::Manager moved = std::move(manager);
   CHECK(moved.handle() != nullptr);
-  CHECK(!moved.GetPluginNames().empty());
+  CHECK(!moved.getPluginNames().empty());
 }
 
 // Discovers a pulser-receiver simulated by the SDK's diagnostics plugin,
@@ -88,9 +88,9 @@ void runSimulator() {
   const std::string plugin = "JSRDotNET_DiagLib";
   jsr::Manager manager;
   manager.loadPluginsFromBinaryDir();
-  manager.AddManagedPlugin(plugin);
-  manager.AddPluginOpenOption(plugin, "SHOW_SIMULATOR_WINDOWS", "NO");
-  manager.AddPluginOpenOption(plugin, "CONNECT_ON_OPEN", "YES");
+  manager.addManagedPlugin(plugin);
+  manager.addPluginOpenOption(plugin, "SHOW_SIMULATOR_WINDOWS", "NO");
+  manager.addPluginOpenOption(plugin, "CONNECT_ON_OPEN", "YES");
 
   std::atomic<int> gainEvents{0};
   manager.replaceStatusChangeEventHandler(
@@ -102,11 +102,11 @@ void runSimulator() {
         throw std::runtime_error("ignored");
       });
 
-  manager.SetDiscoveryEnable(true);
+  manager.setDiscoveryEnable(true);
   std::vector<jsr::PulserReceiverID> ids;
   for (int i = 0; i < 200 && ids.empty(); ++i) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ids = manager.GetPulserReceivers();
+    ids = manager.getPulserReceivers();
   }
   std::printf("Simulator: %zu pulser-receiver(s)\n", ids.size());
   CHECK(!ids.empty());
@@ -115,11 +115,11 @@ void runSimulator() {
   }
   CHECK(std::strcmp(ids.front().InstrumentId.ModelName, "SIM") == 0);
 
-  manager.SetCurrentPulserReceiver(ids.front());
+  manager.setCurrentPulserReceiver(ids.front());
   CHECK(std::strcmp(manager.getId().InstrumentId.SerialNum,
                     ids.front().InstrumentId.SerialNum) == 0);
   CHECK(!manager
-             .GetPulserReceiverInfo(ids.front().InstrumentId.ModelName,
+             .getPulserReceiverInfo(ids.front().InstrumentId.ModelName,
                                     ids.front().InstrumentId.SerialNum,
                                     ids.front().PulserReceiverIndex)
              .empty());
