@@ -1,8 +1,10 @@
 // JSRSDKManagerIntegrationTest.cpp
-// Integration tests for JSRSDKManager requiring a physical device connection
+// Integration tests for JSRSDKManager requiring a physical device connection.
+// TestDevices.h says which devices they accept, and how to choose others.
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/JSRSDKManager.hpp"
+#include "TestDevices.h"
 #include <thread>
 #include <chrono>
 #include <vector>
@@ -25,9 +27,7 @@ static bool isCorrectDevice(const PulserReceiverID &prID) {
     return false;
   }
   
-  return serial == "JB0104" || // HB3-2 (Loaner)
-         serial == "JB0118" || // HB3-1
-         serial == "JC0100";   // HB4
+  return testdevices::isAcceptedSerial(serial);
 }
 
 //--------------------------------------------------------------------------
@@ -182,7 +182,7 @@ protected:
           
           if (!deviceConnected) {
             std::cout << "No real device found after " << maxAttempts << " seconds" << std::endl;
-            std::cout << "Expected devices: JB0104, JB0118, or JC0100" << std::endl;
+            std::cout << "Expected devices: " << testdevices::describe() << std::endl;
             
             // Print summary of callbacks received
             std::cout << "\n=== Callback Summary ===" << std::endl;
@@ -215,7 +215,7 @@ protected:
   // Helper to fail tests if no device is connected
   void RequireDevice() {
     ASSERT_TRUE(deviceConnected) 
-      << "No real device connected - test requires physical device (JB0104, JB0118, or JC0100)";
+      << testdevices::noDeviceMessage();
   }
   
   // Helper to check if device is required for test
@@ -640,7 +640,7 @@ TEST_F(JSRSDKManagerIntegrationTest, GetUnitSerialNum_ConnectedDevice_ReturnsSer
   EXPECT_FALSE(serial.empty());
   
   // Verify it's one of the expected devices
-  EXPECT_TRUE(serial == "JB0104" || serial == "JB0118" || serial == "JC0100")
+  EXPECT_TRUE(testdevices::isAcceptedSerial(serial))
     << "Unexpected device serial: " << serial;
 }
 
@@ -730,7 +730,7 @@ int main(int argc, char **argv) {
   std::cout << " JSRSDKManager Integration Tests\n";
   std::cout << "========================================\n";
   std::cout << "NOTE: These tests require a physical device to be connected.\n";
-  std::cout << "      Expected devices: JB0104, JB0118, or JC0100\n";
+  std::cout << "      Expected devices: " << testdevices::describe() << "\n";
   std::cout << "      Tests will FAIL if no real device is found.\n";
   std::cout << "========================================\n\n";
   

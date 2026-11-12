@@ -2,11 +2,13 @@
 // Integration tests for jsr::Manager (jsr_sdk.hpp), the wrapper over the C
 // API. Like JSRSDKManagerIntegrationTest, they need a physical
 // pulser-receiver and fail without one. CI filters them out; run them by hand
-// with a device attached:
+// with a device attached, or with the "Hardware tests" workflow:
 //   capi_tests --gtest_filter=*IntegrationTest.*
+// TestDevices.h says which devices they accept, and how to choose others.
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/jsr_sdk.hpp"
+#include "TestDevices.h"
 
 #include <atomic>
 #include <chrono>
@@ -25,18 +27,9 @@
 namespace {
 
 bool isTestDevice(const jsr::PulserReceiverID &id) {
-  const std::string serial(id.InstrumentId.SerialNum);
-  const std::string model(id.InstrumentId.ModelName);
-  if (model == "SIM") {
-    return false;
-  }
-  return serial == "JB0104" || // HB3-2 (Loaner)
-         serial == "JB0118" || // HB3-1
-         serial == "JC0100";   // HB4
+  return testdevices::accepts(id.InstrumentId.ModelName,
+                              id.InstrumentId.SerialNum);
 }
-
-const char *const kNoDevice = "No real device connected - test requires "
-                              "physical device (JB0104, JB0118, or JC0100)";
 
 /// Turns discovery on, waits up to 20 s for a test device and selects it.
 bool selectTestDevice(jsr::Manager &manager, jsr::PulserReceiverID &device) {
@@ -70,7 +63,7 @@ protected:
         [this](const jsr::NotifyEvent &) { ++notifyEvents; });
 
     if (!selectTestDevice(*manager, device)) {
-      FAIL() << kNoDevice;
+      FAIL() << testdevices::noDeviceMessage();
     }
   }
 
@@ -167,9 +160,10 @@ TEST(JsrManagerLifetimeIntegrationTest, RecreatedManager_ReopensDevice) {
 
       jsr::PulserReceiverID device{};
       ASSERT_TRUE(selectTestDevice(manager, device))
-          << (round == 1 ? kNoDevice
-                         : "The device wasn't found again after the first "
-                           "manager was destroyed (#13)");
+          << (round == 1
+                  ? testdevices::noDeviceMessage()
+                  : std::string("The device wasn't found again after "
+                                "the first manager was destroyed (#13)"));
       std::cout << "Round " << round << ": opened "
                 << device.InstrumentId.ModelName << " "
                 << device.InstrumentId.SerialNum << std::endl;

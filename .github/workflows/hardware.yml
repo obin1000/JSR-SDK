@@ -1,0 +1,99 @@
+name: Hardware tests
+
+# Runs the *IntegrationTest suites against a real pulser-receiver (#19).
+# Start it from the Actions tab with "Run workflow". It first builds and tests
+# the library with CI, as release.yml does, so it tests exactly what CI built.
+# Then it runs on a self-hosted runner labelled jsr-hardware that has a test
+# device attached. Without such a runner, the hardware job waits in the queue
+# until GitHub cancels it.
+#
+# The runner needs Windows with:
+# - Visual Studio with the "Desktop development with C++" workload and C++/CLI
+#   support (it brings CMake and Ninja too), and .NET Framework 4.8;
+# - MinGW-w64 GCC for x64 on PATH, for #10's check: a GCC-built program
+#   discovers and configures the device using only the release layout;
+# - the pulser-receiver connected.
+on:
+  workflow_dispatch:
+    inputs:
+      serials:
+        description: >-
+          Serial numbers of the attached devices, comma-separated. Empty
+          accepts the lab's devices (see test/common/TestDevices.h).
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  hardware:
+    name: Integration tests on hardware
+    needs: ci
+    runs-on: [self-hosted, windows, jsr-hardware]
+    timeout-minutes: 60
+    env:
+      JSR_TEST_DEVICE_SERIALS: ${{ inputs.serials }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download release layout
+        uses: actions/download-artifact@v8
+        with:
+          name: jsr-sdk
+          path: jsr-sdk
+
+      # test/CMakeLists.txt expects the built library in lib/ of the checkout.
+      # Visual Studio's CMake and Ninja go on PATH for the following steps.
+      - name: Prepare
+        run: |
+          Copy-Item jsr-sdk/lib -Destination . -Recurse -Force
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          if (-not $vs) { throw "Visual Studio not found on this runner" }
+          $cmake = Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake'
+          (Join-Path $cmake 'CMake\bin'), (Join-Path $cmake 'Ninja') | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          "Accepted devices: $(if ($env:JSR_TEST_DEVICE_SERIALS) { $env:JSR_TEST_DEVICE_SERIALS } else { 'the defaults' })"
+
+      - name: Build the MSVC test programs (x64)
+        run: |
+          cmake -S test -B build/test-x64 -A x64
+          if ($LASTEXITCODE -ne 0) { throw "Configuring the tests failed" }
+          cmake --build build/test-x64 --config Release
+          if ($LASTEXITCODE -ne 0) { throw "Building the tests failed" }
+
+      - name: Old C++ interface (clr_tests, MSVC)
+        run: |
+          build/test-x64/Release/clr_tests.exe --gtest_filter=*IntegrationTest.*
+          if ($LASTEXITCODE -ne 0) { throw "clr_tests failed" }
+
+      - name: C API and jsr::Manager (capi_tests, MSVC)
+        if: ${{ !cancelled() }}
+        run: |
+          build/test-x64/capi/Release/capi_tests.exe --gtest_filter=*IntegrationTest.*
+          if ($LASTEXITCODE -ne 0) { throw "capi_tests (MSVC) failed" }
+
+      # #10: built with MinGW GCC against the release layout only, the way
+      # Raijin consumes it.
+      - name: C API and jsr::Manager (capi_tests, MinGW GCC)
+        if: ${{ !cancelled() }}
+        run: |
+          if (-not (Get-Command gcc -ErrorAction SilentlyContinue)) {
+            throw "MinGW-w64 GCC is not on this runner's PATH"
+          }
+          gcc --version
+          cmake -S ci/consumer -B build/gcc -G Ninja -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ `
+            "-DJSR_SDK_DIR=$($env:GITHUB_WORKSPACE -replace '\\', '/')/jsr-sdk"
+          if ($LASTEXITCODE -ne 0) { throw "Configuring the MinGW GCC build failed" }
+          cmake --build build/gcc --target capi_tests
+          if ($LASTEXITCODE -ne 0) { throw "Building capi_tests with MinGW GCC failed" }
+          build/gcc/capi/capi_tests.exe --gtest_filter=*IntegrationTest.*
+          if ($LASTEXITCODE -ne 0) { throw "capi_tests (MinGW GCC) failed" }
