@@ -7,12 +7,12 @@
  * @struct PulserReceiverID
  * @brief Identifies a specific pulser/receiver channel within an instrument.
  *
- * Many ultrasonic testing instruments contain multiple pulser/receiver channels.
- * This structure combines instrument identification with a channel index to
- * uniquely identify a specific pulser/receiver unit.
+ * Many ultrasonic testing instruments contain multiple pulser/receiver
+ * channels. This structure combines instrument identification with a channel
+ * index to uniquely identify a specific pulser/receiver unit.
  *
- * For example, a single physical device might have 4 independent pulser/receiver
- * channels, each accessible via a different index (0-3).
+ * For example, a single physical device might have 4 independent
+ * pulser/receiver channels, each accessible via a different index (0-3).
  *
  * Mirrors JSRDotNETSDK::IPulserReceiverIdentity interface.
  *

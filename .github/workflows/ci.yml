@@ -14,6 +14,23 @@ permissions:
   contents: read
 
 jobs:
+  # The C and C++ code must follow .clang-format (#21). The clang-format
+  # version is pinned (tools/format.py names it), because versions differ on
+  # a few lines. Run "python tools/format.py" to format.
+  format:
+    name: Formatting
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check formatting
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet clang-format==23.1.4
+          CLANG_FORMAT="$RUNNER_TEMP/venv/bin/clang-format" python3 tools/format.py --check
+
   build:
     name: Build library (MSVC, C++/CLI)
     runs-on: windows-2025

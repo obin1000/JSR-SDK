@@ -26,7 +26,8 @@ struct InstrumentID {
   /// Device serial number for unique identification (e.g., "JB0104", "SN12345")
   char SerialNum[MAX_STRING_LENGTH];
 
-  /// Communication port where the device is connected (e.g., "COM3", "USB", "/dev/ttyUSB0")
+  /// Communication port where the device is connected (e.g., "COM3", "USB",
+  /// "/dev/ttyUSB0")
   char Port[MAX_STRING_LENGTH];
 
   /// Name of the plugin that manages this device (e.g., "JSR-DPR", "Simulator")
@@ -51,7 +52,8 @@ struct InstrumentID {
    * Creates a multi-line string containing all identification information
    * in a human-readable format.
    *
-   * @return A formatted string with model, serial number, port, and plugin name.
+   * @return A formatted string with model, serial number, port, and plugin
+   * name.
    *
    * @example
    * @code

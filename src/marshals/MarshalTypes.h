@@ -1,16 +1,15 @@
 ﻿#pragma once
 
-#include "MarshalEnums.h"
+#include "JSR-SDK/events/NotifyEvent.h"
+#include "JSR-SDK/events/StatusChangedEvent.h"
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/InstrumentID.h"
 #include "JSR-SDK/structs/JSRLibMetadata.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
-#include "JSR-SDK/events/NotifyEvent.h"
-#include "JSR-SDK/events/StatusChangedEvent.h"
+#include "MarshalEnums.h"
 
-#include <msclr/marshal_cppstd.h>
 #include <cstring>
-
+#include <msclr/marshal_cppstd.h>
 
 /**
  * @file MarshalTypes.h
@@ -29,14 +28,15 @@ using namespace msclr::interop;
 /**
  * @brief Helper to safely copy a managed string to a fixed-size buffer.
  */
-inline void copyManagedString(System::String ^ src, char *dest, size_t destSize) {
+inline void copyManagedString(System::String ^ src, char *dest,
+                              size_t destSize) {
   if (System::String::IsNullOrEmpty(src) || dest == nullptr || destSize == 0) {
     if (dest != nullptr && destSize > 0) {
       dest[0] = '\0';
     }
     return;
   }
-  
+
   std::string str = marshal_as<std::string>(src);
   size_t len = str.length();
   if (len >= destSize) {
@@ -61,18 +61,19 @@ inline System::String ^ invariantText(System::Object ^ value) {
  * @brief Helper to copy std::string to caller-provided buffer.
  * @return The required size (including null terminator)
  */
-inline size_t copyStringToBuffer(const std::string& src, char *buffer, size_t bufferSize) {
+inline size_t copyStringToBuffer(const std::string &src, char *buffer,
+                                 size_t bufferSize) {
   if (buffer == nullptr || bufferSize == 0) {
     return src.size() + 1;
   }
-  
+
   size_t len = src.length();
   if (len >= bufferSize) {
     len = bufferSize - 1;
   }
   std::memcpy(buffer, src.c_str(), len);
   buffer[len] = '\0';
-  
+
   return src.size() + 1;
 }
 
@@ -80,14 +81,15 @@ inline size_t copyStringToBuffer(const std::string& src, char *buffer, size_t bu
  * @brief Helper to copy managed string to caller-provided buffer.
  * @return The required size (including null terminator)
  */
-inline size_t copyManagedStringToBuffer(System::String^ src, char *buffer, size_t bufferSize) {
+inline size_t copyManagedStringToBuffer(System::String ^ src, char *buffer,
+                                        size_t bufferSize) {
   if (System::String::IsNullOrEmpty(src)) {
     if (buffer != nullptr && bufferSize > 0) {
       buffer[0] = '\0';
     }
     return 1; // Just null terminator
   }
-  
+
   std::string str = marshal_as<std::string>(src);
   return copyStringToBuffer(str, buffer, bufferSize);
 }
@@ -96,24 +98,28 @@ inline size_t copyManagedStringToBuffer(System::String^ src, char *buffer, size_
  * @brief Helper to copy managed string list to caller buffer.
  * @return The actual number of strings
  */
-inline size_t copyStringList(System::Collections::Generic::IEnumerable<System::String^>^ list,
-                             char **buffer, size_t bufferCount, size_t stringLength) {
-  if (list == nullptr) return 0;
-  
+inline size_t copyStringList(
+    System::Collections::Generic::IEnumerable<System::String ^> ^ list,
+    char **buffer, size_t bufferCount, size_t stringLength) {
+  if (list == nullptr)
+    return 0;
+
   size_t count = 0;
-  for each (System::String^ s in list) count++;
-  
+  for each (System::String ^ s in list)
+    count++;
+
   if (buffer == nullptr || bufferCount == 0) {
     return count;
   }
-  
+
   size_t index = 0;
-  for each (System::String^ s in list) {
-    if (index >= bufferCount) break;
+  for each (System::String ^ s in list) {
+    if (index >= bufferCount)
+      break;
     copyManagedString(s, buffer[index], stringLength);
     index++;
   }
-  
+
   return count;
 }
 
@@ -121,20 +127,22 @@ inline size_t copyStringList(System::Collections::Generic::IEnumerable<System::S
  * @brief Helper to copy double array to caller buffer.
  * @return The actual number of values
  */
-inline size_t copyDoubleArray(cli::array<System::Double>^ src, double *buffer, size_t bufferCount) {
-  if (src == nullptr) return 0;
-  
+inline size_t copyDoubleArray(cli::array<System::Double> ^ src, double *buffer,
+                              size_t bufferCount) {
+  if (src == nullptr)
+    return 0;
+
   size_t count = static_cast<size_t>(src->Length);
-  
+
   if (buffer == nullptr || bufferCount == 0) {
     return count;
   }
-  
+
   size_t copyCount = (count < bufferCount) ? count : bufferCount;
   for (size_t i = 0; i < copyCount; ++i) {
     buffer[i] = src[static_cast<int>(i)];
   }
-  
+
   return count;
 }
 
@@ -199,10 +207,14 @@ inline InstrumentID instrumentFromManaged(IInstrumentIdentity ^
   if (instrumentIdentity == nullptr)
     return unmanaged;
 
-  copyManagedString(instrumentIdentity->ModelName, unmanaged.ModelName, InstrumentID::MAX_STRING_LENGTH);
-  copyManagedString(instrumentIdentity->PluginName, unmanaged.PluginName, InstrumentID::MAX_STRING_LENGTH);
-  copyManagedString(instrumentIdentity->Port, unmanaged.Port, InstrumentID::MAX_STRING_LENGTH);
-  copyManagedString(instrumentIdentity->SerialNum, unmanaged.SerialNum, InstrumentID::MAX_STRING_LENGTH);
+  copyManagedString(instrumentIdentity->ModelName, unmanaged.ModelName,
+                    InstrumentID::MAX_STRING_LENGTH);
+  copyManagedString(instrumentIdentity->PluginName, unmanaged.PluginName,
+                    InstrumentID::MAX_STRING_LENGTH);
+  copyManagedString(instrumentIdentity->Port, unmanaged.Port,
+                    InstrumentID::MAX_STRING_LENGTH);
+  copyManagedString(instrumentIdentity->SerialNum, unmanaged.SerialNum,
+                    InstrumentID::MAX_STRING_LENGTH);
 
   return unmanaged;
 }
@@ -227,19 +239,25 @@ inline JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
     return unmanaged;
   }
 
-  copyManagedString(metadata->Name, unmanaged.Name, JSRLibMetadata::MAX_STRING_LENGTH);
-  copyManagedString(metadata->GUID, unmanaged.GUID, JSRLibMetadata::MAX_STRING_LENGTH);
-  copyManagedString(metadata->FriendlyName, unmanaged.FriendlyName, JSRLibMetadata::MAX_STRING_LENGTH);
-  copyManagedString(metadata->Version, unmanaged.Version, JSRLibMetadata::MAX_STRING_LENGTH);
+  copyManagedString(metadata->Name, unmanaged.Name,
+                    JSRLibMetadata::MAX_STRING_LENGTH);
+  copyManagedString(metadata->GUID, unmanaged.GUID,
+                    JSRLibMetadata::MAX_STRING_LENGTH);
+  copyManagedString(metadata->FriendlyName, unmanaged.FriendlyName,
+                    JSRLibMetadata::MAX_STRING_LENGTH);
+  copyManagedString(metadata->Version, unmanaged.Version,
+                    JSRLibMetadata::MAX_STRING_LENGTH);
 
   unmanaged.InterfaceVersion = metadata->InterfaceVersion;
 
   // Copy SupportedModels
   if (metadata->SupportedModels != nullptr) {
     int index = 0;
-    for each (System::String^ model in metadata->SupportedModels) {
-      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE) break;
-      copyManagedString(model, unmanaged.SupportedModels[index], JSRLibMetadata::MAX_STRING_LENGTH);
+    for each (System::String ^ model in metadata->SupportedModels) {
+      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE)
+        break;
+      copyManagedString(model, unmanaged.SupportedModels[index],
+                        JSRLibMetadata::MAX_STRING_LENGTH);
       index++;
     }
     unmanaged.SupportedModelsCount = index;
@@ -248,9 +266,11 @@ inline JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
   // Copy OpenOptions
   if (metadata->OpenOptions != nullptr) {
     int index = 0;
-    for each (System::String^ option in metadata->OpenOptions) {
-      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE) break;
-      copyManagedString(option, unmanaged.OpenOptions[index], JSRLibMetadata::MAX_STRING_LENGTH);
+    for each (System::String ^ option in metadata->OpenOptions) {
+      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE)
+        break;
+      copyManagedString(option, unmanaged.OpenOptions[index],
+                        JSRLibMetadata::MAX_STRING_LENGTH);
       index++;
     }
     unmanaged.OpenOptionsCount = index;
@@ -260,7 +280,8 @@ inline JSRLibMetadata libMetadataFromManaged(IJSRDotNETLibMetadata ^ metadata) {
   if (metadata->ConnectionType != nullptr) {
     int index = 0;
     for each (CONNECTION_TYPE ct in metadata->ConnectionType) {
-      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE) break;
+      if (index >= JSRLibMetadata::MAX_ARRAY_SIZE)
+        break;
       unmanaged.ConnectionType[index] = connectionTypeFromManaged(ct);
       index++;
     }
@@ -279,13 +300,16 @@ inline StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
   if (managedEvent == nullptr)
     return unmanagedEvent;
 
-  copyManagedString(managedEvent->PulserProperty, unmanagedEvent.pulserProperty, StatusChangedEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->PulserProperty, unmanagedEvent.pulserProperty,
+                    StatusChangedEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.pulserState =
       pulserReceiverStateFromManaged(managedEvent->PulserState);
 
   if (managedEvent->NewValue != nullptr) {
-    copyManagedString(invariantText(managedEvent->NewValue), unmanagedEvent.newValue, StatusChangedEvent::MAX_STRING_LENGTH);
+    copyManagedString(invariantText(managedEvent->NewValue),
+                      unmanagedEvent.newValue,
+                      StatusChangedEvent::MAX_STRING_LENGTH);
   }
 
   unmanagedEvent.dataType =
@@ -296,7 +320,8 @@ inline StatusChangedEvent statusChangedEventFromManaged(EventArgsStatusChange ^
     unmanagedEvent.pulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
-  copyManagedString(managedEvent->ErrorMessage, unmanagedEvent.errorMessage, StatusChangedEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->ErrorMessage, unmanagedEvent.errorMessage,
+                    StatusChangedEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.errorCode = errorCodeFromManaged(managedEvent->ErrorCode);
 
@@ -315,30 +340,39 @@ inline NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     return unmanagedEvent;
   }
 
-  copyManagedString(managedEvent->Model, unmanagedEvent.model, NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->Model, unmanagedEvent.model,
+                    NotifyEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.state = pulserReceiverStateFromManaged(managedEvent->State);
 
   if (managedEvent->NewValue != nullptr) {
-    copyManagedString(invariantText(managedEvent->NewValue), unmanagedEvent.newValue, NotifyEvent::MAX_STRING_LENGTH);
+    copyManagedString(invariantText(managedEvent->NewValue),
+                      unmanagedEvent.newValue, NotifyEvent::MAX_STRING_LENGTH);
   }
 
-  copyManagedString(managedEvent->PropertyName, unmanagedEvent.propertyName, NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->PropertyName, unmanagedEvent.propertyName,
+                    NotifyEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.wasSelected = managedEvent->WasSelected;
 
-  copyManagedString(managedEvent->ExceptionTypeInfo, unmanagedEvent.exceptionTypeInfo, NotifyEvent::MAX_STRING_LENGTH);
-  copyManagedString(managedEvent->ErrorMsg, unmanagedEvent.errorMsg, NotifyEvent::MAX_STRING_LENGTH);
-  copyManagedString(managedEvent->ErrorText, unmanagedEvent.errorText, NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->ExceptionTypeInfo,
+                    unmanagedEvent.exceptionTypeInfo,
+                    NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->ErrorMsg, unmanagedEvent.errorMsg,
+                    NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->ErrorText, unmanagedEvent.errorText,
+                    NotifyEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.maxFrequency = managedEvent->MaxFrequency;
 
   // Copy Info array
   if (managedEvent->Info != nullptr) {
     int index = 0;
-    for each (System::String^ infoStr in managedEvent->Info) {
-      if (index >= NotifyEvent::MAX_INFO_ARRAY) break;
-      copyManagedString(infoStr, unmanagedEvent.info[index], NotifyEvent::MAX_STRING_LENGTH);
+    for each (System::String ^ infoStr in managedEvent->Info) {
+      if (index >= NotifyEvent::MAX_INFO_ARRAY)
+        break;
+      copyManagedString(infoStr, unmanagedEvent.info[index],
+                        NotifyEvent::MAX_STRING_LENGTH);
       index++;
     }
     unmanagedEvent.infoCount = index;
@@ -350,7 +384,8 @@ inline NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     unmanagedEvent.pulserReceiverId =
         pulsereceiverFromManaged(managedEvent->PulserReceiverId);
 
-  copyManagedString(managedEvent->Serial, unmanagedEvent.serial, NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->Serial, unmanagedEvent.serial,
+                    NotifyEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.discoverState =
       discoveryStateFlagsFromManaged(managedEvent->DiscoverState);
@@ -359,7 +394,8 @@ inline NotifyEvent notifyEventFromManaged(EventArgsManagerNotify ^
     unmanagedEvent.instrumentId =
         instrumentFromManaged(managedEvent->InstrumentId);
 
-  copyManagedString(managedEvent->PluginName, unmanagedEvent.pluginName, NotifyEvent::MAX_STRING_LENGTH);
+  copyManagedString(managedEvent->PluginName, unmanagedEvent.pluginName,
+                    NotifyEvent::MAX_STRING_LENGTH);
 
   unmanagedEvent.notifyType = notifyTypeFromManaged(managedEvent->NotifyType);
   unmanagedEvent.dataType =

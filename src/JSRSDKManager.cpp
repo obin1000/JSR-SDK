@@ -1,8 +1,8 @@
 ﻿#include "JSR-SDK/JSRSDKManager.hpp"
 #include "JSRSDKWrapper.hpp"
 #include "ManagedErrors.hpp"
-#include "marshals/MarshalTypes.h"
 #include "SdkError.hpp"
+#include "marshals/MarshalTypes.h"
 
 #include <msclr/marshal.h>
 #include <msclr/marshal_cppstd.h>
@@ -382,7 +382,8 @@ public:
 
       size_t copyCount = (count < bufferCount) ? count : bufferCount;
       for (size_t i = 0; i < copyCount; ++i) {
-        buffer[i] = pulsereceiverFromManaged(managedReceivers[static_cast<int>(i)]);
+        buffer[i] =
+            pulsereceiverFromManaged(managedReceivers[static_cast<int>(i)]);
       }
 
       return count;

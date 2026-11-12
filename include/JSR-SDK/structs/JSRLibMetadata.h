@@ -8,8 +8,9 @@
  * @brief Contains metadata information about a JSR plugin library.
  *
  * This structure provides comprehensive information about a plugin library,
- * including identification, capabilities, supported devices, and version information.
- * This data is typically used for plugin discovery, validation, and compatibility checking.
+ * including identification, capabilities, supported devices, and version
+ * information. This data is typically used for plugin discovery, validation,
+ * and compatibility checking.
  *
  * Mirrors JSRDotNETSDK::IJSRDotNETLibMetadata interface.
  *
@@ -76,7 +77,9 @@ struct JSRLibMetadata {
    * All array counts are initialized to zero.
    * InterfaceVersion is initialized to 0.
    */
-  JSRLibMetadata() : InterfaceVersion(0), ConnectionTypeCount(0), SupportedModelsCount(0), OpenOptionsCount(0) {
+  JSRLibMetadata()
+      : InterfaceVersion(0), ConnectionTypeCount(0), SupportedModelsCount(0),
+        OpenOptionsCount(0) {
     Name[0] = '\0';
     GUID[0] = '\0';
     FriendlyName[0] = '\0';

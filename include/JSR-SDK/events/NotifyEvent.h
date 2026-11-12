@@ -5,18 +5,18 @@
 #include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
 #include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
 #include "JSR-SDK/enums/C_STATUS_CHANGE.h"
-#include "JSR-SDK/structs/PulserReceiverID.h"
 #include "JSR-SDK/structs/InstrumentID.h"
+#include "JSR-SDK/structs/PulserReceiverID.h"
 
-#include <functional>
 #include <cstring>
+#include <functional>
 
 /**
  * @struct NotifyEvent
  * @brief Event structure containing notification data from the JSR SDK Manager.
  *
- * This structure is used in notification callbacks to inform about various events
- * such as device discovery, property changes, errors, and state changes.
+ * This structure is used in notification callbacks to inform about various
+ * events such as device discovery, property changes, errors, and state changes.
  * All string fields are fixed-size character arrays.
  *
  * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
@@ -104,8 +104,8 @@ struct NotifyEvent {
    * Boolean fields are initialized to false.
    */
   NotifyEvent()
-      : prIndex(0), state{}, notifyType{}, discoverState{},
-        wasSelected(false), dataType{}, maxFrequency(0.0), infoCount(0) {
+      : prIndex(0), state{}, notifyType{}, discoverState{}, wasSelected(false),
+        dataType{}, maxFrequency(0.0), infoCount(0) {
     model[0] = '\0';
     newValue[0] = '\0';
     propertyName[0] = '\0';
@@ -122,17 +122,17 @@ struct NotifyEvent {
  * @typedef NotifyCallback
  * @brief Callback function type for notification events.
  *
- * Use this to register a callback that will be invoked when notification events occur.
- * The callback receives a const reference to a NotifyEvent structure containing
- * all relevant event information.
+ * Use this to register a callback that will be invoked when notification events
+ * occur. The callback receives a const reference to a NotifyEvent structure
+ * containing all relevant event information.
  *
  * @param event The notification event data
  *
  * @example
  * @code
  * manager->replaceNotifyEventHandler([](const NotifyEvent& event) {
- *     std::cout << "Device: " << event.model << " - " << event.serial << std::endl;
- *     if (event.notifyType == C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED) {
+ *     std::cout << "Device: " << event.model << " - " << event.serial <<
+ * std::endl; if (event.notifyType == C_NOTIFY_TYPE::PULSER_RCVR_DISCOVERED) {
  *         std::cout << "New device discovered!" << std::endl;
  *     }
  * });
