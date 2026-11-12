@@ -581,6 +581,30 @@ JSR_API size_t JSR_CALL JSR_GetLastErrorMessage(char *buffer,
   return length + 1;
 }
 
+// --- Versions ---------------------------------------------------------------
+// JSR_SDK_VERSION is the release; the build passes it in (JsrSdkVersion in
+// JSR-SDK.vcxproj).
+#ifndef JSR_SDK_VERSION
+#define JSR_SDK_VERSION "0.0.0-dev"
+#endif
+
+JSR_API int32_t JSR_CALL JSR_GetApiVersion(int32_t *version) {
+  return guarded([&] { *required(version, "version") = JSR_API_VERSION; });
+}
+
+JSR_API int32_t JSR_CALL JSR_GetLibraryVersion(char *buffer, size_t bufferSize,
+                                               size_t *required) {
+  return guarded([&] {
+    static constexpr char kVersion[] = JSR_SDK_VERSION;
+    if (buffer != nullptr && bufferSize > 0) {
+      size_t copied = clampCount(sizeof kVersion - 1, bufferSize - 1);
+      std::memcpy(buffer, kVersion, copied);
+      buffer[copied] = '\0';
+    }
+    report(required, sizeof kVersion);
+  });
+}
+
 JSR_API int32_t JSR_CALL JSR_Create(JSR_Manager **manager) {
   return guarded([&] {
     JSR_Manager **out = required(manager, "manager");

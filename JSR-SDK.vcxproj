@@ -23,10 +23,12 @@
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
     <!-- The C API is native code: thread_local needs it, and nothing managed
          may run while the DLL loads. /EHa lets catch (...) stop every
-         exception before it reaches a caller. -->
+         exception before it reaches a caller. JSR_GetLibraryVersion() returns
+         JsrSdkVersion. -->
     <ClCompile Include="src\jsr_sdk_c.cpp">
       <CompileAsManaged>false</CompileAsManaged>
       <ExceptionHandling>Async</ExceptionHandling>
+      <PreprocessorDefinitions>JSR_SDK_VERSION="$(JsrSdkVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +88,9 @@
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>JSRSDK</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <!-- The release, without the "v" of its tag: msbuild -p:JsrSdkVersion=0.13.0.
+         CI sets it; a local build is 0.0.0-dev. -->
+    <JsrSdkVersion Condition="'$(JsrSdkVersion)' == ''">0.0.0-dev</JsrSdkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'" Label="Configuration">

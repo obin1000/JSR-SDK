@@ -45,6 +45,21 @@
  *   may be freed. A callback must therefore not block on a thread that is
  *   replacing callbacks.
  *
+ * Versions
+ * --------
+ * JSR_API_VERSION is the version of this API that the header describes, and
+ * JSR_GetApiVersion() returns the one the loaded JSR-SDK.dll implements. A
+ * program should refuse to run when the two differ (jsr::Manager does).
+ * JSR_GetLibraryVersion() returns the release, such as "0.13.0".
+ *
+ * Compatibility rules for JSR-SDK itself:
+ * - Adding a function, an enum constant or an error code keeps
+ *   JSR_API_VERSION. A program that uses a new function needs a DLL that has
+ *   it; Windows refuses to load the program otherwise.
+ * - Any other change raises JSR_API_VERSION: removing or renaming a function,
+ *   changing a signature, a struct, a constant's value or a function's
+ *   behaviour in a way that breaks callers.
+ *
  * Machine requirements: .NET Framework 4.8, the Microsoft Visual C++
  * runtime, and the plugin DLLs from the release next to JSR-SDK.dll.
  */
@@ -72,6 +87,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Version of the API this header describes; see "Versions" above. */
+#define JSR_API_VERSION 1
 
 /* Length of the string fields in the structs below, including the NUL. */
 #define JSR_STRING_LENGTH 256
@@ -181,6 +199,21 @@ typedef void(JSR_CALL *JSR_NotifyCallback)(const JSR_NotifyEvent *event,
  */
 JSR_API size_t JSR_CALL JSR_GetLastErrorMessage(char *buffer,
                                                 size_t bufferSize);
+
+/**
+ * Stores the API version the loaded JSR-SDK.dll implements in *version.
+ * Compare it with JSR_API_VERSION before anything else.
+ */
+JSR_API int32_t JSR_CALL JSR_GetApiVersion(int32_t *version);
+
+/**
+ * Retrieves the release of the loaded JSR-SDK.dll, such as "0.13.0", or
+ * "0.0.0-dev" for a local build. A string result. For messages and logs;
+ * compare JSR_GetApiVersion() for compatibility.
+ */
+JSR_API int32_t JSR_CALL JSR_GetLibraryVersion(char *buffer,
+                                               size_t bufferSize,
+                                               size_t *required);
 
 /**
  * Creates a manager and stores it in *manager. The first call starts the .NET

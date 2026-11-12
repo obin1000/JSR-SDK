@@ -94,6 +94,60 @@ TEST(CApiEnums, ErrorCodes_MatchCppEnum) {
 }
 
 //--------------------------------------------------------------------------
+//  Versions (#20)
+//--------------------------------------------------------------------------
+TEST(CApiVersion, ApiVersion_MatchesHeader) {
+  int32_t version = -1;
+  ASSERT_EQ(JSR_GetApiVersion(&version), JSR_OK) << lastError();
+  EXPECT_EQ(version, JSR_API_VERSION);
+  EXPECT_EQ(JSR_GetApiVersion(nullptr), JSR_ERROR_NULL_POINTER);
+}
+
+TEST(CApiVersion, LibraryVersion_QueryThenReadAndTruncate) {
+  size_t required = 0;
+  ASSERT_EQ(JSR_GetLibraryVersion(nullptr, 0, &required), JSR_OK);
+  ASSERT_GT(required, 1u);
+
+  std::vector<char> buffer(required, 'x');
+  ASSERT_EQ(JSR_GetLibraryVersion(buffer.data(), buffer.size(), nullptr),
+            JSR_OK);
+  const std::string version = buffer.data();
+  EXPECT_EQ(version.size(), required - 1);
+#ifdef JSR_SDK_EXPECTED_VERSION
+  EXPECT_EQ(version, JSR_SDK_EXPECTED_VERSION);
+#endif
+
+  char tiny[3] = "xx";
+  size_t again = 0;
+  ASSERT_EQ(JSR_GetLibraryVersion(tiny, sizeof tiny, &again), JSR_OK);
+  EXPECT_EQ(again, required);
+  EXPECT_EQ(std::string(tiny), version.substr(0, 2));
+}
+
+TEST(CppWrapper, Versions_MatchTheCApi) {
+  EXPECT_EQ(jsr::apiVersion(), JSR_API_VERSION);
+  std::vector<char> buffer(64);
+  ASSERT_EQ(JSR_GetLibraryVersion(buffer.data(), buffer.size(), nullptr),
+            JSR_OK);
+  EXPECT_EQ(jsr::libraryVersion(), buffer.data());
+}
+
+TEST(CppWrapper, OtherApiVersion_ThrowsVersionMismatch) {
+  EXPECT_NO_THROW(jsr::detail::checkApiVersion(JSR_API_VERSION, "1.2.3"));
+  try {
+    jsr::detail::checkApiVersion(JSR_API_VERSION + 1, "1.2.3");
+    FAIL() << "no exception";
+  } catch (const jsr::Error &e) {
+    EXPECT_EQ(e.code(), JSR_ERROR_VERSION_MISMATCH);
+    const std::string message = e.what();
+    EXPECT_NE(message.find("1.2.3"), std::string::npos) << message;
+    EXPECT_NE(message.find(std::to_string(JSR_API_VERSION + 1)),
+              std::string::npos)
+        << message;
+  }
+}
+
+//--------------------------------------------------------------------------
 //  Calls on a manager with the plugins loaded
 //--------------------------------------------------------------------------
 TEST_F(CApiTest, PluginsLoaded_IsTrue) {

@@ -31,17 +31,28 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
 
+      # JSR_GetLibraryVersion() returns it: the tag without its "v" for a
+      # release (release.yml calls this workflow for the tag), otherwise a dev
+      # version naming the commit.
+      - name: Choose the library version
+        shell: pwsh
+        run: |
+          $version = '0.0.0-dev+' + '${{ github.sha }}'.Substring(0, 7)
+          if ('${{ github.ref_type }}' -eq 'tag') { $version = '${{ github.ref_name }}'.TrimStart('v') }
+          "JSR_SDK_VERSION=$version" >> $env:GITHUB_ENV
+          "Library version: $version"
+
       - name: Build x64 dynamic library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=x64
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=x64 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
 
       - name: Build x86 dynamic library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
 
       - name: Build x64 static library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=x64 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
 
       - name: Build x86 static library
-        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32 -p:JsrSdkVersion=${{ env.JSR_SDK_VERSION }}
 
       # The unit tests (test/CMakeLists.txt), for x64 and x86: clr_tests (C++/CLI,
       # the DLL's internals and the C API against the C++ interface) and
@@ -61,7 +72,7 @@ jobs:
           $env:PATH = (Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin') + ";$env:PATH"
           cmake --version
           foreach ($arch in 'x64', 'Win32') {
-            cmake -S test -B "build/test-$arch" -A $arch -T v143
+            cmake -S test -B "build/test-$arch" -A $arch -T v143 "-DJSR_SDK_EXPECTED_VERSION=$env:JSR_SDK_VERSION"
             if ($LASTEXITCODE -ne 0) { throw "Configuring the $arch tests failed" }
             cmake --build "build/test-$arch" --config Release
             if ($LASTEXITCODE -ne 0) { throw "Building the $arch tests failed" }
