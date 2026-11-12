@@ -113,6 +113,7 @@ A program loads whichever `JSR-SDK.dll` sits next to it, so the DLL can come fro
 - `JSR_GetLibraryVersion()` (`jsr::libraryVersion()`) returns the release, such as `0.13.0`, for messages and logs.
 - The API version only goes up for an incompatible change. New functions and enum values keep it, so a newer DLL runs programs built for an older release with the same API version.
 - Releases before 0.13.0 don't have these functions. A program built with 0.13.0 or later won't start with such a DLL: Windows reports that `JSR_GetApiVersion` is missing.
+- [CHANGELOG.md](CHANGELOG.md) lists what changed in each release, breaking changes first.
 
 ### Threading and events
 These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKManager.hpp`).
