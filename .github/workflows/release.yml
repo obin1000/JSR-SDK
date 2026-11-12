@@ -26,7 +26,7 @@ jobs:
         run: Set-Content -Path "${{github.workspace}}\package\VERSION" -Value "${{github.ref_name}}" -Encoding ASCII
       - name: Zip release
         shell: pwsh
-        run: Compress-Archive -Path '${{github.workspace}}\package\include','${{github.workspace}}\package\lib', '${{github.workspace}}\package\CMakeLists.txt', '${{github.workspace}}\package\LICENSE', '${{github.workspace}}\package\VERSION' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
+        run: Compress-Archive -Path '${{github.workspace}}\package\include','${{github.workspace}}\package\lib', '${{github.workspace}}\package\cmake', '${{github.workspace}}\package\CMakeLists.txt', '${{github.workspace}}\package\LICENSE', '${{github.workspace}}\package\VERSION' -DestinationPath '${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip' -Force
       - name: Generate hash
         shell: pwsh
         run: |

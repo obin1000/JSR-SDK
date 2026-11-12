@@ -140,6 +140,7 @@ jobs:
           path: |
             include/
             lib/
+            cmake/
             CMakeLists.txt
             LICENSE
           if-no-files-found: error
