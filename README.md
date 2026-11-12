@@ -117,7 +117,7 @@ A program loads whichever `JSR-SDK.dll` sits next to it, so the DLL can come fro
 ### Threading and events
 These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKManager.hpp`).
 - **One thread at a time per manager.** A manager's calls are not synchronized: use it from one thread, or serialize the calls yourself. Separate managers are independent.
-- **Events can arrive inside your own calls.** The SDK raises the event for a change it makes inside the call that made it. For example, `setGainIndex()` calls the status-change callback on your thread before it returns.
+- **Events can arrive inside your own calls.** The SDK raises the event for a change it makes inside the call that made it. For example, `setGainIndex()` calls the status-change callback before it returns. That call can come from another thread while yours is still inside `setGainIndex()`.
 - **Other events arrive on library threads.** Discovery events, for example, come from threads owned by the .NET runtime, not the thread that registered the callback.
 - **Callbacks must be thread-safe, return quickly and not throw.** Exceptions a callback throws are dropped: the SDK raised the event inside one of its own calls, and the exception would otherwise make that call fail.
 - **Callbacks of one kind never overlap.** Status callbacks run one at a time, and so do notify callbacks.
