@@ -36,8 +36,14 @@ public:
   }
 
   ~JSRSDKManagerAdapter() override {
-    removeStatusChangeEventHandler();
-    removeNotifyEventHandler();
+    // A destructor must not throw; the manager is gone either way. Only
+    // exceptions are caught: a crash ends the process (#36), and under /clr
+    // catch (...) would catch that too.
+    try {
+      removeStatusChangeEventHandler();
+      removeNotifyEventHandler();
+    } catch (const std::exception &) {
+    }
 
     // A gcroot doesn't dispose what it holds, so dispose the wrapper here:
     // that unsubscribes from the SDK's events and shuts the .NET manager
@@ -47,8 +53,7 @@ public:
       JSRSDKWrapper ^ wrapper = m_manager;
       m_manager = nullptr;
       delete wrapper;
-    } catch (...) {
-      // A destructor must not throw; the manager is gone either way.
+    } catch (System::Exception ^) {
     }
   }
 
@@ -69,29 +74,49 @@ public:
   }
 
   // === Event handlers used for callbacks ===
+  // Like every method here, they turn managed exceptions into C++ ones: the
+  // C API only catches C++ exceptions (#36).
   void
   replaceStatusChangeEventHandler(const StatusChangeCallback &cb) override {
     removeStatusChangeEventHandler();
-    m_statusHolder = std::make_unique<StatusChangeCallback>(cb);
-    m_manager->SetStatusChangeCallback(m_statusHolder.get());
+    auto holder = std::make_unique<StatusChangeCallback>(cb);
+    try {
+      m_manager->SetStatusChangeCallback(holder.get());
+    } catch (System::Exception ^ exception) {
+      rethrowManaged(exception, "Failed setting the status change callback");
+    }
+    m_statusHolder = std::move(holder);
   }
 
   void removeStatusChangeEventHandler() override {
     if (m_statusHolder) {
-      m_manager->SetStatusChangeCallback(nullptr);
+      try {
+        m_manager->SetStatusChangeCallback(nullptr);
+      } catch (System::Exception ^ exception) {
+        rethrowManaged(exception, "Failed removing the status change callback");
+      }
       m_statusHolder.reset();
     }
   }
 
   void replaceNotifyEventHandler(const NotifyCallback &cb) override {
     removeNotifyEventHandler();
-    m_notifyHolder = std::make_unique<NotifyCallback>(cb);
-    m_manager->SetNotifyCallback(m_notifyHolder.get());
+    auto holder = std::make_unique<NotifyCallback>(cb);
+    try {
+      m_manager->SetNotifyCallback(holder.get());
+    } catch (System::Exception ^ exception) {
+      rethrowManaged(exception, "Failed setting the notify callback");
+    }
+    m_notifyHolder = std::move(holder);
   }
 
   void removeNotifyEventHandler() override {
     if (m_notifyHolder) {
-      m_manager->SetNotifyCallback(nullptr);
+      try {
+        m_manager->SetNotifyCallback(nullptr);
+      } catch (System::Exception ^ exception) {
+        rethrowManaged(exception, "Failed removing the notify callback");
+      }
       m_notifyHolder.reset();
     }
   }

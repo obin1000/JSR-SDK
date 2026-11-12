@@ -14,6 +14,10 @@
  *   one of the negative JSR_ERROR_* values. JSR_GetLastErrorMessage() then
  *   returns the message of the last failed call on the same thread.
  * - No exception ever crosses this API.
+ * - A crash (an access violation or another structured exception) is not
+ *   an error code: inside the library or a callback, it ends the process
+ *   where it happened. After a crash memory may be corrupt, so carrying on
+ *   would hide the bug and keep driving the hardware in an unknown state.
  * - Booleans are int32_t: 0 is false, anything else is true.
  * - Enums are passed as int32_t; the JSR_* enum constants below name the
  *   values.
@@ -40,7 +44,8 @@
  *   thread. Other events, such as discovery, arrive on threads owned by the
  *   .NET runtime.
  * - Callbacks must be thread-safe, return quickly and never throw or longjmp
- *   out. Callbacks of one kind never overlap.
+ *   out. A C++ exception from a callback is caught and dropped; a crash is
+ *   not. Callbacks of one kind never overlap.
  * - Replacing or removing a callback waits for a running one to return;
  *   after that the old callback is never called again, so its user data
  *   may be freed. A callback must therefore not block on a thread that is

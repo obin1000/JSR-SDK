@@ -120,6 +120,7 @@ These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKMana
 - **Events can arrive inside your own calls.** The SDK raises the event for a change it makes inside the call that made it. For example, `setGainIndex()` calls the status-change callback before it returns. That call can come from another thread while yours is still inside `setGainIndex()`.
 - **Other events arrive on library threads.** Discovery events, for example, come from threads owned by the .NET runtime, not the thread that registered the callback.
 - **Callbacks must be thread-safe, return quickly and not throw.** Exceptions a callback throws are dropped: the SDK raised the event inside one of its own calls, and the exception would otherwise make that call fail.
+- **A crash ends the process.** An access violation or another structured exception, in a callback or inside the library, is not caught or turned into an error code. After a crash memory may be corrupt, so carrying on would hide the bug and keep driving the pulser-receiver in an unknown state. It also lets page heap, Application Verifier and AddressSanitizer report memory errors where they happen.
 - **Callbacks of one kind never overlap.** Status callbacks run one at a time, and so do notify callbacks.
 - **Replacing or removing a callback waits for a running one.** Once the call returns, the old callback isn't running and won't be called again, so you may free whatever it uses. Because of that wait, a callback must not block on a thread that is replacing callbacks.
 
