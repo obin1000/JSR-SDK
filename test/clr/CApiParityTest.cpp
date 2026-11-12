@@ -10,7 +10,6 @@
 // and methods.py: edit those and regenerate, not this file. Setters are called
 // with the value the device already has, so the simulated devices stay
 // unchanged.
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/JSRSDKManager.hpp"
@@ -22,6 +21,7 @@
 #include <cstdio>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -381,6 +381,37 @@ TEST_F(CApiParityTest, OpenCriteria) {
         }),
         cOutcome(JSR_RemoveOpenOption(cManager, sim::kPlugin, option, &removed),
                  [&] { return text(removed, true); }));
+  }
+}
+
+TEST_F(CApiParityTest, PluginLibraryMetadata) {
+  for (const char *plugin : {sim::kPlugin, "JSRDotNET_DPR"}) {
+    SCOPED_TRACE(plugin);
+    // About 33 KB each, so on the heap.
+    auto viaC = std::make_unique<JSR_LibMetadata>();
+    ASSERT_EQ(JSR_GetPluginLibraryMetadata(cManager, plugin, viaC.get()),
+              JSR_OK);
+    auto viaCpp = std::make_unique<JSRLibMetadata>();
+    ASSERT_TRUE(legacy->GetPluginLibraryMetadata(plugin, viaCpp.get()));
+
+    EXPECT_STREQ(viaC->Name, viaCpp->Name);
+    EXPECT_STREQ(viaC->GUID, viaCpp->GUID);
+    EXPECT_STREQ(viaC->FriendlyName, viaCpp->FriendlyName);
+    EXPECT_STREQ(viaC->Version, viaCpp->Version);
+    EXPECT_EQ(viaC->InterfaceVersion, viaCpp->InterfaceVersion);
+    ASSERT_EQ(viaC->ConnectionTypeCount, viaCpp->ConnectionTypeCount);
+    for (size_t i = 0; i < viaC->ConnectionTypeCount; ++i) {
+      EXPECT_EQ(viaC->ConnectionType[i],
+                static_cast<int32_t>(viaCpp->ConnectionType[i]));
+    }
+    ASSERT_EQ(viaC->SupportedModelsCount, viaCpp->SupportedModelsCount);
+    for (size_t i = 0; i < viaC->SupportedModelsCount; ++i) {
+      EXPECT_STREQ(viaC->SupportedModels[i], viaCpp->SupportedModels[i]);
+    }
+    ASSERT_EQ(viaC->OpenOptionsCount, viaCpp->OpenOptionsCount);
+    for (size_t i = 0; i < viaC->OpenOptionsCount; ++i) {
+      EXPECT_STREQ(viaC->OpenOptions[i], viaCpp->OpenOptions[i]);
+    }
   }
 }
 

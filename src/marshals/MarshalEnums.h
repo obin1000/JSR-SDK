@@ -25,7 +25,7 @@
 // src/ on the include path.
 //
 // Every C++ enum has the same names and values as its .NET counterpart
-// (test/MarshalEnumsTest.cpp checks this by reflection), so the conversions
+// (test/clr/EnumParityTest.cpp checks this by reflection), so the conversions
 // are casts:
 // - From .NET, a value passes through unchanged. A value the C++ enum doesn't
 //   name reaches the caller as that number, never as a different setting.

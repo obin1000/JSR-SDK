@@ -1,10 +1,10 @@
 // CApiTest.cpp
+// Portable: every compiler in CI builds and runs it (see test/capi).
 // Tests for the C API in jsr_sdk.h and the C++ wrapper in jsr_sdk.hpp.
 // They need no hardware: only the plugins next to the test program.
-#include "pch.h"
 #include <gtest/gtest.h>
 
-#include "JSR-SDK/JSRSDKManager.hpp"
+#include "JSR-SDK/enums/C_ERROR_CODE.h"
 #include "JSR-SDK/jsr_sdk.h"
 #include "JSR-SDK/jsr_sdk.hpp"
 
@@ -150,41 +150,6 @@ TEST_F(CApiTest, StringResult_QueryThenReadAndTruncate) {
   EXPECT_EQ(again, required);
   EXPECT_EQ(std::strncmp(tiny, path.data(), 3), 0);
   EXPECT_EQ(tiny[3], '\0');
-}
-
-TEST_F(CApiTest, LibMetadata_MatchesCppInterface) {
-  const auto names = pluginNames(manager);
-  ASSERT_FALSE(names.empty());
-
-  auto viaC = std::make_unique<JSR_LibMetadata>();
-  ASSERT_EQ(JSR_GetPluginLibraryMetadata(manager, names[0].c_str(), viaC.get()),
-            JSR_OK)
-      << lastError();
-
-  JSRSDKManager *legacy = CreateJSRSDKManager();
-  legacy->loadPluginsFromBinaryDir();
-  auto viaCpp = std::make_unique<JSRLibMetadata>();
-  ASSERT_TRUE(legacy->GetPluginLibraryMetadata(names[0].c_str(), viaCpp.get()));
-  DestroyJSRSDKManager(legacy);
-
-  EXPECT_STREQ(viaC->Name, viaCpp->Name);
-  EXPECT_STREQ(viaC->GUID, viaCpp->GUID);
-  EXPECT_STREQ(viaC->FriendlyName, viaCpp->FriendlyName);
-  EXPECT_STREQ(viaC->Version, viaCpp->Version);
-  EXPECT_EQ(viaC->InterfaceVersion, viaCpp->InterfaceVersion);
-  ASSERT_EQ(viaC->ConnectionTypeCount, viaCpp->ConnectionTypeCount);
-  for (size_t i = 0; i < viaC->ConnectionTypeCount; ++i) {
-    EXPECT_EQ(viaC->ConnectionType[i],
-              static_cast<int32_t>(viaCpp->ConnectionType[i]));
-  }
-  ASSERT_EQ(viaC->SupportedModelsCount, viaCpp->SupportedModelsCount);
-  for (size_t i = 0; i < viaC->SupportedModelsCount; ++i) {
-    EXPECT_STREQ(viaC->SupportedModels[i], viaCpp->SupportedModels[i]);
-  }
-  ASSERT_EQ(viaC->OpenOptionsCount, viaCpp->OpenOptionsCount);
-  for (size_t i = 0; i < viaC->OpenOptionsCount; ++i) {
-    EXPECT_STREQ(viaC->OpenOptions[i], viaCpp->OpenOptions[i]);
-  }
 }
 
 TEST_F(CApiTest, SdkException_BecomesCodeAndMessage) {

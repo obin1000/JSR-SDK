@@ -1,5 +1,4 @@
 ﻿// MarshalTypesTest.cpp
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "marshals/MarshalTypes.h"

@@ -4,7 +4,7 @@ Writes, relative to the repository root:
   include/JSR-SDK/jsr_sdk.h     the C API
   src/jsr_sdk_c.cpp             its implementation
   include/JSR-SDK/jsr_sdk.hpp   the jsr::Manager wrapper
-  test/CApiParityTest.cpp       parity tests against JSRSDKManager
+  test/clr/CApiParityTest.cpp       parity tests against JSRSDKManager
 and formats them with clang-format and the repository's .clang-format.
 
 Usage:
@@ -33,8 +33,8 @@ OUTPUTS = {
     'jsr_sdk.h.in': 'include/JSR-SDK/jsr_sdk.h',
     'jsr_sdk_c.cpp.in': 'src/jsr_sdk_c.cpp',
     'jsr_sdk.hpp.in': 'include/JSR-SDK/jsr_sdk.hpp',
-    'CApiParityTest.cpp.in': 'test/CApiParityTest.cpp',
-    'EnumParityTest.cpp.in': 'test/EnumParityTest.cpp',
+    'CApiParityTest.cpp.in': 'test/clr/CApiParityTest.cpp',
+    'EnumParityTest.cpp.in': 'test/clr/EnumParityTest.cpp',
 }
 
 
@@ -83,7 +83,7 @@ ENUMS = [
 RENAME = {'ERRORC': 'ERROR'}
 
 # The .NET SDK enum each C++ enum mirrors (full type name in JSRDotNETSDK.dll).
-# src/marshals/MarshalEnums.h casts between them, so test/EnumParityTest.cpp
+# src/marshals/MarshalEnums.h casts between them, so test/clr/EnumParityTest.cpp
 # checks that they have the same names and values.
 MANAGED_ENUMS = {
     'C_ERROR_CODE': 'JSRDotNETSDK.ERROR_CODE',

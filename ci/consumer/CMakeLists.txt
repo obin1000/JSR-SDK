@@ -18,6 +18,11 @@ add_subdirectory("${JSR_SDK_DIR}" jsr-sdk)
 
 enable_testing()
 
+# The portable C API unit tests (test/capi), with googletest, so every
+# compiler runs them against the release layout, not only MSVC.
+include("${CMAKE_CURRENT_LIST_DIR}/../../test/googletest.cmake")
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../../test/capi" capi)
+
 # Builds one test program against JSR-SDK, copies the SDK's DLLs and plugins
 # next to it and registers it with CTest. STRICT turns warnings into errors.
 # RUNTIME_DLLS copies the DLLs with $<TARGET_RUNTIME_DLLS> instead of

@@ -31,12 +31,8 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
 
-      - name: Restore NuGet packages
-        run: msbuild JSR-SDK.sln -t:restore -p:RestorePackagesConfig=true
-
-      # The solution maps dynamic|x64 to the library and the x64 unit tests.
-      - name: Build x64 dynamic library and unit tests
-        run: msbuild JSR-SDK.sln -t:Rebuild -p:Configuration=dynamic -p:Platform=x64
+      - name: Build x64 dynamic library
+        run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=x64
 
       - name: Build x86 dynamic library
         run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=dynamic -p:Platform=Win32
@@ -47,14 +43,31 @@ jobs:
       - name: Build x86 static library
         run: msbuild JSR-SDK.vcxproj -t:Rebuild -p:Configuration=static -p:Platform=Win32
 
-      # The unit tests include simulator tests: the SDK's diagnostics plugin
+      # The unit tests (test/CMakeLists.txt), for x64 and x86: clr_tests (C++/CLI,
+      # the DLL's internals and the C API against the C++ interface) and
+      # capi_tests (portable; the consumer jobs also run them with every
+      # compiler). They include simulator tests: the SDK's diagnostics plugin
       # simulates pulser-receivers, so they need no hardware. The integration
-      # tests need a real pulser-receiver attached, so they stay manual.
-      # test.exe is a .NET program: if a manager's threads outlive it, it never
+      # tests need a real pulser-receiver and stay manual.
+      # clr_tests is a .NET program: if a manager's threads outlive it, it never
       # exits, so fail fast instead of waiting for the job's 6-hour limit.
-      - name: Run unit tests
-        timeout-minutes: 10
-        run: x64\Release\test.exe --gtest_filter=-*IntegrationTest.*
+      # Visual Studio's own CMake is used because it always knows the installed
+      # Visual Studio generator; v143 matches the library's toolset.
+      - name: Run unit tests (x64 and x86)
+        timeout-minutes: 30
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          $env:PATH = (Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin') + ";$env:PATH"
+          cmake --version
+          foreach ($arch in 'x64', 'Win32') {
+            cmake -S test -B "build/test-$arch" -A $arch -T v143
+            if ($LASTEXITCODE -ne 0) { throw "Configuring the $arch tests failed" }
+            cmake --build "build/test-$arch" --config Release
+            if ($LASTEXITCODE -ne 0) { throw "Building the $arch tests failed" }
+            ctest --test-dir "build/test-$arch" -C Release --output-on-failure
+            if ($LASTEXITCODE -ne 0) { throw "The $arch tests failed" }
+          }
 
       - name: Check that the C API covers JSRSDKManager
         run: python ci/check_c_api_parity.py
@@ -259,6 +272,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Extracting WinLibs failed" }
           # Prepended to PATH for the following steps, ahead of any other gcc.
           Join-Path $env:RUNNER_TEMP 'mingw32\bin' | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          # WinLibs' CMake uses GnuTLS without any trusted CA certificates, so
+          # it can't verify https downloads (googletest). Give it the CA bundle
+          # that Git for Windows installs (its location depends on the Git
+          # version), instead of turning verification off.
+          $ca = @(
+            'C:\Program Files\Git\ucrt64\etc\ssl\certs\ca-bundle.crt',
+            'C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt',
+            'C:\Program Files\Git\usr\ssl\certs\ca-bundle.crt'
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $ca) { throw "No CA bundle found in the Git for Windows installation" }
+          "JSR_CA_BUNDLE=$($ca -replace '\\', '/')" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Show compiler
         run: |
@@ -273,6 +297,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_C_COMPILER=gcc
           -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_TLS_CAINFO="$env:JSR_CA_BUNDLE"
           -DJSR_SDK_DIR="${{ github.workspace }}/jsr-sdk"
 
       - name: Build

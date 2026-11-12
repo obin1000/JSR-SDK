@@ -1,6 +1,5 @@
 // ManagedErrorsTest.cpp
 // Tests for turning .NET exceptions into SdkError (src/ManagedErrors.hpp).
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "ManagedErrors.hpp"

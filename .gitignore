@@ -404,3 +404,6 @@ release.zip
 JSR-SDK-*.zip
 /lib
 VERSION
+
+# CMake build folders (tests, consumer checks)
+/build
