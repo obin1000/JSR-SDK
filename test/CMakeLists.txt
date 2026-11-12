@@ -46,6 +46,7 @@ add_executable(clr_tests
   clr/EnumParityTest.cpp
   clr/JSRSDKManagerIntegrationTest.cpp
   clr/ManagedErrorsTest.cpp
+  clr/ManagerShutdownTest.cpp
   clr/MarshalEnumsTest.cpp
   clr/MarshallTypesTest.cpp
   clr/SimulatorTest.cpp)
@@ -60,6 +61,19 @@ set_target_properties(clr_tests PROPERTIES
   VS_DOTNET_REFERENCE_JSRDotNETSDK
     "${JSR_SDK_ROOT}/external/JSRDotNETSDK_1.2.14/Libs/JSRDotNETSDK.dll")
 jsr_sdk_copy_runtime(clr_tests)
+
+# A .NET program that must exit after destroying its managers (#13);
+# ManagerShutdownTest runs it.
+add_executable(shutdown_check clr/shutdown_check.cpp)
+target_link_libraries(shutdown_check PRIVATE JSR-SDK)
+target_compile_features(shutdown_check PRIVATE cxx_std_17)
+set_target_properties(shutdown_check PROPERTIES
+  COMMON_LANGUAGE_RUNTIME ""
+  DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+jsr_sdk_copy_runtime(shutdown_check)
+add_dependencies(clr_tests shutdown_check)
+target_compile_definitions(clr_tests PRIVATE
+  "JSR_SHUTDOWN_CHECK_EXE=\"$<TARGET_FILE:shutdown_check>\"")
 
 add_test(NAME clr_tests COMMAND clr_tests --gtest_filter=-*IntegrationTest.*)
 set_tests_properties(clr_tests PROPERTIES TIMEOUT 300)
