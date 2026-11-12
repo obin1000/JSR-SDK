@@ -215,8 +215,8 @@ std::thread::id testThread;
 
 void recordCall(void *user, std::atomic<int> &calls) {
   const auto *log = static_cast<const CallbackLog *>(user);
-  // Count a call on freed data rather than crash: the SDK catches everything
-  // a callback raises.
+  // Count a call on freed data rather than crash, so the test fails with a
+  // message about #14.
   if (log->canary != CallbackLog::kAlive) {
     ++callsOnFreedLog;
     return;

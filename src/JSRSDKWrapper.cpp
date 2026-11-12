@@ -1,9 +1,11 @@
 #include "JSRSDKWrapper.hpp"
+#include "CallbackGuard.hpp"
 #include "marshals/MarshalTypes.h"
 
 #include <msclr/lock.h>
 #include <stdexcept>
 
+using jsr::detail::invokeCallback;
 using jsr::detail::notifyEventFromManaged;
 using jsr::detail::statusChangedEventFromManaged;
 using namespace JSRDotNETSDK;
@@ -62,12 +64,9 @@ void JSRSDKWrapper::OnStatusChangedEvent(Object ^ sender,
     return;
   }
   StatusChangedEvent nativeEvt = statusChangedEventFromManaged(eventData);
-  try {
-    (*m_nativeStatusCb)(nativeEvt);
-  } catch (...) {
-    // Never let a callback's exception into the SDK, which raised the event
-    // inside one of its own calls.
-  }
+  // Drops a C++ exception from the callback, which would otherwise make the
+  // SDK call that raised the event fail. A crash ends the process (#36).
+  invokeCallback(*m_nativeStatusCb, nativeEvt);
 }
 
 // Event handler for notify events; see OnStatusChangedEvent.
@@ -78,11 +77,7 @@ void JSRSDKWrapper::OnNotifyEvent(Object ^ sender,
     return;
   }
   NotifyEvent nativeEvt = notifyEventFromManaged(eventData);
-  try {
-    (*m_nativeNotifyCb)(nativeEvt);
-  } catch (...) {
-    // See OnStatusChangedEvent.
-  }
+  invokeCallback(*m_nativeNotifyCb, nativeEvt); // See OnStatusChangedEvent.
 }
 
 // Set the native status change callback

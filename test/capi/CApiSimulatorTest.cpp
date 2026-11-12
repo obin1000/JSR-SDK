@@ -2,9 +2,11 @@
 // Tests for the C API callbacks and the jsr::Manager wrapper against the
 // SDK's simulated pulser-receivers: events arrive with their data, the user
 // pointer comes back, callbacks can be replaced and removed, and a throwing
-// C++ callback doesn't stop later events. No hardware needed.
+// C++ callback doesn't stop later events, while a crashing one ends the
+// process. No hardware needed.
 #include <gtest/gtest.h>
 
+#include "CrashSupport.h"
 #include "JSR-SDK/jsr_sdk.h"
 #include "JSR-SDK/jsr_sdk.hpp"
 #include "SimulatorSupport.h"
@@ -194,7 +196,7 @@ void JSR_CALL countNotify(const JSR_NotifyEvent *, void *user) {
   auto *log = static_cast<StressLog *>(user);
   // A call after the log was freed reads the canary its destructor cleared
   // (unless the memory was reused in the meantime). Count it, rather than
-  // crash: the SDK catches everything a callback raises.
+  // crash, so the test fails with a message about #14.
   if (log->canary != StressLog::kAlive) {
     ++callsOnFreedLog;
     return;
@@ -240,6 +242,80 @@ TEST_F(CApiSimulatorTest, ReplacingNotifyCallbackDuringDiscovery_IsSafe) {
   EXPECT_GT(replacements, 100);
   EXPECT_GT(calls.load(), 0) << "discovery raised no events during the test";
 }
+
+//--------------------------------------------------------------------------
+//  Exceptions and crashes in callbacks (#36)
+//--------------------------------------------------------------------------
+namespace {
+
+#ifdef _MSC_VER
+void JSR_CALL throwOnStatus(const JSR_StatusChangedEvent *, void *user) {
+  ++*static_cast<std::atomic<int> *>(user);
+  throw std::runtime_error("callback failure");
+}
+#endif
+
+void JSR_CALL crashOnStatus(const JSR_StatusChangedEvent *, void *) {
+  crash::accessViolation();
+}
+
+void JSR_CALL crashOnNotify(const JSR_NotifyEvent *, void *) {
+  crash::accessViolation();
+}
+
+} // namespace
+
+#ifdef _MSC_VER
+TEST_F(CApiSimulatorTest, ThrowingCallback_IsDroppedAndEventsContinue) {
+  // A C++ exception from a callback is stopped: the call that raised the
+  // event succeeds, and later events still arrive. Only with the MSVC ABI
+  // (MSVC, clang-cl): the library can't catch the exceptions of MinGW
+  // compilers, so a C callback built with one must not throw at all.
+  std::atomic<int> calls{0};
+  ASSERT_EQ(JSR_SetStatusChangeCallback(manager, throwOnStatus, &calls),
+            JSR_OK);
+  const int32_t original = gainIndex();
+  EXPECT_EQ(JSR_SetGainIndex(manager, original == 5 ? 6 : 5), JSR_OK)
+      << lastError();
+  EXPECT_EQ(JSR_SetGainIndex(manager, original), JSR_OK) << lastError();
+  EXPECT_TRUE(sim::waitFor([&] { return calls.load() >= 2; }));
+  ASSERT_EQ(JSR_SetStatusChangeCallback(manager, nullptr, nullptr), JSR_OK);
+}
+#endif
+
+#if GTEST_HAS_DEATH_TEST
+// A crash is not an exception: after one, memory may be corrupt and a lock
+// may be held, so it must end the process where it happened instead of
+// being dropped (#36). Each death test runs in a child process; the .NET
+// runtime reports the crash as an unhandled AccessViolationException.
+using CApiSimulatorDeathTest = CApiSimulatorTest;
+
+TEST_F(CApiSimulatorDeathTest, CrashingStatusCallback_EndsTheProcess) {
+  EXPECT_DEATH(
+      {
+        crash::quietly();
+        JSR_SetStatusChangeCallback(manager, crashOnStatus, nullptr);
+        JSR_SetGainIndex(manager, 5);
+        JSR_SetGainIndex(manager, 6);
+        // The event may come from another thread: give it time.
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+      },
+      "AccessViolationException");
+}
+
+TEST_F(CApiSimulatorDeathTest, CrashingNotifyCallback_EndsTheProcess) {
+  EXPECT_DEATH(
+      {
+        crash::quietly();
+        JSR_SetNotifyCallback(manager, crashOnNotify, nullptr);
+        // Restarting discovery raises notify events on library threads.
+        JSR_SetDiscoveryEnable(manager, 0);
+        JSR_SetDiscoveryEnable(manager, 1);
+        std::this_thread::sleep_for(sim::kTimeout);
+      },
+      "AccessViolationException");
+}
+#endif
 
 //--------------------------------------------------------------------------
 //  Typed values through the C API

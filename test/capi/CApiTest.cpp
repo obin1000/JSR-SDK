@@ -4,6 +4,7 @@
 // They need no hardware: only the plugins next to the test program.
 #include <gtest/gtest.h>
 
+#include "CrashSupport.h"
 #include "JSR-SDK/enums/C_ERROR_CODE.h"
 #include "JSR-SDK/jsr_sdk.h"
 #include "JSR-SDK/jsr_sdk.hpp"
@@ -92,6 +93,29 @@ TEST(CApiEnums, ErrorCodes_MatchCppEnum) {
   EXPECT_EQ(JSR_ERROR_DEVICE_NOT_READY,
             static_cast<int>(C_ERROR_CODE::DEVICE_NOT_READY));
 }
+
+//--------------------------------------------------------------------------
+//  Crashes inside a call (#36)
+//--------------------------------------------------------------------------
+#if GTEST_HAS_DEATH_TEST
+TEST(CApiDeathTest, CrashInsideACall_EndsTheProcess) {
+  // A crash inside the library, here from a bad buffer the caller passed,
+  // must end the process. It used to be turned into JSR_ERROR_UNKNOWN, and
+  // the program carried on in an unknown state. The call runs on its own
+  // thread because googletest catches crashes on the test thread, which
+  // would hide the exit code.
+  const int accessViolation = static_cast<int>(0xC0000005);
+  EXPECT_EXIT(
+      {
+        crash::quietly();
+        std::thread([] {
+          char *const bad = reinterpret_cast<char *>(crash::badAddress);
+          JSR_GetLibraryVersion(bad, 64, nullptr);
+        }).join();
+      },
+      ::testing::ExitedWithCode(accessViolation), "");
+}
+#endif
 
 //--------------------------------------------------------------------------
 //  Versions (#20)

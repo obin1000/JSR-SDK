@@ -21,13 +21,20 @@
   <ItemGroup>
     <ClCompile Include="src\JSRSDKManager.cpp" />
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
+    <!-- Calls the user's callbacks: native with /EHsc, so a crash in one
+         isn't caught (#36). /clr code always catches crashes. -->
+    <ClCompile Include="src\CallbackGuard.cpp">
+      <CompileAsManaged>false</CompileAsManaged>
+      <ExceptionHandling>Sync</ExceptionHandling>
+    </ClCompile>
     <!-- The C API is native code: thread_local needs it, and nothing managed
-         may run while the DLL loads. /EHa lets catch (...) stop every
-         exception before it reaches a caller. JSR_GetLibraryVersion() returns
-         JsrSdkVersion. -->
+         may run while the DLL loads. With /EHs (not /EHa), catch (...) stops
+         C++ exceptions but not crashes, which end the process (#36). The
+         adapter turns every managed exception into a C++ one first.
+         JSR_GetLibraryVersion() returns JsrSdkVersion. -->
     <ClCompile Include="src\jsr_sdk_c.cpp">
       <CompileAsManaged>false</CompileAsManaged>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>SyncCThrow</ExceptionHandling>
       <PreprocessorDefinitions>JSR_SDK_VERSION="$(JsrSdkVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
@@ -52,6 +59,7 @@
     <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h" />
     <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
     <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
+    <ClInclude Include="src\CallbackGuard.hpp" />
     <ClInclude Include="src\JSRSDKWrapper.hpp" />
     <ClInclude Include="src\marshals\MarshalEnums.h" />
     <ClInclude Include="src\marshals\MarshalTypes.h" />
