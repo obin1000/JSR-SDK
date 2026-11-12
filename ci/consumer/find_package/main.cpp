@@ -10,8 +10,8 @@ int main() {
     manager.loadPluginsFromBinaryDir();
     std::cout << "JSR-SDK " << jsr::libraryVersion() << ", API version "
               << jsr::apiVersion() << ", "
-              << manager.GetPluginNames().size() << " plugins\n";
-    return manager.GetPluginNames().empty() ? 1 : 0;
+              << manager.getPluginNames().size() << " plugins\n";
+    return manager.getPluginNames().empty() ? 1 : 0;
   } catch (const jsr::Error &e) {
     std::cerr << "JSR-SDK error " << e.code() << ": " << e.what() << "\n";
     return 1;
