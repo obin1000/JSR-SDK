@@ -80,6 +80,28 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "The $arch tests failed" }
           }
 
+      # Full page heap puts every allocation at the end of its own page and
+      # makes freed memory inaccessible, so a use-after-free crashes where it
+      # happens instead of corrupting the heap quietly (#24). The simulator
+      # suites include the #14 callback stress test, repeated three times.
+      # The registry key (Image File Execution Options) is what
+      # gflags /p /enable writes; the runner is an administrator. Page heap
+      # needs crashes to end the process, which they do since #36.
+      - name: Run the simulator tests under full page heap (x64)
+        timeout-minutes: 30
+        shell: pwsh
+        run: |
+          $ifeo = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\capi_tests.exe'
+          New-Item $ifeo -Force | Out-Null
+          New-ItemProperty $ifeo -Name GlobalFlag -Value 0x02000000 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty $ifeo -Name PageHeapFlags -Value 0x3 -PropertyType DWord -Force | Out-Null
+          try {
+            build/test-x64/capi/Release/capi_tests.exe --gtest_filter=CApiSimulatorTest.*:JsrManagerSimulatorTest.* --gtest_repeat=3
+            if ($LASTEXITCODE -ne 0) { throw "The simulator tests failed under page heap (exit code $LASTEXITCODE)" }
+          } finally {
+            Remove-Item $ifeo -Recurse -Force
+          }
+
       - name: Check that the C API covers JSRSDKManager
         run: python ci/check_c_api_parity.py
 
