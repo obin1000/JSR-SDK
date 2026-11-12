@@ -1,10 +1,19 @@
 # Changelog
 Notable changes per release. Changes that can break a build or change behaviour come first in each release. Releases before 0.12.0 are on the [releases page](https://github.com/obin1000/JSR-SDK/releases).
 
-## Unreleased (0.14.0)
+## 1.0.0-rc.1 (2026-11-12)
+1.0 makes the C API the SDK's only binary interface. From 1.0 on, the 1.x releases keep `jsr_sdk.h` and `jsr_sdk.hpp` compatible: they only add things. A program built with any 1.x release runs with the `JSR-SDK.dll` of any later 1.x release. `JSR_API_VERSION` stays 1, so programs built with 0.13 against `jsr_sdk.h` or `jsr_sdk.hpp` run with the 1.0 DLL too. The README's "Moving from JSRSDKManager.hpp" section shows how to move over.
+
+### Changes that can break your build
+- **The old C++ interface is gone** (#48). `JSR-SDK/JSRSDKManager.hpp`, `CreateJSRSDKManager()` and its `C_*` enums and C++ structs were removed; use `jsr_sdk.hpp` (or `jsr_sdk.h`). `include/JSR-SDK/` now holds only those two headers, and `JSR-SDK.dll` exports only the `JSR_*` functions.
+- **The static library is gone** (#47). The SDK is only a DLL. `JSR_SDK_USE_DYNAMIC_LIB OFF` is still accepted, with a warning.
+
 ### Behaviour changes
 - **A crash ends the process** (#36). An access violation or another structured exception, in a callback or inside the library, is no longer caught. Before, a crash in a callback was dropped, and a crash inside a call returned `JSR_ERROR_UNKNOWN`. Carrying on after a crash hid the bug and kept driving the device with possibly corrupt memory.
 - **MinGW C callbacks must catch their own exceptions** (#36). The library can only catch the C++ exceptions of MSVC and clang-cl. An exception thrown by a C callback built with MinGW x64 now makes the SDK call that raised the event fail; it used to be caught as if it were a crash. `jsr::Manager` still drops callback exceptions with every compiler.
+
+### Changed
+- **`jsr::Manager` methods are camelCase** (#45): `getPluginNames()`, `setDiscoveryEnable()`, `getPulserReceivers()`, `shutdown()` and so on. The .NET SDK's PascalCase names still work through 1.x, with a deprecation warning that names the replacement.
 
 ### Added
 - **`find_package(JSR-SDK)`** for an unpacked release, with the target `JSR-SDK::JSR-SDK` and a version check (#42). `add_subdirectory()` and `FetchContent` work as before.
@@ -16,6 +25,8 @@ Notable changes per release. Changes that can break a build or change behaviour 
 
 ### Development
 - CI runs the simulator tests under full page heap, which turns a use-after-free into a crash where it happens (#24, #41).
+- CI checks the formatting of the C and C++ code; `python tools/format.py` formats it (#21).
+- `clr_tests` compiles the DLL's implementation itself, so the parity test still compares the C API with it (#48).
 
 ## 0.13.0 (2026-11-12)
 ### Changes that can break your build
