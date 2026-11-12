@@ -248,10 +248,12 @@ TEST_F(CApiSimulatorTest, ReplacingNotifyCallbackDuringDiscovery_IsSafe) {
 //--------------------------------------------------------------------------
 namespace {
 
+#ifdef _MSC_VER
 void JSR_CALL throwOnStatus(const JSR_StatusChangedEvent *, void *user) {
   ++*static_cast<std::atomic<int> *>(user);
   throw std::runtime_error("callback failure");
 }
+#endif
 
 void JSR_CALL crashOnStatus(const JSR_StatusChangedEvent *, void *) {
   crash::accessViolation();
@@ -263,9 +265,12 @@ void JSR_CALL crashOnNotify(const JSR_NotifyEvent *, void *) {
 
 } // namespace
 
+#ifdef _MSC_VER
 TEST_F(CApiSimulatorTest, ThrowingCallback_IsDroppedAndEventsContinue) {
   // A C++ exception from a callback is stopped: the call that raised the
-  // event succeeds, and later events still arrive.
+  // event succeeds, and later events still arrive. Only with the MSVC ABI
+  // (MSVC, clang-cl): the library can't catch the exceptions of MinGW
+  // compilers, so a C callback built with one must not throw at all.
   std::atomic<int> calls{0};
   ASSERT_EQ(JSR_SetStatusChangeCallback(manager, throwOnStatus, &calls),
             JSR_OK);
@@ -276,6 +281,7 @@ TEST_F(CApiSimulatorTest, ThrowingCallback_IsDroppedAndEventsContinue) {
   EXPECT_TRUE(sim::waitFor([&] { return calls.load() >= 2; }));
   ASSERT_EQ(JSR_SetStatusChangeCallback(manager, nullptr, nullptr), JSR_OK);
 }
+#endif
 
 #if GTEST_HAS_DEATH_TEST
 // A crash is not an exception: after one, memory may be corrupt and a lock

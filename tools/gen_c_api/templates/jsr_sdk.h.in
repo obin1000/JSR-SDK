@@ -44,8 +44,10 @@
  *   thread. Other events, such as discovery, arrive on threads owned by the
  *   .NET runtime.
  * - Callbacks must be thread-safe, return quickly and never throw or longjmp
- *   out. A C++ exception from a callback is caught and dropped; a crash is
- *   not. Callbacks of one kind never overlap.
+ *   out. A C++ exception from a callback built with MSVC or clang-cl is
+ *   caught and dropped; a crash is not. The library can't catch the
+ *   exceptions of other compilers, such as MinGW GCC: catch them inside the
+ *   callback (jsr::Manager does). Callbacks of one kind never overlap.
  * - Replacing or removing a callback waits for a running one to return;
  *   after that the old callback is never called again, so its user data
  *   may be freed. A callback must therefore not block on a thread that is
