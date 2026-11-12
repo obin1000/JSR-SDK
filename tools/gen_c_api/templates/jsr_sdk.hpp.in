@@ -163,6 +163,10 @@ inline void checkApiVersion(int32_t loaded, const std::string &release) {
 } // namespace detail
 
 /// Owns a JSR_Manager. Movable, not copyable.
+///
+/// Methods are camelCase (getPluginNames, setGainIndex). The .NET SDK's
+/// PascalCase names (GetPluginNames) still work but are deprecated, and go
+/// away in 2.0.
 class Manager {
 public:
   /// Creates the manager; the first one starts the .NET runtime. Throws
@@ -234,7 +238,7 @@ public:
   // --- Struct results ---
 
   /// Retrieves the instruments a plugin found.
-  std::vector<InstrumentID> GetInstruments(const std::string &pluginName) {
+  std::vector<InstrumentID> getInstruments(const std::string &pluginName) {
     return detail::readArray<InstrumentID>(
         [&](InstrumentID *buffer, size_t bufferCount, size_t *count) {
           return JSR_GetInstruments(m_handle, pluginName.c_str(), buffer,
@@ -243,7 +247,7 @@ public:
   }
 
   /// Retrieves all pulser receivers the SDK detected.
-  std::vector<PulserReceiverID> GetPulserReceivers() {
+  std::vector<PulserReceiverID> getPulserReceivers() {
     return detail::readArray<PulserReceiverID>(
         [&](PulserReceiverID *buffer, size_t bufferCount, size_t *count) {
           return JSR_GetPulserReceivers(m_handle, buffer, bufferCount, count);
@@ -252,11 +256,29 @@ public:
 
   /// Retrieves the metadata of a plugin library.
   std::unique_ptr<LibMetadata>
-  GetPluginLibraryMetadata(const std::string &pluginName) {
+  getPluginLibraryMetadata(const std::string &pluginName) {
     auto metadata = std::make_unique<LibMetadata>();
     detail::check(JSR_GetPluginLibraryMetadata(m_handle, pluginName.c_str(),
                                                metadata.get()));
     return metadata;
+  }
+
+  /** Deprecated name of getInstruments(). */
+  [[deprecated("use getInstruments()")]] std::vector<InstrumentID>
+  GetInstruments(const std::string &pluginName) {
+    return getInstruments(pluginName);
+  }
+
+  /** Deprecated name of getPulserReceivers(). */
+  [[deprecated("use getPulserReceivers()")]] std::vector<PulserReceiverID>
+  GetPulserReceivers() {
+    return getPulserReceivers();
+  }
+
+  /** Deprecated name of getPluginLibraryMetadata(). */
+  [[deprecated("use getPluginLibraryMetadata()")]] std::unique_ptr<LibMetadata>
+  GetPluginLibraryMetadata(const std::string &pluginName) {
+    return getPluginLibraryMetadata(pluginName);
   }
 
   /// Retrieves the ID of the current pulser receiver.
