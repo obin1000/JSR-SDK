@@ -136,7 +136,16 @@ ctest --test-dir build/test-x64 -C Release --output-on-failure
 Use `-p:Platform=Win32` and `-A Win32` for x86.
 - `clr_tests` (`test/clr/`) tests the DLL's internals and compares the C API with the C++ interface. It is C++/CLI, so it needs MSVC and a Visual Studio generator.
 - `capi_tests` (`test/capi/`) tests the C API and `jsr::Manager`. It is plain C++17; CI also builds and runs it with every supported compiler, through `ci/consumer`.
-- Both run against simulated pulser-receivers from the SDK's diagnostics plugin, so no hardware is needed. The `*IntegrationTest` suites need a real device: run the test programs by hand for those.
+- Both run against simulated pulser-receivers from the SDK's diagnostics plugin, so no hardware is needed.
+
+#### Hardware tests
+The `*IntegrationTest` suites need a real pulser-receiver, so CI skips them. Run them by hand with a device attached:
+```
+build/test-x64/Release/clr_tests.exe --gtest_filter=*IntegrationTest.*
+build/test-x64/capi/Release/capi_tests.exe --gtest_filter=*IntegrationTest.*
+```
+- They accept the lab's devices by default. To use others, set `JSR_TEST_DEVICE_SERIALS` to their serial numbers, separated by commas (`set JSR_TEST_DEVICE_SERIALS=JB0104,JC0100`).
+- The **Hardware tests** workflow runs them too: start it from the Actions tab. It builds and tests the library with CI first. Then, on a self-hosted runner labelled `jsr-hardware` with a device attached, it runs both programs built with MSVC, and `capi_tests` built with MinGW GCC against the release layout. [hardware.yml](.github/workflows/hardware.yml) lists what the runner needs.
 
 Code that is generated from `tools/gen_c_api` (the per-method parts of the C API and the parity tests) is regenerated with `python tools/gen_c_api/generate.py`; see [its README](tools/gen_c_api/README.md).
 
