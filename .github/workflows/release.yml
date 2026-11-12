@@ -37,6 +37,8 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          # A tag with a suffix, such as v1.0.0-rc.1, is a release candidate.
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip
             ${{github.workspace}}\JSR-SDK-${{ github.ref_name }}.zip.sha256

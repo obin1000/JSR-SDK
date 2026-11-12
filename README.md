@@ -27,7 +27,7 @@ jsr_sdk_copy_runtime(my_app)
 #### Or with find_package
 Unpack the release zip and point CMake at it, for example with `-DCMAKE_PREFIX_PATH=C:/libs/JSR-SDK-v<version>`:
 ```CMake
-find_package(JSR-SDK 0.14 CONFIG REQUIRED)
+find_package(JSR-SDK 1.0 CONFIG REQUIRED)
 
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE JSR-SDK::JSR-SDK)
@@ -130,6 +130,7 @@ A program loads whichever `JSR-SDK.dll` sits next to it, so the DLL can come fro
 - `JSR_API_VERSION` in `jsr_sdk.h` is the API version of the headers, and `JSR_GetApiVersion()` returns the one of the loaded DLL. `jsr::Manager` compares them and throws a `jsr::Error` with `JSR_ERROR_VERSION_MISMATCH` when they differ. C programs should make the same check before `JSR_Create()`.
 - `JSR_GetLibraryVersion()` (`jsr::libraryVersion()`) returns the release, such as `0.13.0`, for messages and logs.
 - The API version only goes up for an incompatible change. New functions and enum values keep it, so a newer DLL runs programs built for an older release with the same API version.
+- From 1.0, the 1.x releases keep `jsr_sdk.h` and `jsr_sdk.hpp` compatible: they only add things, and `JSR_API_VERSION` stays 1. A program built with a 1.x release runs with the `JSR-SDK.dll` of any later 1.x release.
 - Releases before 0.13.0 don't have these functions. A program built with 0.13.0 or later won't start with such a DLL: Windows reports that `JSR_GetApiVersion` is missing.
 - [CHANGELOG.md](CHANGELOG.md) lists what changed in each release, breaking changes first.
 
