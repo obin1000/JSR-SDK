@@ -272,6 +272,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Extracting WinLibs failed" }
           # Prepended to PATH for the following steps, ahead of any other gcc.
           Join-Path $env:RUNNER_TEMP 'mingw32\bin' | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          # WinLibs' CMake uses GnuTLS without any trusted CA certificates, so
+          # it can't verify https downloads (googletest). Give it the CA bundle
+          # that Git for Windows installs (its location depends on the Git
+          # version), instead of turning verification off.
+          $ca = @(
+            'C:\Program Files\Git\ucrt64\etc\ssl\certs\ca-bundle.crt',
+            'C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt',
+            'C:\Program Files\Git\usr\ssl\certs\ca-bundle.crt'
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $ca) { throw "No CA bundle found in the Git for Windows installation" }
+          "JSR_CA_BUNDLE=$($ca -replace '\\', '/')" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Show compiler
         run: |
@@ -286,6 +297,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_C_COMPILER=gcc
           -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_TLS_CAINFO="$env:JSR_CA_BUNDLE"
           -DJSR_SDK_DIR="${{ github.workspace }}/jsr-sdk"
 
       - name: Build
