@@ -288,12 +288,33 @@ def w_arg(kind, name):
     raise ValueError(kind)
 
 
+def camel(name):
+    """jsr::Manager's name for a method: camelCase (1.0)."""
+    return name[0].lower() + name[1:]
+
+
 def w_method(entry):
+    """The jsr::Manager method, plus a deprecated alias under the SDK's
+    PascalCase name if that differs (GetPluginNames for getPluginNames)."""
+    c_name, cpp_name, inputs, output, doc = entry
+    name = camel(cpp_name)
+    method = w_method_named((c_name, name, inputs, output, doc), brief(entry))
+    if name == cpp_name:
+        return method
+    params = ', '.join(w_param(k, n) for k, n in inputs)
+    args = ', '.join(n for _, n in inputs)
+    return method + (f'  /** Deprecated name of {name}(). */\n'
+                     f'  [[deprecated("use {name}()")]] decltype(auto) {cpp_name}({params}) {{\n'
+                     f'    return {name}({args});\n'
+                     f'  }}\n')
+
+
+def w_method_named(entry, description):
     c_name, cpp_name, inputs, output, _ = entry
     params = ', '.join(w_param(k, n) for k, n in inputs)
     a = ', '.join(['m_handle'] + [w_arg(k, n) for k, n in inputs])
     fn = f'JSR_{c_name}'
-    doc = f'  /** {brief(entry)} */\n'
+    doc = f'  /** {description} */\n'
     if output is None:
         return doc + f'  void {cpp_name}({params}) {{ detail::check({fn}({a})); }}\n'
     if output == 'bool' or output.startswith('retbool:'):

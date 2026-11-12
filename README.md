@@ -48,7 +48,7 @@ A version request accepts releases with the same major version that aren't older
 CI builds and runs a small program with each of these on every pull request. MinGW builds need the dynamic library (`JSR_SDK_USE_DYNAMIC_LIB ON`); they link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes.
 
 ### C++
-Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17.
+Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17. Its methods are camelCase; the .NET SDK's PascalCase names, such as `GetPluginNames`, still work but are deprecated.
 ```cpp
 #include "JSR-SDK/jsr_sdk.hpp"
 
@@ -59,7 +59,7 @@ int main() {
     jsr::Manager manager;
     manager.loadPluginsFromBinaryDir();
 
-    for (const auto &plugin : manager.GetPluginNames()) {
+    for (const auto &plugin : manager.getPluginNames()) {
       std::cout << "Found plugin: " << plugin << "\n";
     }
 
@@ -112,7 +112,7 @@ int main(void) {
 ```
 
 ### The old C++ interface
-`JSR-SDK/JSRSDKManager.hpp` (`CreateJSRSDKManager()`) is superseded by `jsr_sdk.hpp`, and stays for existing users. It is an abstract C++ class, so it only works with MSVC and clang-cl; other compilers get a compile error. `jsr::Manager` uses the same method names, so moving over is mostly a matter of replacing `CreateJSRSDKManager()` with a `jsr::Manager` and dropping the buffer arguments.
+`JSR-SDK/JSRSDKManager.hpp` (`CreateJSRSDKManager()`) is superseded by `jsr_sdk.hpp`, and stays for existing users. It is an abstract C++ class, so it only works with MSVC and clang-cl; other compilers get a compile error. `jsr::Manager` has the same methods in camelCase (`GetPluginNames` becomes `getPluginNames`), so moving over is mostly a matter of replacing `CreateJSRSDKManager()` with a `jsr::Manager`, lowercasing the first letter of the SDK's PascalCase method names, and dropping the buffer arguments.
 
 ### Run-time requirements
 - .NET Framework 4.8 and the Microsoft Visual C++ runtime (x64 or x86).

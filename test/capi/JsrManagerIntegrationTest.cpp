@@ -33,12 +33,12 @@ bool isTestDevice(const jsr::PulserReceiverID &id) {
 
 /// Turns discovery on, waits up to 20 s for a test device and selects it.
 bool selectTestDevice(jsr::Manager &manager, jsr::PulserReceiverID &device) {
-  manager.SetDiscoveryEnable(true);
+  manager.setDiscoveryEnable(true);
   for (int attempt = 0; attempt < 20; ++attempt) {
-    for (const auto &id : manager.GetPulserReceivers()) {
+    for (const auto &id : manager.getPulserReceivers()) {
       if (isTestDevice(id)) {
         device = id;
-        manager.SetCurrentPulserReceiver(device);
+        manager.setCurrentPulserReceiver(device);
         return true;
       }
     }
@@ -85,7 +85,7 @@ TEST_F(JsrManagerIntegrationTest, CurrentDevice_IsSelected) {
 
 TEST_F(JsrManagerIntegrationTest, Info_IsNotEmpty) {
   EXPECT_FALSE(manager->getInfo().empty());
-  EXPECT_FALSE(manager->GetPulserReceiverInfo(device).empty());
+  EXPECT_FALSE(manager->getPulserReceiverInfo(device).empty());
 }
 
 TEST_F(JsrManagerIntegrationTest, GainIndex_RoundTrips) {
@@ -287,8 +287,8 @@ TEST_F(JsrManagerIntegrationTest,
           std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
     }
     if (std::chrono::steady_clock::now() >= nextDiscovery) {
-      manager->SetDiscoveryEnable(false);
-      manager->SetDiscoveryEnable(true);
+      manager->setDiscoveryEnable(false);
+      manager->setDiscoveryEnable(true);
       nextDiscovery =
           std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
     }
