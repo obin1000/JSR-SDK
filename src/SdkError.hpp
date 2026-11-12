@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JSR-SDK/enums/C_ERROR_CODE.h"
+#include "types/enums/C_ERROR_CODE.h"
 
 #include <stdexcept>
 #include <string>

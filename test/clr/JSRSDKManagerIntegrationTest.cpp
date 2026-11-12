@@ -1,9 +1,10 @@
 // JSRSDKManagerIntegrationTest.cpp
-// Integration tests for JSRSDKManager requiring a physical device connection.
+// Integration tests for the DLL's internal SdkManager (src/SdkManager.hpp),
+// requiring a physical device connection.
 // TestDevices.h says which devices they accept, and how to choose others.
 #include <gtest/gtest.h>
 
-#include "JSR-SDK/JSRSDKManager.hpp"
+#include "SdkManager.hpp"
 #include "TestDevices.h"
 #include <chrono>
 #include <string>
@@ -36,7 +37,7 @@ static bool isCorrectDevice(const PulserReceiverID &prID) {
 //--------------------------------------------------------------------------
 class JSRSDKManagerIntegrationTest : public ::testing::Test {
 protected:
-  JSRSDKManager *manager;
+  jsr::detail::SdkManager *manager;
   bool deviceConnected;
   std::string testPluginName;
   PulserReceiverID connectedDeviceId;
@@ -47,8 +48,8 @@ protected:
 
   void SetUp() override {
     // Create the manager using the factory function
-    manager = CreateJSRSDKManager();
-    ASSERT_NE(manager, nullptr) << "Failed to create JSRSDKManager";
+    manager = jsr::detail::createSdkManager();
+    ASSERT_NE(manager, nullptr) << "Failed to create the SdkManager";
 
     deviceConnected = false;
     testPluginName = "";
@@ -222,7 +223,7 @@ protected:
       } catch (...) {
         // Ignore shutdown errors in teardown
       }
-      DestroyJSRSDKManager(manager);
+      delete manager;
       manager = nullptr;
     }
   }

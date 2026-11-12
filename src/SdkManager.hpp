@@ -1,60 +1,54 @@
 #pragma once
 
-// This is a C++ class interface, so the program must lay out virtual-function
-// tables and standard library types exactly like the MSVC-built DLL does.
-// Only MSVC and clang-cl do. Other compilers (MinGW-w64 GCC, MinGW clang)
-// would build fine and then call the wrong methods at run time.
-#if !defined(_MSC_VER)
-#error                                                                         \
-    "JSRSDKManager.hpp needs MSVC or clang-cl. With other compilers, use the C API in jsr_sdk.h or the C++ wrapper in jsr_sdk.hpp."
-#endif
+#include "types/enums/C_IS_PULSING.h"
+#include "types/enums/C_MANAGER_STATE.h"
+#include "types/enums/C_POWER_LIMIT.h"
+#include "types/enums/C_PROPERTY_UNITS.h"
+#include "types/enums/C_PULSER_IMPEDANCE.h"
+#include "types/enums/C_PULSER_PROPERTY_ROLE.h"
+#include "types/enums/C_RECEIVER_MODE.h"
+#include "types/enums/C_TRIGGER_IMPEDANCE.h"
+#include "types/enums/C_TRIGGER_POLARITY.h"
+#include "types/enums/C_TRIGGER_SOURCE.h"
+#include "types/events/NotifyEvent.h"
+#include "types/events/StatusChangedEvent.h"
+#include "types/structs/InstrumentID.h"
+#include "types/structs/JSRLibMetadata.h"
+#include "types/structs/PulserReceiverID.h"
 
-#include "enums/C_IS_PULSING.h"
-#include "enums/C_MANAGER_STATE.h"
-#include "enums/C_POWER_LIMIT.h"
-#include "enums/C_PROPERTY_UNITS.h"
-#include "enums/C_PULSER_IMPEDANCE.h"
-#include "enums/C_PULSER_PROPERTY_ROLE.h"
-#include "enums/C_RECEIVER_MODE.h"
-#include "enums/C_TRIGGER_IMPEDANCE.h"
-#include "enums/C_TRIGGER_POLARITY.h"
-#include "enums/C_TRIGGER_SOURCE.h"
-#include "events/NotifyEvent.h"
-#include "events/StatusChangedEvent.h"
-#include "structs/InstrumentID.h"
-#include "structs/JSRLibMetadata.h"
-#include "structs/PulserReceiverID.h"
+namespace jsr::detail {
 
 /**
- * @brief Abstract class representing the interface to unmanaged C++.
- * This class provides a set of virtual functions to interact with the JSR SDK.
- * The C++/CLI implementation is hidden in the implementation, allowing
- * unmanaged C++ to use this header.
+ * @brief The SDK's methods, as the DLL implements them (src/JSRSDKManager.cpp).
  *
- * All functions that return strings or arrays now use caller-allocated buffers.
- * Functions return the number of items/characters written, or the required size
- * if the buffer is too small or null.
+ * Internal: the C API in jsr_sdk.h is built on it. Before 1.0 this was the
+ * public interface JSRSDKManager.hpp; 1.0 removed it in favour of jsr_sdk.h
+ * and jsr_sdk.hpp.
+ *
+ * Functions that return strings or arrays use caller-allocated buffers. They
+ * return the number of items/characters written, or the required size if the
+ * buffer is too small or null.
  */
-class JSRSDKManager {
+class SdkManager {
 public:
   // === C++ constructor and destructor ===
   /**
    * This object should not be copied or moved.
    **/
-  JSRSDKManager(const JSRSDKManager &) = delete;
-  JSRSDKManager &operator=(const JSRSDKManager &) = delete;
-  JSRSDKManager(JSRSDKManager &&) = delete;
-  JSRSDKManager &operator=(JSRSDKManager &&) = delete;
+  SdkManager(const SdkManager &) = delete;
+  SdkManager &operator=(const SdkManager &) = delete;
+  SdkManager(SdkManager &&) = delete;
+  SdkManager &operator=(SdkManager &&) = delete;
 
   /**
    * @brief Constructs a manager.
    */
-  JSRSDKManager() = default;
+  SdkManager() = default;
 
   /**
    * @brief Closes the connection to the devices and releases all resources.
    */
-  virtual ~JSRSDKManager() = default;
+  virtual ~SdkManager() = default;
 
   // === Custom functions added ===
   /**
@@ -1343,10 +1337,7 @@ public:
   virtual bool getIsPulserPresent() = 0;
 };
 
-extern "C" {
-// Factory function to create the manager
-__declspec(dllexport) JSRSDKManager *CreateJSRSDKManager();
+/// Creates the DLL's implementation. Throws SdkError if that fails.
+SdkManager *createSdkManager();
 
-// Explicitly destroy the manager
-__declspec(dllexport) void DestroyJSRSDKManager(JSRSDKManager *bridge);
-}
+} // namespace jsr::detail

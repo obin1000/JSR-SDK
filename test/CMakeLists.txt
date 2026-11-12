@@ -1,6 +1,6 @@
 # The JSR-SDK unit tests:
-#   clr_tests   C++/CLI tests of the DLL's internals and of the C API against
-#               the C++ interface (clr/). MSVC only.
+#   clr_tests   C++/CLI tests of the DLL's internals, and of the C API against
+#               the DLL's implementation of the SDK's methods (clr/). MSVC only.
 #   capi_tests  portable tests of the C API and jsr::Manager (capi/).
 #
 # Build the library first, for the same platform (x64 or Win32):
@@ -41,7 +41,13 @@ enable_testing()
 
 add_subdirectory(capi)
 
+# clr_tests compiles the DLL's implementation of the SDK's methods
+# (jsr::detail::SdkManager) itself, so it can test it directly and compare
+# the C API with it; the DLL only exports the C API.
 add_executable(clr_tests
+  "${JSR_SDK_ROOT}/src/CallbackGuard.cpp"
+  "${JSR_SDK_ROOT}/src/JSRSDKManager.cpp"
+  "${JSR_SDK_ROOT}/src/JSRSDKWrapper.cpp"
   clr/CApiParityTest.cpp
   clr/EnumParityTest.cpp
   clr/JSRSDKManagerIntegrationTest.cpp

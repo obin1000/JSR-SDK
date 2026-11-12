@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JSR-SDK/enums/C_CONNECTION_TYPE.h"
+#include "types/enums/C_CONNECTION_TYPE.h"
 #include <cstring>
 
 /**
@@ -17,8 +17,7 @@
  * All strings are fixed-size buffers. Arrays have a maximum size with
  * explicit count fields to track actual usage.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use JSR_LibMetadata in jsr_sdk.h.
+ * @note Internal to the DLL. Programs use JSR_LibMetadata in jsr_sdk.h.
  */
 struct JSRLibMetadata {
   /// Maximum length for string fields (including null terminator)

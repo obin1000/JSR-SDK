@@ -38,12 +38,12 @@ jsr_sdk_copy_runtime(my_app)
 A version request accepts releases with the same major version that aren't older. Before 1.0 the minor version has to match too, because a 0.x minor release may break the API. Set `JSR_SDK_USE_DYNAMIC_LIB` and the `JSR_SDK_INCLUDE_*` plugin options before `find_package()` to change them.
 
 ### Supported compilers
-| Compiler | `jsr_sdk.hpp` (C++) | `jsr_sdk.h` (C) | `JSRSDKManager.hpp` (old C++ interface) |
-|---|---|---|---|
-| MSVC, x64 and x86 | ✅ | ✅ | ✅ |
-| clang-cl | ✅ | ✅ | ✅ |
-| MinGW-w64 GCC, x64 and x86 | ✅ | ✅ | ❌ |
-| MinGW clang | ✅ | ✅ | ❌ |
+| Compiler | `jsr_sdk.hpp` (C++) | `jsr_sdk.h` (C) |
+|---|---|---|
+| MSVC, x64 and x86 | ✅ | ✅ |
+| clang-cl | ✅ | ✅ |
+| MinGW-w64 GCC, x64 and x86 | ✅ | ✅ |
+| MinGW clang | ✅ | ✅ |
 
 CI builds and runs a small program with each of these on every pull request. MinGW builds need the dynamic library (`JSR_SDK_USE_DYNAMIC_LIB ON`); they link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes.
 
@@ -111,8 +111,17 @@ int main(void) {
 }
 ```
 
-### The old C++ interface
-`JSR-SDK/JSRSDKManager.hpp` (`CreateJSRSDKManager()`) is superseded by `jsr_sdk.hpp`, and stays for existing users. It is an abstract C++ class, so it only works with MSVC and clang-cl; other compilers get a compile error. `jsr::Manager` uses the same method names, so moving over is mostly a matter of replacing `CreateJSRSDKManager()` with a `jsr::Manager` and dropping the buffer arguments.
+### Moving from JSRSDKManager.hpp
+1.0 removed the old C++ interface, `JSR-SDK/JSRSDKManager.hpp` with `CreateJSRSDKManager()`, together with its `C_*` enums and C++ structs. It only worked with MSVC and clang-cl. `jsr_sdk.hpp` has the same methods and works with every compiler:
+
+| 0.x (`JSRSDKManager.hpp`) | 1.0 (`jsr_sdk.hpp`) |
+|---|---|
+| `JSRSDKManager *m = CreateJSRSDKManager();` … `DestroyJSRSDKManager(m);` | `jsr::Manager m;`, which frees itself |
+| `m->GetPluginNames(buffers, count, length)` | `m.getPluginNames()` returns a `std::vector<std::string>`; names are camelCase |
+| `m->getUnitSerialNum(buffer, size)` | `m.getUnitSerialNum()` returns a `std::string` |
+| `C_RECEIVER_MODE::THRU` | `JSR_RECEIVER_MODE_THRU` (the enums of `jsr_sdk.h`) |
+| `PulserReceiverID`, `StatusChangedEvent`, `NotifyEvent` | `jsr::PulserReceiverID`, `jsr::StatusChangedEvent`, `jsr::NotifyEvent` (the structs of `jsr_sdk.h`; enum fields are `int32_t`) |
+| `std::runtime_error` | `jsr::Error`, which also has `code()` (a `JSR_ERROR_*` value) |
 
 ### Run-time requirements
 - .NET Framework 4.8 and the Microsoft Visual C++ runtime (x64 or x86).
@@ -127,7 +136,7 @@ A program loads whichever `JSR-SDK.dll` sits next to it, so the DLL can come fro
 - [CHANGELOG.md](CHANGELOG.md) lists what changed in each release, breaking changes first.
 
 ### Threading and events
-These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKManager.hpp`).
+These rules hold for both `jsr_sdk.h` and `jsr_sdk.hpp`.
 - **One thread at a time per manager.** A manager's calls are not synchronized: use it from one thread, or serialize the calls yourself. Separate managers are independent.
 - **Events can arrive inside your own calls.** The SDK raises the event for a change it makes inside the call that made it. For example, `setGainIndex()` calls the status-change callback before it returns. That call can come from another thread while yours is still inside `setGainIndex()`.
 - **Other events arrive on library threads.** Discovery events, for example, come from threads owned by the .NET runtime, not the thread that registered the callback.
@@ -147,7 +156,7 @@ cmake --build build/test-x64 --config Release
 ctest --test-dir build/test-x64 -C Release --output-on-failure
 ```
 Use `-p:Platform=Win32` and `-A Win32` for x86.
-- `clr_tests` (`test/clr/`) tests the DLL's internals and compares the C API with the C++ interface. It is C++/CLI, so it needs MSVC and a Visual Studio generator.
+- `clr_tests` (`test/clr/`) tests the DLL's internals and compares the C API with the DLL's implementation of the SDK's methods, which it compiles itself. It is C++/CLI, so it needs MSVC and a Visual Studio generator.
 - `capi_tests` (`test/capi/`) tests the C API and `jsr::Manager`. It is plain C++17; CI also builds and runs it with every supported compiler, through `ci/consumer`.
 - Both run against simulated pulser-receivers from the SDK's diagnostics plugin, so no hardware is needed.
 

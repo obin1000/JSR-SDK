@@ -69,7 +69,7 @@ jobs:
           cmake --build build/test-x64 --config Release
           if ($LASTEXITCODE -ne 0) { throw "Building the tests failed" }
 
-      - name: Old C++ interface (clr_tests, MSVC)
+      - name: The DLL's internals (clr_tests, MSVC)
         run: |
           build/test-x64/Release/clr_tests.exe --gtest_filter=*IntegrationTest.*
           if ($LASTEXITCODE -ne 0) { throw "clr_tests failed" }

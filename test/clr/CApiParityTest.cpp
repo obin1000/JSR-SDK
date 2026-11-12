@@ -12,9 +12,9 @@
 // unchanged.
 #include <gtest/gtest.h>
 
-#include "JSR-SDK/JSRSDKManager.hpp"
 #include "JSR-SDK/jsr_sdk.h"
 #include "SdkError.hpp"
+#include "SdkManager.hpp"
 #include "SimulatorSupport.h"
 
 #include <climits>
@@ -183,12 +183,12 @@ cDoubles(const std::function<int32_t(double *, size_t, size_t *)> &read) {
 /// selected. Shared across the suite because discovery takes seconds.
 class CApiParityTest : public ::testing::Test {
 protected:
-  static JSRSDKManager *legacy;
+  static jsr::detail::SdkManager *legacy;
   static JSR_Manager *cManager;
   static bool ready;
 
   static void SetUpTestCase() {
-    legacy = CreateJSRSDKManager();
+    legacy = jsr::detail::createSdkManager();
     legacy->loadPluginsFromBinaryDir();
     legacy->AddManagedPlugin(sim::kPlugin);
     legacy->AddPluginOpenOption(sim::kPlugin, "SHOW_SIMULATOR_WINDOWS", "NO");
@@ -225,7 +225,7 @@ protected:
 
   static void TearDownTestCase() {
     JSR_Destroy(cManager);
-    DestroyJSRSDKManager(legacy);
+    delete legacy;
     cManager = nullptr;
     legacy = nullptr;
   }
@@ -235,7 +235,7 @@ protected:
   }
 };
 
-JSRSDKManager *CApiParityTest::legacy = nullptr;
+jsr::detail::SdkManager *CApiParityTest::legacy = nullptr;
 JSR_Manager *CApiParityTest::cManager = nullptr;
 bool CApiParityTest::ready = false;
 

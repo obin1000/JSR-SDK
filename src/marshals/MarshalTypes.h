@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "JSR-SDK/events/NotifyEvent.h"
-#include "JSR-SDK/events/StatusChangedEvent.h"
-#include "JSR-SDK/structs/ExceptionJSRSDK.h"
-#include "JSR-SDK/structs/InstrumentID.h"
-#include "JSR-SDK/structs/JSRLibMetadata.h"
-#include "JSR-SDK/structs/PulserReceiverID.h"
 #include "MarshalEnums.h"
+#include "types/events/NotifyEvent.h"
+#include "types/events/StatusChangedEvent.h"
+#include "types/structs/ExceptionJSRSDK.h"
+#include "types/structs/InstrumentID.h"
+#include "types/structs/JSRLibMetadata.h"
+#include "types/structs/PulserReceiverID.h"
 
 #include <cstring>
 #include <msclr/marshal_cppstd.h>

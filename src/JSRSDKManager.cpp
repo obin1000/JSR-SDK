@@ -1,7 +1,7 @@
-﻿#include "JSR-SDK/JSRSDKManager.hpp"
-#include "JSRSDKWrapper.hpp"
+﻿#include "JSRSDKWrapper.hpp"
 #include "ManagedErrors.hpp"
 #include "SdkError.hpp"
+#include "SdkManager.hpp"
 #include "marshals/MarshalTypes.h"
 
 #include <msclr/marshal.h>
@@ -19,7 +19,7 @@ using namespace System::Collections::Generic;
 // The conversions (marshals/) and rethrowManaged() (ManagedErrors.hpp).
 using namespace jsr::detail;
 
-class JSRSDKManagerAdapter : public JSRSDKManager {
+class JSRSDKManagerAdapter : public jsr::detail::SdkManager {
 private:
   gcroot<JSRSDKWrapper ^> m_manager;
 
@@ -1666,17 +1666,10 @@ public:
   }
 };
 
-extern "C" {
-
-__declspec(dllexport) JSRSDKManager *CreateJSRSDKManager() {
+jsr::detail::SdkManager *jsr::detail::createSdkManager() {
   try {
     return new JSRSDKManagerAdapter();
   } catch (System::Exception ^ exception) {
     rethrowManaged(exception, "Failed creating JSR adapter object");
   }
-}
-
-__declspec(dllexport) void DestroyJSRSDKManager(JSRSDKManager *bridge) {
-  delete bridge;
-}
 }

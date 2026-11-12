@@ -1,7 +1,7 @@
 #pragma once
 
-#include "JSR-SDK/events/NotifyEvent.h"
-#include "JSR-SDK/events/StatusChangedEvent.h"
+#include "types/events/NotifyEvent.h"
+#include "types/events/StatusChangedEvent.h"
 
 namespace jsr::detail {
 

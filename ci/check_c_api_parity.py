@@ -1,6 +1,6 @@
 """Checks that the C API covers the whole C++ interface.
 
-- Every virtual method of JSRSDKManager has a JSR_* function in jsr_sdk.h.
+- Every virtual method of the DLL's SdkManager has a JSR_* function in jsr_sdk.h.
 - Every JSR_* function declared in jsr_sdk.h is defined in src/jsr_sdk_c.cpp.
 - Every JSR_* function is used by the C++ wrapper in jsr_sdk.hpp.
 
@@ -33,12 +33,12 @@ def read(path):
 
 
 def main():
-    legacy = read('include/JSR-SDK/JSRSDKManager.hpp')
+    legacy = read('src/SdkManager.hpp')
     header = read('include/JSR-SDK/jsr_sdk.h')
     source = read('src/jsr_sdk_c.cpp')
     wrapper = read('include/JSR-SDK/jsr_sdk.hpp')
 
-    methods = sorted(set(re.findall(r'virtual\s+[^;(]*?\b(\w+)\s*\(', legacy)) - {'JSRSDKManager'})
+    methods = sorted(set(re.findall(r'virtual\s+[^;(]*?\b(\w+)\s*\(', legacy)) - {'SdkManager'})
     declared = set(re.findall(r'\bJSR_CALL\s+JSR_(\w+)\s*\(', header))
     defined = set(re.findall(r'\bJSR_CALL\s+JSR_(\w+)\s*\(', source))
     used = set(re.findall(r'\bJSR_(\w+)\s*\(', wrapper))
@@ -48,7 +48,7 @@ def main():
         expected = RENAMED.get(method, [method[0].upper() + method[1:]])
         for name in expected:
             if name not in declared:
-                errors.append(f'JSRSDKManager::{method} has no JSR_{name} in jsr_sdk.h')
+                errors.append(f'SdkManager::{method} has no JSR_{name} in jsr_sdk.h')
     for name in sorted(declared - defined):
         errors.append(f'JSR_{name} is declared in jsr_sdk.h but not defined in jsr_sdk_c.cpp')
     for name in sorted(declared - used - WRAPPER_EXEMPT):

@@ -1,6 +1,6 @@
 # C API generator
 
-The C API has one function per `JSRSDKManager` method, so most of its code is
+The C API has one function per method of the DLL's internal `SdkManager` (`src/SdkManager.hpp`), so most of its code is
 generated from a method list rather than written by hand:
 
 | Generated file | What the generator writes into it |
@@ -15,7 +15,7 @@ Everything else in those files (conventions, structs, callbacks, struct
 conversions, the test fixture) is written by hand in `templates/`.
 
 ## Adding an SDK method
-1. Add it to `JSRSDKManager.hpp` and to the adapter in `src/JSRSDKManager.cpp`.
+1. Add it to `src/SdkManager.hpp` and to the adapter in `src/JSRSDKManager.cpp`.
 2. Add one line to `methods.py`. The docstring there explains the format.
 3. Regenerate and commit the generated files together with the change:
    ```
@@ -30,5 +30,5 @@ if it isn't on `PATH`). It formats its output with the repository's
 - `python tools/gen_c_api/generate.py --check` fails when a generated file
   doesn't match what the generator produces. CI runs it, so hand edits to
   generated files and forgotten regenerations fail the build.
-- `ci/check_c_api_parity.py` fails when a `JSRSDKManager` method has no C
+- `ci/check_c_api_parity.py` fails when an `SdkManager` method has no C
   function.

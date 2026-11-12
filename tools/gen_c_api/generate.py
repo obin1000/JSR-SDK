@@ -4,7 +4,7 @@ Writes, relative to the repository root:
   include/JSR-SDK/jsr_sdk.h     the C API
   src/jsr_sdk_c.cpp             its implementation
   include/JSR-SDK/jsr_sdk.hpp   the jsr::Manager wrapper
-  test/clr/CApiParityTest.cpp       parity tests against JSRSDKManager
+  test/clr/CApiParityTest.cpp       parity tests against the DLL's SdkManager
 and formats them with clang-format and the repository's .clang-format.
 
 Usage:
@@ -44,10 +44,10 @@ def read(path):
 
 ENTRIES = [e for _, es in methods.SECTIONS for e in es]
 
-# --- Briefs from JSRSDKManager.hpp ------------------------------------------
+# --- Briefs from SdkManager.hpp ------------------------------------------
 BRIEFS = {}
 for _doc, _name in re.findall(r'/\*\*(.*?)\*/\s*virtual\s+[^;(]*?\b(\w+)\s*\(',
-                              read('include/JSR-SDK/JSRSDKManager.hpp'), re.S):
+                              read('src/SdkManager.hpp'), re.S):
     _match = re.search(r'@brief\s+(.*?)(?=\n\s*\*\s*@|\Z)', _doc, re.S)
     if _match:
         _text = ' '.join(l.strip().lstrip('*').strip() for l in _match.group(1).splitlines())
@@ -60,7 +60,7 @@ def brief(entry):
 
 
 # --- Enums ------------------------------------------------------------------
-# (C++ enum, C typedef, C value prefix, header in include/JSR-SDK/enums)
+# (C++ enum, C typedef, C value prefix, header in src/types/enums)
 ENUMS = [
     ('C_ERROR_CODE', 'JSR_ErrorCode', 'JSR_ERROR_', 'C_ERROR_CODE.h'),
     ('C_CONNECTION_TYPE', 'JSR_ConnectionType', 'JSR_CONNECTION_TYPE_', 'C_CONNECTION_TYPE.h'),
@@ -107,7 +107,7 @@ MANAGED_ENUMS = {
 
 
 def enum_values(cpp, prefix, header):
-    body = read('include/JSR-SDK/enums/' + header)
+    body = read('src/types/enums/' + header)
     values = []
     for name, value in re.findall(r'^\s*(\w+)\s*=\s*(-?\d+)', body, re.M):
         if cpp == 'C_ERROR_CODE' and name == 'SUCCESS':
@@ -239,7 +239,7 @@ def c_body(entry):
     else:
         raise ValueError(output)
     return (f'{c_signature(entry)} {{\n'
-            f'  return call(manager, [&](JSRSDKManager &m) {{ {stmt} }});\n'
+            f'  return call(manager, [&](SdkManager &m) {{ {stmt} }});\n'
             f'}}\n')
 
 

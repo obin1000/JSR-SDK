@@ -6,8 +6,7 @@
 #
 # It defines:
 #   JSR-SDK (and its alias JSR-SDK::JSR-SDK)
-#               the library: link it to use jsr_sdk.h, jsr_sdk.hpp or
-#               JSRSDKManager.hpp;
+#               the library: link it to use jsr_sdk.h or jsr_sdk.hpp;
 #   jsr_sdk_copy_runtime(<target>)
 #               copies the DLLs a program needs next to it after each build.
 #

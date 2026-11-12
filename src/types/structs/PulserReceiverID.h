@@ -16,8 +16,7 @@
  *
  * Mirrors JSRDotNETSDK::IPulserReceiverIdentity interface.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use JSR_PulserReceiverID in jsr_sdk.h.
+ * @note Internal to the DLL. Programs use JSR_PulserReceiverID in jsr_sdk.h.
  */
 struct PulserReceiverID {
   /**

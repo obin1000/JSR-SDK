@@ -40,34 +40,34 @@
   </ItemGroup>
   <ItemGroup>
 
-    <ClInclude Include="include\JSR-SDK\enums\C_CONNECTION_TYPE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_DISCOVERY_STATE_FLAGS.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_ERROR_CODE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_IS_PULSING.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_MANAGER_STATE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_NOTIFY_TYPE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_POWER_LIMIT.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PROPERTY_UNITS.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_IMPEDANCE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_DATA_TYPE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_PROPERTY_ROLE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_PULSER_RECEIVER_STATE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_RECEIVER_MODE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_STATUS_CHANGE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_IMPEDANCE.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_POLARITY.h" />
-    <ClInclude Include="include\JSR-SDK\enums\C_TRIGGER_SOURCE.h" />
-    <ClInclude Include="include\JSR-SDK\events\NotifyEvent.h" />
-    <ClInclude Include="include\JSR-SDK\events\StatusChangedEvent.h" />
+    <ClInclude Include="src\types\enums\C_CONNECTION_TYPE.h" />
+    <ClInclude Include="src\types\enums\C_DISCOVERY_STATE_FLAGS.h" />
+    <ClInclude Include="src\types\enums\C_ERROR_CODE.h" />
+    <ClInclude Include="src\types\enums\C_IS_PULSING.h" />
+    <ClInclude Include="src\types\enums\C_MANAGER_STATE.h" />
+    <ClInclude Include="src\types\enums\C_NOTIFY_TYPE.h" />
+    <ClInclude Include="src\types\enums\C_POWER_LIMIT.h" />
+    <ClInclude Include="src\types\enums\C_PROPERTY_UNITS.h" />
+    <ClInclude Include="src\types\enums\C_PULSER_IMPEDANCE.h" />
+    <ClInclude Include="src\types\enums\C_PULSER_PROPERTY_DATA_TYPE.h" />
+    <ClInclude Include="src\types\enums\C_PULSER_PROPERTY_ROLE.h" />
+    <ClInclude Include="src\types\enums\C_PULSER_RECEIVER_STATE.h" />
+    <ClInclude Include="src\types\enums\C_RECEIVER_MODE.h" />
+    <ClInclude Include="src\types\enums\C_STATUS_CHANGE.h" />
+    <ClInclude Include="src\types\enums\C_TRIGGER_IMPEDANCE.h" />
+    <ClInclude Include="src\types\enums\C_TRIGGER_POLARITY.h" />
+    <ClInclude Include="src\types\enums\C_TRIGGER_SOURCE.h" />
+    <ClInclude Include="src\types\events\NotifyEvent.h" />
+    <ClInclude Include="src\types\events\StatusChangedEvent.h" />
     <ClInclude Include="src\CallbackGuard.hpp" />
     <ClInclude Include="src\JSRSDKWrapper.hpp" />
     <ClInclude Include="src\marshals\MarshalEnums.h" />
     <ClInclude Include="src\marshals\MarshalTypes.h" />
-    <ClInclude Include="include\JSR-SDK\structs\ExceptionJSRSDK.h" />
-    <ClInclude Include="include\JSR-SDK\structs\InstrumentID.h" />
-    <ClInclude Include="include\JSR-SDK\structs\JSRLibMetadata.h" />
-    <ClInclude Include="include\JSR-SDK\JSRSDKManager.hpp" />
-    <ClInclude Include="include\JSR-SDK\structs\PulserReceiverID.h" />
+    <ClInclude Include="src\types\structs\ExceptionJSRSDK.h" />
+    <ClInclude Include="src\types\structs\InstrumentID.h" />
+    <ClInclude Include="src\types\structs\JSRLibMetadata.h" />
+    <ClInclude Include="src\SdkManager.hpp" />
+    <ClInclude Include="src\types\structs\PulserReceiverID.h" />
     <ClInclude Include="include\JSR-SDK\jsr_sdk.h" />
     <ClInclude Include="include\JSR-SDK\jsr_sdk.hpp" />
     <ClInclude Include="src\ManagedErrors.hpp" />
@@ -148,13 +148,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|Win32'">
-    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\lib\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='static|Win32'">
-    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\lib\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
@@ -163,14 +163,14 @@
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='dynamic|x64'">
-    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\lib\$(Platform)\$(Configuration)\</OutDir>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
     <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='static|x64'">
-    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\lib\$(Platform)\$(Configuration)\</OutDir>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <SourcePath>$(ProjectDir)\src;$(SourcePath)</SourcePath>
