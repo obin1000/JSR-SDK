@@ -86,8 +86,6 @@
 
 #if defined(JSR_SDK_BUILDING)
 #define JSR_API __declspec(dllexport)
-#elif defined(JSR_SDK_STATIC)
-#define JSR_API
 #else
 #define JSR_API __declspec(dllimport)
 #endif

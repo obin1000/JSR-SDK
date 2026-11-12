@@ -9,8 +9,6 @@ Select a release from the github, and copy the download url and hash. This adds 
 ```CMake
 include(FetchContent)
 
-# Tell the JSR-SDK to use the dynamic library instead of the static one.
-SET(JSR_SDK_USE_DYNAMIC_LIB ON)
 set(JSR_SDK_VERSION "v<version>")
 FetchContent_Declare(
     JSR-SDK
@@ -35,7 +33,7 @@ add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE JSR-SDK::JSR-SDK)
 jsr_sdk_copy_runtime(my_app)
 ```
-A version request accepts releases with the same major version that aren't older. Before 1.0 the minor version has to match too, because a 0.x minor release may break the API. Set `JSR_SDK_USE_DYNAMIC_LIB` and the `JSR_SDK_INCLUDE_*` plugin options before `find_package()` to change them.
+A version request accepts releases with the same major version that aren't older. Before 1.0 the minor version has to match too, because a 0.x minor release may break the API. Set the `JSR_SDK_INCLUDE_*` plugin options before `find_package()` to change them.
 
 ### Supported compilers
 | Compiler | `jsr_sdk.hpp` (C++) | `jsr_sdk.h` (C) | `JSRSDKManager.hpp` (old C++ interface) |
@@ -45,7 +43,7 @@ A version request accepts releases with the same major version that aren't older
 | MinGW-w64 GCC, x64 and x86 | ✅ | ✅ | ❌ |
 | MinGW clang | ✅ | ✅ | ❌ |
 
-CI builds and runs a small program with each of these on every pull request. MinGW builds need the dynamic library (`JSR_SDK_USE_DYNAMIC_LIB ON`); they link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes.
+CI builds and runs a small program with each of these on every pull request. MinGW builds link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes. Since 1.0 the SDK is only a DLL: releases before it also had a static library (`JSR_SDK_USE_DYNAMIC_LIB OFF`), and setting that option now only gives a warning.
 
 ### C++
 Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17. Its methods are camelCase; the .NET SDK's PascalCase names, such as `GetPluginNames`, still work but are deprecated.
