@@ -10,6 +10,7 @@
 #include "SimulatorSupport.h"
 
 #include <atomic>
+#include <chrono>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
@@ -174,6 +175,70 @@ TEST_F(CApiSimulatorTest, RemovedCallback_IsNoLongerCalled) {
   // Give stray events time to arrive; none may.
   EXPECT_FALSE(sim::waitFor([&] { return !statusEvents.snapshot().empty(); },
                             std::chrono::milliseconds(1500)));
+}
+
+namespace {
+
+/// User data of one notify callback in the stress test below.
+struct StressLog {
+  static constexpr int kAlive = 0x5AFE;
+  int canary = kAlive;
+  std::atomic<int> *calls = nullptr;
+  ~StressLog() { canary = 0; }
+};
+
+/// Calls that found their user data already freed.
+std::atomic<int> callsOnFreedLog{0};
+
+void JSR_CALL countNotify(const JSR_NotifyEvent *, void *user) {
+  auto *log = static_cast<StressLog *>(user);
+  // A call after the log was freed reads the canary its destructor cleared
+  // (unless the memory was reused in the meantime). Count it, rather than
+  // crash: the SDK catches everything a callback raises.
+  if (log->canary != StressLog::kAlive) {
+    ++callsOnFreedLog;
+    return;
+  }
+  ++*log->calls;
+}
+
+} // namespace
+
+TEST_F(CApiSimulatorTest, ReplacingNotifyCallbackDuringDiscovery_IsSafe) {
+  // #14: once JSR_SetNotifyCallback() returns, the old callback is neither
+  // running nor called again, so its user data may be freed at once.
+  // Discovery raises notify events on library threads while this loop keeps
+  // replacing the callback and freeing the previous user data immediately.
+  std::atomic<int> calls{0};
+  callsOnFreedLog = 0;
+  std::unique_ptr<StressLog> current;
+  int replacements = 0;
+  const auto end = std::chrono::steady_clock::now() + std::chrono::seconds(4);
+  auto nextDiscovery = std::chrono::steady_clock::now();
+
+  while (std::chrono::steady_clock::now() < end) {
+    auto next = std::make_unique<StressLog>();
+    next->calls = &calls;
+    ASSERT_EQ(JSR_SetNotifyCallback(manager, countNotify, next.get()), JSR_OK);
+    current = std::move(next); // Frees the previous user data right away.
+    ++replacements;
+
+    // Restart discovery now and then, so events keep coming.
+    if (std::chrono::steady_clock::now() >= nextDiscovery) {
+      ASSERT_EQ(JSR_SetDiscoveryEnable(manager, 0), JSR_OK);
+      ASSERT_EQ(JSR_SetDiscoveryEnable(manager, 1), JSR_OK);
+      nextDiscovery =
+          std::chrono::steady_clock::now() + std::chrono::milliseconds(300);
+    }
+  }
+  ASSERT_EQ(JSR_SetNotifyCallback(manager, nullptr, nullptr), JSR_OK);
+  current.reset();
+
+  EXPECT_EQ(callsOnFreedLog.load(), 0)
+      << "a replaced notify callback ran after JSR_SetNotifyCallback() "
+         "returned (#14)";
+  EXPECT_GT(replacements, 100);
+  EXPECT_GT(calls.load(), 0) << "discovery raised no events during the test";
 }
 
 //--------------------------------------------------------------------------
