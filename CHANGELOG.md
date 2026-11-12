@@ -1,7 +1,7 @@
 # Changelog
 Notable changes per release. Changes that can break a build or change behaviour come first in each release. Releases before 0.12.0 are on the [releases page](https://github.com/obin1000/JSR-SDK/releases).
 
-## 0.14.0 (2026-11-12)
+## Unreleased (1.0.0)
 ### Behaviour changes
 - **A crash ends the process** (#36). An access violation or another structured exception, in a callback or inside the library, is no longer caught. Before, a crash in a callback was dropped, and a crash inside a call returned `JSR_ERROR_UNKNOWN`. Carrying on after a crash hid the bug and kept driving the device with possibly corrupt memory.
 - **MinGW C callbacks must catch their own exceptions** (#36). The library can only catch the C++ exceptions of MSVC and clang-cl. An exception thrown by a C callback built with MinGW x64 now makes the SDK call that raised the event fail; it used to be caught as if it were a crash. `jsr::Manager` still drops callback exceptions with every compiler.
