@@ -1,5 +1,4 @@
 #include "marshals/MarshalEnums.h"
-#include "pch.h"
 #include <gtest/gtest.h>
 
 using namespace JSRDotNETSDK;

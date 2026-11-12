@@ -117,6 +117,23 @@ These rules hold for every interface (`jsr_sdk.h`, `jsr_sdk.hpp` and `JSRSDKMana
 - **Replacing or removing a callback waits for a running one.** Once the call returns, the old callback isn't running and won't be called again, so you may free whatever it uses. Because of that wait, a callback must not block on a thread that is replacing callbacks.
 
 
+## Development
+The library is a C++/CLI project for Visual Studio (`JSR-SDK.vcxproj`); building it needs MSVC and .NET Framework 4.8. The tests are a CMake project in `test/` that runs against the built library, and fetches googletest itself.
+
+```
+msbuild JSR-SDK.vcxproj -p:Configuration=dynamic -p:Platform=x64
+cmake -S test -B build/test-x64 -A x64
+cmake --build build/test-x64 --config Release
+ctest --test-dir build/test-x64 -C Release --output-on-failure
+```
+Use `-p:Platform=Win32` and `-A Win32` for x86.
+- `clr_tests` (`test/clr/`) tests the DLL's internals and compares the C API with the C++ interface. It is C++/CLI, so it needs MSVC and a Visual Studio generator.
+- `capi_tests` (`test/capi/`) tests the C API and `jsr::Manager`. It is plain C++17; CI also builds and runs it with every supported compiler, through `ci/consumer`.
+- Both run against simulated pulser-receivers from the SDK's diagnostics plugin, so no hardware is needed. The `*IntegrationTest` suites need a real device: run the test programs by hand for those.
+
+Code that is generated from `tools/gen_c_api` (the per-method parts of the C API and the parity tests) is regenerated with `python tools/gen_c_api/generate.py`; see [its README](tools/gen_c_api/README.md).
+
+
 ## Disclaimer
 
 This repository (“**JSR-SDK**”) is an **independent, community-driven wrapper** for the closed-source **JSRDotNETSDK**. It is **not** developed, endorsed, maintained, or otherwise associated with **JSR** or any of its subsidiaries or affiliates.

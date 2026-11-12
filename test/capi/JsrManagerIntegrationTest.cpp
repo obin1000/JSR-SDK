@@ -3,7 +3,6 @@
 // API. Like JSRSDKManagerIntegrationTest, they need a physical
 // pulser-receiver and fail without one. CI filters them out; run them by hand
 // with a device attached.
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/jsr_sdk.hpp"

@@ -1,7 +1,7 @@
 """The C API's method list: one entry per JSRSDKManager method.
 
 generate.py turns this list into the per-method parts of jsr_sdk.h,
-src/jsr_sdk_c.cpp, jsr_sdk.hpp and test/CApiParityTest.cpp. To add an SDK
+src/jsr_sdk_c.cpp, jsr_sdk.hpp and test/clr/CApiParityTest.cpp. To add an SDK
 method to the C API, add it to JSRSDKManager.hpp and the adapter in
 src/JSRSDKManager.cpp, add one line here, and run generate.py.
 

@@ -1,6 +1,5 @@
 // JSRSDKManagerIntegrationTest.cpp
 // Integration tests for JSRSDKManager requiring a physical device connection
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/JSRSDKManager.hpp"

@@ -3,7 +3,6 @@
 // SDK's simulated pulser-receivers: events arrive with their data, the user
 // pointer comes back, callbacks can be replaced and removed, and a throwing
 // C++ callback doesn't stop later events. No hardware needed.
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/jsr_sdk.h"

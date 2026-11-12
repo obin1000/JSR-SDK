@@ -2,7 +2,6 @@
 // Tests for the C++ interface (JSRSDKManager.hpp) against the SDK's simulated
 // pulser-receivers: discovery, selection, settings, events and errors. They
 // need no hardware and run in CI.
-#include "pch.h"
 #include <gtest/gtest.h>
 
 #include "JSR-SDK/JSRSDKManager.hpp"
