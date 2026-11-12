@@ -1,20 +1,21 @@
 #pragma once
 
+#include "JSR-SDK/enums/C_ERROR_CODE.h"
 #include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
 #include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
 #include "JSR-SDK/enums/C_STATUS_CHANGE.h"
-#include "JSR-SDK/enums/C_ERROR_CODE.h"
 
 #include "JSR-SDK/structs/ExceptionJSRSDK.h"
 #include "JSR-SDK/structs/PulserReceiverID.h"
 
+#include <cstring>
 #include <functional>
 #include <string>
-#include <cstring>
 
 /**
  * @struct StatusChangedEvent
- * @brief Event structure containing status change data from the JSR SDK Manager.
+ * @brief Event structure containing status change data from the JSR SDK
+ * Manager.
  *
  * This structure is used in status change callbacks to inform about changes to
  * pulser/receiver properties, state transitions, and errors that occur during
@@ -70,8 +71,7 @@ struct StatusChangedEvent {
    * Enums are value-initialized to their default values.
    * The exception object is default-constructed.
    */
-  StatusChangedEvent()
-      : dataType{}, pulserState{}, changeType{}, errorCode{} {
+  StatusChangedEvent() : dataType{}, pulserState{}, changeType{}, errorCode{} {
     pulserProperty[0] = '\0';
     newValue[0] = '\0';
     errorMessage[0] = '\0';
@@ -82,16 +82,16 @@ struct StatusChangedEvent {
  * @typedef StatusChangeCallback
  * @brief Callback function type for status change events.
  *
- * Use this to register a callback that will be invoked when status changes occur.
- * The callback receives a const reference to a StatusChangedEvent structure
- * containing all relevant event information.
+ * Use this to register a callback that will be invoked when status changes
+ * occur. The callback receives a const reference to a StatusChangedEvent
+ * structure containing all relevant event information.
  *
  * @param event The status change event data
  *
  * @example
  * @code
- * manager->replaceStatusChangeEventHandler([](const StatusChangedEvent& event) {
- *     std::cout << "Property: " << event.pulserProperty
+ * manager->replaceStatusChangeEventHandler([](const StatusChangedEvent& event)
+ * { std::cout << "Property: " << event.pulserProperty
  *               << " = " << event.newValue << std::endl;
  *
  *     if (event.errorCode != C_ERROR_CODE::NO_ERROR) {

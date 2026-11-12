@@ -4,8 +4,8 @@
 // C++/CLI only (/clr). Internal to the DLL; test/ManagedErrorsTest.cpp tests
 // it.
 
-#include "marshals/MarshalEnums.h"
 #include "SdkError.hpp"
+#include "marshals/MarshalEnums.h"
 
 #include <msclr/marshal_cppstd.h>
 #include <string>

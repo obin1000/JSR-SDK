@@ -1,8 +1,8 @@
 #pragma once
 
 #include "JSR-SDK/enums/C_ERROR_CODE.h"
-#include <string>
 #include <cstring>
+#include <string>
 
 /**
  * @class ExceptionJSRSDK
@@ -88,7 +88,8 @@ public:
   }
 
   /**
-   * @brief Constructs an exception with error code, message, and inner exception.
+   * @brief Constructs an exception with error code, message, and inner
+   * exception.
    *
    * Use this constructor when wrapping another exception or providing
    * additional context about a nested error.

@@ -51,6 +51,7 @@ public:
   void SetNotifyCallback(NotifyCallback *cb);
 
   // Property to access the managed JSRDotNETManager instance
-  property JSRDotNETSDK::JSRDotNETManager ^
-      dotNETManager { JSRDotNETSDK::JSRDotNETManager ^ get(); }
+  property JSRDotNETSDK::JSRDotNETManager ^ dotNETManager {
+    JSRDotNETSDK::JSRDotNETManager ^ get();
+  }
 };
