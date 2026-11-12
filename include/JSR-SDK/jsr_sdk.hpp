@@ -161,6 +161,10 @@ inline void checkApiVersion(int32_t loaded, const std::string &release) {
 } // namespace detail
 
 /// Owns a JSR_Manager. Movable, not copyable.
+///
+/// Methods are camelCase (getPluginNames, setGainIndex). The .NET SDK's
+/// PascalCase names (GetPluginNames) still work but are deprecated, and go
+/// away in 2.0.
 class Manager {
 public:
   /// Creates the manager; the first one starts the .NET runtime. Throws
@@ -232,7 +236,7 @@ public:
   // --- Struct results ---
 
   /// Retrieves the instruments a plugin found.
-  std::vector<InstrumentID> GetInstruments(const std::string &pluginName) {
+  std::vector<InstrumentID> getInstruments(const std::string &pluginName) {
     return detail::readArray<InstrumentID>(
         [&](InstrumentID *buffer, size_t bufferCount, size_t *count) {
           return JSR_GetInstruments(m_handle, pluginName.c_str(), buffer,
@@ -241,7 +245,7 @@ public:
   }
 
   /// Retrieves all pulser receivers the SDK detected.
-  std::vector<PulserReceiverID> GetPulserReceivers() {
+  std::vector<PulserReceiverID> getPulserReceivers() {
     return detail::readArray<PulserReceiverID>(
         [&](PulserReceiverID *buffer, size_t bufferCount, size_t *count) {
           return JSR_GetPulserReceivers(m_handle, buffer, bufferCount, count);
@@ -250,11 +254,29 @@ public:
 
   /// Retrieves the metadata of a plugin library.
   std::unique_ptr<LibMetadata>
-  GetPluginLibraryMetadata(const std::string &pluginName) {
+  getPluginLibraryMetadata(const std::string &pluginName) {
     auto metadata = std::make_unique<LibMetadata>();
     detail::check(JSR_GetPluginLibraryMetadata(m_handle, pluginName.c_str(),
                                                metadata.get()));
     return metadata;
+  }
+
+  /** Deprecated name of getInstruments(). */
+  [[deprecated("use getInstruments()")]] std::vector<InstrumentID>
+  GetInstruments(const std::string &pluginName) {
+    return getInstruments(pluginName);
+  }
+
+  /** Deprecated name of getPulserReceivers(). */
+  [[deprecated("use getPulserReceivers()")]] std::vector<PulserReceiverID>
+  GetPulserReceivers() {
+    return getPulserReceivers();
+  }
+
+  /** Deprecated name of getPluginLibraryMetadata(). */
+  [[deprecated("use getPluginLibraryMetadata()")]] std::unique_ptr<LibMetadata>
+  GetPluginLibraryMetadata(const std::string &pluginName) {
+    return getPluginLibraryMetadata(pluginName);
   }
 
   /// Retrieves the ID of the current pulser receiver.
@@ -277,38 +299,58 @@ public:
    * this list is empty, then all ports will be searched. The "port string" is
    * specific to the method used for searching for instruments: e.g. COM port
    * for SERIAL, IP Address for ETHERNET, etc. */
-  void AddPortToExclude(const std::string &plugin, const std::string &port) {
+  void addPortToExclude(const std::string &plugin, const std::string &port) {
     detail::check(JSR_AddPortToExclude(m_handle, plugin.c_str(), port.c_str()));
+  }
+  /** Deprecated name of addPortToExclude(). */
+  [[deprecated("use addPortToExclude()")]] decltype(auto)
+  AddPortToExclude(const std::string &plugin, const std::string &port) {
+    return addPortToExclude(plugin, port);
   }
 
   /** Get the list of excluded ports for a plugin. */
-  std::vector<std::string> GetPortsToExclude(const std::string &plugin) {
+  std::vector<std::string> getPortsToExclude(const std::string &plugin) {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetPortsToExclude(m_handle, plugin.c_str(), buffers,
                                        bufferCount, length, count);
         });
   }
+  /** Deprecated name of getPortsToExclude(). */
+  [[deprecated("use getPortsToExclude()")]] decltype(auto)
+  GetPortsToExclude(const std::string &plugin) {
+    return getPortsToExclude(plugin);
+  }
 
   /** Adds a port to include when the plugin will search for instruments. If
    * this list is empty, then all ports will be searched. The "port string" is
    * specific to the method used for searching for instruments: e.g. COM port
    * for SERIAL, IP Address for ETHERNET, etc. */
-  void AddPortToInclude(const std::string &plugin, const std::string &port) {
+  void addPortToInclude(const std::string &plugin, const std::string &port) {
     detail::check(JSR_AddPortToInclude(m_handle, plugin.c_str(), port.c_str()));
+  }
+  /** Deprecated name of addPortToInclude(). */
+  [[deprecated("use addPortToInclude()")]] decltype(auto)
+  AddPortToInclude(const std::string &plugin, const std::string &port) {
+    return addPortToInclude(plugin, port);
   }
 
   /** Get the list of included ports for a plugin. */
-  std::vector<std::string> GetPortsToInclude(const std::string &plugin) {
+  std::vector<std::string> getPortsToInclude(const std::string &plugin) {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetPortsToInclude(m_handle, plugin.c_str(), buffers,
                                        bufferCount, length, count);
         });
   }
+  /** Deprecated name of getPortsToInclude(). */
+  [[deprecated("use getPortsToInclude()")]] decltype(auto)
+  GetPortsToInclude(const std::string &plugin) {
+    return getPortsToInclude(plugin);
+  }
 
   /** Adds an open option for a specific plugin. */
-  bool AddOpenOption(const std::string &plugin, const std::string &optionName,
+  bool addOpenOption(const std::string &plugin, const std::string &optionName,
                      const std::string &optionValue) {
     int32_t value = 0;
     detail::check(JSR_AddOpenOption(m_handle, plugin.c_str(),
@@ -316,101 +358,166 @@ public:
                                     &value));
     return value != 0;
   }
+  /** Deprecated name of addOpenOption(). */
+  [[deprecated("use addOpenOption()")]] decltype(auto)
+  AddOpenOption(const std::string &plugin, const std::string &optionName,
+                const std::string &optionValue) {
+    return addOpenOption(plugin, optionName, optionValue);
+  }
 
   /** Get an open option value. */
-  std::string GetOpenOption(const std::string &plugin,
+  std::string getOpenOption(const std::string &plugin,
                             const std::string &optionName) {
     return detail::readString([&](char *buffer, size_t size, size_t *required) {
       return JSR_GetOpenOption(m_handle, plugin.c_str(), optionName.c_str(),
                                buffer, size, required);
     });
   }
+  /** Deprecated name of getOpenOption(). */
+  [[deprecated("use getOpenOption()")]] decltype(auto)
+  GetOpenOption(const std::string &plugin, const std::string &optionName) {
+    return getOpenOption(plugin, optionName);
+  }
 
   /** Get the names of all open options for a plugin. */
-  std::vector<std::string> GetOpenOptionNames(const std::string &plugin) {
+  std::vector<std::string> getOpenOptionNames(const std::string &plugin) {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetOpenOptionNames(m_handle, plugin.c_str(), buffers,
                                         bufferCount, length, count);
         });
   }
+  /** Deprecated name of getOpenOptionNames(). */
+  [[deprecated("use getOpenOptionNames()")]] decltype(auto)
+  GetOpenOptionNames(const std::string &plugin) {
+    return getOpenOptionNames(plugin);
+  }
 
   /** Removes an open option for a specific plugin. */
-  bool RemoveOpenOption(const std::string &plugin,
+  bool removeOpenOption(const std::string &plugin,
                         const std::string &optionName) {
     int32_t value = 0;
     detail::check(JSR_RemoveOpenOption(m_handle, plugin.c_str(),
                                        optionName.c_str(), &value));
     return value != 0;
   }
+  /** Deprecated name of removeOpenOption(). */
+  [[deprecated("use removeOpenOption()")]] decltype(auto)
+  RemoveOpenOption(const std::string &plugin, const std::string &optionName) {
+    return removeOpenOption(plugin, optionName);
+  }
 
   // --- Manager ---
 
   /** Adds a managed plugin by its name. */
-  void AddManagedPlugin(const std::string &pluginName) {
+  void addManagedPlugin(const std::string &pluginName) {
     detail::check(JSR_AddManagedPlugin(m_handle, pluginName.c_str()));
+  }
+  /** Deprecated name of addManagedPlugin(). */
+  [[deprecated("use addManagedPlugin()")]] decltype(auto)
+  AddManagedPlugin(const std::string &pluginName) {
+    return addManagedPlugin(pluginName);
   }
 
   /** Adds an open option for a specific plugin. */
-  void AddPluginOpenOption(const std::string &pluginName,
+  void addPluginOpenOption(const std::string &pluginName,
                            const std::string &optionName,
                            const std::string &optionValue) {
     detail::check(JSR_AddPluginOpenOption(
         m_handle, pluginName.c_str(), optionName.c_str(), optionValue.c_str()));
   }
+  /** Deprecated name of addPluginOpenOption(). */
+  [[deprecated("use addPluginOpenOption()")]] decltype(auto)
+  AddPluginOpenOption(const std::string &pluginName,
+                      const std::string &optionName,
+                      const std::string &optionValue) {
+    return addPluginOpenOption(pluginName, optionName, optionValue);
+  }
 
   /** Adds a plugin type to the manager. */
-  void AddPluginType(const std::string &pluginType) {
+  void addPluginType(const std::string &pluginType) {
     detail::check(JSR_AddPluginType(m_handle, pluginType.c_str()));
+  }
+  /** Deprecated name of addPluginType(). */
+  [[deprecated("use addPluginType()")]] decltype(auto)
+  AddPluginType(const std::string &pluginType) {
+    return addPluginType(pluginType);
   }
 
   /** Forces the detachment of all plugins and resources. */
-  void ForceDetach() { detail::check(JSR_ForceDetach(m_handle)); }
+  void forceDetach() { detail::check(JSR_ForceDetach(m_handle)); }
+  /** Deprecated name of forceDetach(). */
+  [[deprecated("use forceDetach()")]] decltype(auto) ForceDetach() {
+    return forceDetach();
+  }
 
   /** Retrieves custom settings available in the manager. */
-  std::vector<std::string> GetCustomSettings() {
+  std::vector<std::string> getCustomSettings() {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetCustomSettings(m_handle, buffers, bufferCount, length,
                                        count);
         });
   }
+  /** Deprecated name of getCustomSettings(). */
+  [[deprecated("use getCustomSettings()")]] decltype(auto) GetCustomSettings() {
+    return getCustomSettings();
+  }
 
   /** Retrieves the names of all managed plugins. */
-  std::vector<std::string> GetManagedPluginNames() {
+  std::vector<std::string> getManagedPluginNames() {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetManagedPluginNames(m_handle, buffers, bufferCount,
                                            length, count);
         });
   }
+  /** Deprecated name of getManagedPluginNames(). */
+  [[deprecated("use getManagedPluginNames()")]] decltype(auto)
+  GetManagedPluginNames() {
+    return getManagedPluginNames();
+  }
 
   /** Retrieves names of the loaded plugins. */
-  std::vector<std::string> GetPluginNames() {
+  std::vector<std::string> getPluginNames() {
     return detail::readStrings([&](char **buffers, size_t bufferCount,
                                    size_t length, size_t *count) {
       return JSR_GetPluginNames(m_handle, buffers, bufferCount, length, count);
     });
   }
+  /** Deprecated name of getPluginNames(). */
+  [[deprecated("use getPluginNames()")]] decltype(auto) GetPluginNames() {
+    return getPluginNames();
+  }
 
   /** Retrieves the attributes of a specific pulser property. */
-  int GetPulserPropertyAttributes(const std::string &settingName) {
+  int getPulserPropertyAttributes(const std::string &settingName) {
     int32_t value = 0;
     detail::check(
         JSR_GetPulserPropertyAttributes(m_handle, settingName.c_str(), &value));
     return static_cast<int>(value);
   }
+  /** Deprecated name of getPulserPropertyAttributes(). */
+  [[deprecated("use getPulserPropertyAttributes()")]] decltype(auto)
+  GetPulserPropertyAttributes(const std::string &settingName) {
+    return getPulserPropertyAttributes(settingName);
+  }
 
   /** Retrieves the units of a specific pulser property. */
-  JSR_PropertyUnits GetPulserPropertyUnits(const std::string &settingName) {
+  JSR_PropertyUnits getPulserPropertyUnits(const std::string &settingName) {
     int32_t value = 0;
     detail::check(
         JSR_GetPulserPropertyUnits(m_handle, settingName.c_str(), &value));
     return static_cast<JSR_PropertyUnits>(value);
   }
+  /** Deprecated name of getPulserPropertyUnits(). */
+  [[deprecated("use getPulserPropertyUnits()")]] decltype(auto)
+  GetPulserPropertyUnits(const std::string &settingName) {
+    return getPulserPropertyUnits(settingName);
+  }
 
   /** Retrieves the units of a specific pulser property as a string. */
-  std::string GetPulserPropertyUnitsAsString(const std::string &settingName,
+  std::string getPulserPropertyUnitsAsString(const std::string &settingName,
                                              bool useShort) {
     return detail::readString([&](char *buffer, size_t size, size_t *required) {
       return JSR_GetPulserPropertyUnitsAsString(m_handle, settingName.c_str(),
@@ -418,10 +525,16 @@ public:
                                                 required);
     });
   }
+  /** Deprecated name of getPulserPropertyUnitsAsString(). */
+  [[deprecated("use getPulserPropertyUnitsAsString()")]] decltype(auto)
+  GetPulserPropertyUnitsAsString(const std::string &settingName,
+                                 bool useShort) {
+    return getPulserPropertyUnitsAsString(settingName, useShort);
+  }
 
   /** Retrieves information about a pulser receiver identified by model, serial
    * number and index. */
-  std::vector<std::string> GetPulserReceiverInfo(const std::string &model,
+  std::vector<std::string> getPulserReceiverInfo(const std::string &model,
                                                  const std::string &serialNum,
                                                  int index) {
     return detail::readStrings(
@@ -431,81 +544,153 @@ public:
               static_cast<int32_t>(index), buffers, bufferCount, length, count);
         });
   }
+  /** Deprecated name of getPulserReceiverInfo(). */
+  [[deprecated("use getPulserReceiverInfo()")]] decltype(auto)
+  GetPulserReceiverInfo(const std::string &model, const std::string &serialNum,
+                        int index) {
+    return getPulserReceiverInfo(model, serialNum, index);
+  }
 
   /** Retrieves information about a pulser receiver identified by its ID. */
-  std::vector<std::string> GetPulserReceiverInfo(const PulserReceiverID &id) {
+  std::vector<std::string> getPulserReceiverInfo(const PulserReceiverID &id) {
     return detail::readStrings(
         [&](char **buffers, size_t bufferCount, size_t length, size_t *count) {
           return JSR_GetPulserReceiverInfoById(m_handle, &id, buffers,
                                                bufferCount, length, count);
         });
   }
+  /** Deprecated name of getPulserReceiverInfo(). */
+  [[deprecated("use getPulserReceiverInfo()")]] decltype(auto)
+  GetPulserReceiverInfo(const PulserReceiverID &id) {
+    return getPulserReceiverInfo(id);
+  }
 
   /** Checks if a specific pulser setting is supported. */
-  bool IsPulserSettingSupported(const std::string &settingName) {
+  bool isPulserSettingSupported(const std::string &settingName) {
     int32_t value = 0;
     detail::check(
         JSR_IsPulserSettingSupported(m_handle, settingName.c_str(), &value));
     return value != 0;
   }
+  /** Deprecated name of isPulserSettingSupported(). */
+  [[deprecated("use isPulserSettingSupported()")]] decltype(auto)
+  IsPulserSettingSupported(const std::string &settingName) {
+    return isPulserSettingSupported(settingName);
+  }
 
   /** Loads plugins from a specified path. */
-  void LoadPlugins(const std::string &pluginPath) {
+  void loadPlugins(const std::string &pluginPath) {
     detail::check(JSR_LoadPlugins(m_handle, pluginPath.c_str()));
+  }
+  /** Deprecated name of loadPlugins(). */
+  [[deprecated("use loadPlugins()")]] decltype(auto)
+  LoadPlugins(const std::string &pluginPath) {
+    return loadPlugins(pluginPath);
   }
 
   /** Notifies the manager's thread procedure. */
-  void NotifyThreadProc() { detail::check(JSR_NotifyThreadProc(m_handle)); }
+  void notifyThreadProc() { detail::check(JSR_NotifyThreadProc(m_handle)); }
+  /** Deprecated name of notifyThreadProc(). */
+  [[deprecated("use notifyThreadProc()")]] decltype(auto) NotifyThreadProc() {
+    return notifyThreadProc();
+  }
 
   /** Removes all open options for a specific plugin. */
-  void RemoveAllOpenOptions(const std::string &pluginName) {
+  void removeAllOpenOptions(const std::string &pluginName) {
     detail::check(JSR_RemoveAllOpenOptions(m_handle, pluginName.c_str()));
+  }
+  /** Deprecated name of removeAllOpenOptions(). */
+  [[deprecated("use removeAllOpenOptions()")]] decltype(auto)
+  RemoveAllOpenOptions(const std::string &pluginName) {
+    return removeAllOpenOptions(pluginName);
   }
 
   /** Removes a managed plugin by its name. NULL or "" removes the default
    * plugin. */
-  void RemoveManagedPlugin(const std::string &pluginName = "") {
+  void removeManagedPlugin(const std::string &pluginName = "") {
     detail::check(JSR_RemoveManagedPlugin(m_handle, pluginName.c_str()));
+  }
+  /** Deprecated name of removeManagedPlugin(). */
+  [[deprecated("use removeManagedPlugin()")]] decltype(auto)
+  RemoveManagedPlugin(const std::string &pluginName = "") {
+    return removeManagedPlugin(pluginName);
   }
 
   /** Requests the manager's thread procedure. */
-  void RequestThreadProc() { detail::check(JSR_RequestThreadProc(m_handle)); }
+  void requestThreadProc() { detail::check(JSR_RequestThreadProc(m_handle)); }
+  /** Deprecated name of requestThreadProc(). */
+  [[deprecated("use requestThreadProc()")]] decltype(auto) RequestThreadProc() {
+    return requestThreadProc();
+  }
 
   /** Selects the current pulser receiver by its ID. */
-  void SetCurrentPulserReceiver(const PulserReceiverID &id) {
+  void setCurrentPulserReceiver(const PulserReceiverID &id) {
     detail::check(JSR_SetCurrentPulserReceiverById(m_handle, &id));
+  }
+  /** Deprecated name of setCurrentPulserReceiver(). */
+  [[deprecated("use setCurrentPulserReceiver()")]] decltype(auto)
+  SetCurrentPulserReceiver(const PulserReceiverID &id) {
+    return setCurrentPulserReceiver(id);
   }
 
   /** Selects the current pulser receiver by model, serial number and index. */
-  void SetCurrentPulserReceiver(const std::string &model,
+  void setCurrentPulserReceiver(const std::string &model,
                                 const std::string &serialNum, int index) {
     detail::check(JSR_SetCurrentPulserReceiverByModel(
         m_handle, model.c_str(), serialNum.c_str(),
         static_cast<int32_t>(index)));
   }
+  /** Deprecated name of setCurrentPulserReceiver(). */
+  [[deprecated("use setCurrentPulserReceiver()")]] decltype(auto)
+  SetCurrentPulserReceiver(const std::string &model,
+                           const std::string &serialNum, int index) {
+    return setCurrentPulserReceiver(model, serialNum, index);
+  }
 
   /** Enables or disables discovery mode. */
-  void SetDiscoveryEnable(bool enable) {
+  void setDiscoveryEnable(bool enable) {
     detail::check(JSR_SetDiscoveryEnable(m_handle, enable ? 1 : 0));
+  }
+  /** Deprecated name of setDiscoveryEnable(). */
+  [[deprecated("use setDiscoveryEnable()")]] decltype(auto)
+  SetDiscoveryEnable(bool enable) {
+    return setDiscoveryEnable(enable);
   }
 
   /** Sets the value of a specific pulser property. */
-  void SetPulserPropertyValue(const std::string &property,
+  void setPulserPropertyValue(const std::string &property,
                               const std::string &value) {
     detail::check(
         JSR_SetPulserPropertyValue(m_handle, property.c_str(), value.c_str()));
   }
+  /** Deprecated name of setPulserPropertyValue(). */
+  [[deprecated("use setPulserPropertyValue()")]] decltype(auto)
+  SetPulserPropertyValue(const std::string &property,
+                         const std::string &value) {
+    return setPulserPropertyValue(property, value);
+  }
 
   /** Sets the value of a pulser property for a specific role. */
-  void SetPulserPropertyValue(const std::string &property,
+  void setPulserPropertyValue(const std::string &property,
                               JSR_PulserPropertyRole role,
                               const std::string &value) {
     detail::check(JSR_SetPulserPropertyValueWithRole(
         m_handle, property.c_str(), static_cast<int32_t>(role), value.c_str()));
   }
+  /** Deprecated name of setPulserPropertyValue(). */
+  [[deprecated("use setPulserPropertyValue()")]] decltype(auto)
+  SetPulserPropertyValue(const std::string &property,
+                         JSR_PulserPropertyRole role,
+                         const std::string &value) {
+    return setPulserPropertyValue(property, role, value);
+  }
 
   /** Shuts down the manager and releases all resources. */
-  void Shutdown() { detail::check(JSR_Shutdown(m_handle)); }
+  void shutdown() { detail::check(JSR_Shutdown(m_handle)); }
+  /** Deprecated name of shutdown(). */
+  [[deprecated("use shutdown()")]] decltype(auto) Shutdown() {
+    return shutdown();
+  }
 
   /** Checks if plugins are loaded. */
   bool getPluginsLoaded() {

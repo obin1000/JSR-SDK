@@ -48,7 +48,7 @@ A version request accepts releases with the same major version that aren't older
 CI builds and runs a small program with each of these on every pull request. MinGW builds need the dynamic library (`JSR_SDK_USE_DYNAMIC_LIB ON`); they link `lib/<arch>/dynamic/libJSR-SDK.dll.a`, which the release zip includes.
 
 ### C++
-Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17.
+Include `JSR-SDK/jsr_sdk.hpp` and create a `jsr::Manager`. It frees the manager when it goes out of scope, returns `std::string` and `std::vector`, and throws `jsr::Error` (with `code()` and `what()`) when a call fails. It needs C++17. Its methods are camelCase; the .NET SDK's PascalCase names, such as `GetPluginNames`, still work but are deprecated.
 ```cpp
 #include "JSR-SDK/jsr_sdk.hpp"
 
@@ -59,7 +59,7 @@ int main() {
     jsr::Manager manager;
     manager.loadPluginsFromBinaryDir();
 
-    for (const auto &plugin : manager.GetPluginNames()) {
+    for (const auto &plugin : manager.getPluginNames()) {
       std::cout << "Found plugin: " << plugin << "\n";
     }
 
