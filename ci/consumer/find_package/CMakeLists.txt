@@ -8,6 +8,10 @@ project(jsr_sdk_find_package LANGUAGES C CXX)
 set(JSR_SDK_DIR "" CACHE PATH "Unpacked JSR-SDK release")
 list(APPEND CMAKE_PREFIX_PATH "${JSR_SDK_DIR}")
 
+# A project written for 0.x may still ask for the static library, which 1.0
+# removed: JSR-SDK warns and uses the DLL.
+set(JSR_SDK_USE_DYNAMIC_LIB OFF)
+
 find_package(JSR-SDK CONFIG REQUIRED)
 if(NOT TARGET JSR-SDK::JSR-SDK)
   message(FATAL_ERROR "find_package(JSR-SDK) did not define JSR-SDK::JSR-SDK")
