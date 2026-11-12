@@ -1,13 +1,13 @@
-"""The C API's method list: one entry per JSRSDKManager method.
+"""The C API's method list: one entry per SdkManager method (src/SdkManager.hpp).
 
 generate.py turns this list into the per-method parts of jsr_sdk.h,
 src/jsr_sdk_c.cpp, jsr_sdk.hpp and test/clr/CApiParityTest.cpp. To add an SDK
-method to the C API, add it to JSRSDKManager.hpp and the adapter in
+method to the C API, add it to src/SdkManager.hpp and the adapter in
 src/JSRSDKManager.cpp, add one line here, and run generate.py.
 
 Each entry is (c_name, cpp_name, inputs, output, doc):
   c_name    the C function is JSR_<c_name>.
-  cpp_name  the JSRSDKManager method it wraps, and the jsr::Manager method.
+  cpp_name  the SdkManager method it wraps (jsr::Manager uses it camelCased).
   inputs    list of (kind, name). Kinds:
               str     const char *, NULL is an error
               optstr  const char *, NULL means ""
@@ -19,7 +19,7 @@ Each entry is (c_name, cpp_name, inputs, output, doc):
   output    None, 'bool', 'i32', 'dbl', 'enum:...', 'str' (string result),
             'strs' (string list), 'dbls' (double list) or 'retbool:<name>'
             (a bool the C++ method returns, as an int32_t out-parameter).
-  doc       one-line description; defaults to the @brief in JSRSDKManager.hpp.
+  doc       one-line description; defaults to the @brief in SdkManager.hpp.
 
 Functions with struct results or callbacks (JSR_Create, JSR_Destroy,
 JSR_Set*Callback, JSR_GetInstruments, JSR_GetPulserReceivers,

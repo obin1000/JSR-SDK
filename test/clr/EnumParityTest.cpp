@@ -1,5 +1,5 @@
 // EnumParityTest.cpp
-// Checks that every C++ enum in include/JSR-SDK/enums has exactly the names
+// Checks that every C++ enum in src/types/enums has exactly the names
 // and values of the .NET SDK enum it mirrors. src/marshals/MarshalEnums.h
 // converts between them with casts, so a value added or renumbered on either
 // side must fail here rather than turn into a different setting.

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JSR-SDK/enums/C_ERROR_CODE.h"
+#include "types/enums/C_ERROR_CODE.h"
 #include <cstring>
 #include <string>
 
@@ -15,8 +15,7 @@
  *
  * All string data is stored in fixed-size character arrays.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use the exception fields of
+ * @note Internal to the DLL. Programs use the exception fields of
  *       JSR_StatusChangedEvent in jsr_sdk.h.
  */
 class ExceptionJSRSDK {

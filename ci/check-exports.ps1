@@ -13,7 +13,7 @@
 param(
   [Parameter(Mandatory)] [string] $Dll,
   # Exact names that may be exported.
-  [string[]] $Allowed = @('CreateJSRSDKManager', 'DestroyJSRSDKManager'),
+  [string[]] $Allowed = @(),
   # Name patterns that may be exported, such as the C API's 'JSR_*'.
   [string[]] $AllowedPatterns = @()
 )

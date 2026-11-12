@@ -113,7 +113,7 @@ jobs:
             Remove-Item $ifeo -Recurse -Force
           }
 
-      - name: Check that the C API covers JSRSDKManager
+      - name: Check that the C API covers every SDK method
         run: python ci/check_c_api_parity.py
 
       - name: Check DLL exports
@@ -135,12 +135,12 @@ jobs:
           bash ci/make-mingw-implib.sh lib/x64/dynamic/JSR-SDK.dll x64
           bash ci/make-mingw-implib.sh lib/Win32/dynamic/JSR-SDK.dll Win32
 
-      # Make sure the export check can fail: with one allowed name too few it
-      # must reject the DLL.
+      # Make sure the export check can fail: with no names allowed it must
+      # reject the DLL.
       - name: Check that the export check rejects unexpected exports
         shell: pwsh
         run: |
-          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll -Allowed CreateJSRSDKManager
+          ./ci/check-exports.ps1 -Dll lib/x64/dynamic/JSR-SDK.dll
           if ($LASTEXITCODE -ne 1) { throw "check-exports.ps1 accepted an unexpected export" }
           exit 0
 

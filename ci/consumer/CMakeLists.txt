@@ -90,10 +90,3 @@ add_test(NAME find_package
           --build-options ${_find_package_options}
           --test-command find_package_check)
 set_tests_properties(find_package PROPERTIES TIMEOUT 300)
-
-# JSRSDKManager.hpp is a C++ class interface, so it only works with compilers
-# that share MSVC's C++ ABI: MSVC itself and clang-cl.
-if(MSVC)
-  add_consumer_test(legacy_smoke legacy_smoke.cpp)
-  set_target_properties(legacy_smoke PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-endif()

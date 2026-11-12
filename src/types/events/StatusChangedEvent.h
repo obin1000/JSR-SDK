@@ -1,12 +1,12 @@
 #pragma once
 
-#include "JSR-SDK/enums/C_ERROR_CODE.h"
-#include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
-#include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
-#include "JSR-SDK/enums/C_STATUS_CHANGE.h"
+#include "types/enums/C_ERROR_CODE.h"
+#include "types/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
+#include "types/enums/C_PULSER_RECEIVER_STATE.h"
+#include "types/enums/C_STATUS_CHANGE.h"
 
-#include "JSR-SDK/structs/ExceptionJSRSDK.h"
-#include "JSR-SDK/structs/PulserReceiverID.h"
+#include "types/structs/ExceptionJSRSDK.h"
+#include "types/structs/PulserReceiverID.h"
 
 #include <cstring>
 #include <functional>
@@ -24,8 +24,7 @@
  * All string fields are fixed-size character arrays, so no memory is
  * allocated.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use JSR_StatusChangedEvent in jsr_sdk.h.
+ * @note Internal to the DLL. Programs use JSR_StatusChangedEvent in jsr_sdk.h.
  */
 struct StatusChangedEvent {
   /// Maximum length for string fields (including null terminator)

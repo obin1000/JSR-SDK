@@ -13,8 +13,7 @@
  * All string fields are fixed-size character arrays, so no memory is
  * allocated.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use JSR_InstrumentID in jsr_sdk.h.
+ * @note Internal to the DLL. Programs use JSR_InstrumentID in jsr_sdk.h.
  */
 struct InstrumentID {
   /// Maximum length for string fields (including null terminator)

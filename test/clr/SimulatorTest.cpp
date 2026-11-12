@@ -1,11 +1,11 @@
 // SimulatorTest.cpp
-// Tests for the C++ interface (JSRSDKManager.hpp) against the SDK's simulated
-// pulser-receivers: discovery, selection, settings, events and errors. They
-// need no hardware and run in CI.
+// Tests for the DLL's internal C++ interface (SdkManager.hpp) against the SDK's
+// simulated pulser-receivers: discovery, selection, settings, events and
+// errors. They need no hardware and run in CI.
 #include <gtest/gtest.h>
 
-#include "JSR-SDK/JSRSDKManager.hpp"
 #include "SdkError.hpp"
+#include "SdkManager.hpp"
 #include "SimulatorSupport.h"
 
 #include <atomic>
@@ -49,7 +49,7 @@ bool contains(const std::vector<std::string> &values, const std::string &v) {
 /// discovery takes a few seconds.
 class SimulatorTest : public ::testing::Test {
 protected:
-  static JSRSDKManager *manager;
+  static jsr::detail::SdkManager *manager;
   static PulserReceiverID device;
   static bool deviceFound;
   static sim::EventLog<StatusChangedEvent> *statusEvents;
@@ -58,7 +58,7 @@ protected:
   static void SetUpTestCase() {
     statusEvents = new sim::EventLog<StatusChangedEvent>();
     notifyEvents = new sim::EventLog<NotifyEvent>();
-    manager = CreateJSRSDKManager();
+    manager = jsr::detail::createSdkManager();
     manager->replaceStatusChangeEventHandler(
         [](const StatusChangedEvent &e) { statusEvents->add(e); });
     manager->replaceNotifyEventHandler(
@@ -87,7 +87,7 @@ protected:
   }
 
   static void TearDownTestCase() {
-    DestroyJSRSDKManager(manager);
+    delete manager;
     manager = nullptr;
     delete statusEvents;
     delete notifyEvents;
@@ -100,7 +100,7 @@ protected:
   }
 };
 
-JSRSDKManager *SimulatorTest::manager = nullptr;
+jsr::detail::SdkManager *SimulatorTest::manager = nullptr;
 PulserReceiverID SimulatorTest::device;
 bool SimulatorTest::deviceFound = false;
 sim::EventLog<StatusChangedEvent> *SimulatorTest::statusEvents = nullptr;

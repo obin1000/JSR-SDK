@@ -4,9 +4,7 @@
 // GCC and MinGW clang alike. It needs C++17.
 //
 // jsr::Manager owns a JSR_Manager, returns std::string and std::vector,
-// takes std::function callbacks and throws jsr::Error when a call fails. The
-// method names match the older JSRSDKManager.hpp interface, so moving over
-// is mostly a matter of replacing CreateJSRSDKManager() with a jsr::Manager.
+// takes std::function callbacks and throws jsr::Error when a call fails.
 //
 //   jsr::Manager manager;
 //   manager.loadPluginsFromBinaryDir();

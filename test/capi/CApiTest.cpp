@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include "CrashSupport.h"
-#include "JSR-SDK/enums/C_ERROR_CODE.h"
 #include "JSR-SDK/jsr_sdk.h"
 #include "JSR-SDK/jsr_sdk.hpp"
 
@@ -84,14 +83,6 @@ TEST(CApiErrors, LastErrorMessage_IsPerThread) {
   std::string otherThread = "not run";
   std::thread([&] { otherThread = lastError(); }).join();
   EXPECT_EQ(otherThread, "");
-}
-
-TEST(CApiEnums, ErrorCodes_MatchCppEnum) {
-  EXPECT_EQ(JSR_OK, static_cast<int>(C_ERROR_CODE::SUCCESS));
-  EXPECT_EQ(JSR_ERROR_UNKNOWN, static_cast<int>(C_ERROR_CODE::UNKNOWN));
-  EXPECT_EQ(JSR_ERROR_NOT_FOUND, static_cast<int>(C_ERROR_CODE::NOT_FOUND));
-  EXPECT_EQ(JSR_ERROR_DEVICE_NOT_READY,
-            static_cast<int>(C_ERROR_CODE::DEVICE_NOT_READY));
 }
 
 //--------------------------------------------------------------------------

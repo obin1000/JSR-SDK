@@ -1,12 +1,12 @@
 #pragma once
 
-#include "JSR-SDK/enums/C_DISCOVERY_STATE_FLAGS.h"
-#include "JSR-SDK/enums/C_NOTIFY_TYPE.h"
-#include "JSR-SDK/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
-#include "JSR-SDK/enums/C_PULSER_RECEIVER_STATE.h"
-#include "JSR-SDK/enums/C_STATUS_CHANGE.h"
-#include "JSR-SDK/structs/InstrumentID.h"
-#include "JSR-SDK/structs/PulserReceiverID.h"
+#include "types/enums/C_DISCOVERY_STATE_FLAGS.h"
+#include "types/enums/C_NOTIFY_TYPE.h"
+#include "types/enums/C_PULSER_PROPERTY_DATA_TYPE.h"
+#include "types/enums/C_PULSER_RECEIVER_STATE.h"
+#include "types/enums/C_STATUS_CHANGE.h"
+#include "types/structs/InstrumentID.h"
+#include "types/structs/PulserReceiverID.h"
 
 #include <cstring>
 #include <functional>
@@ -19,8 +19,7 @@
  * events such as device discovery, property changes, errors, and state changes.
  * All string fields are fixed-size character arrays.
  *
- * @note It is a C++ type of the JSRSDKManager.hpp interface (MSVC and clang-cl
- * only). From C or other compilers, use JSR_NotifyEvent in jsr_sdk.h.
+ * @note Internal to the DLL. Programs use JSR_NotifyEvent in jsr_sdk.h.
  */
 struct NotifyEvent {
   /// Maximum length for string fields (including null terminator)
