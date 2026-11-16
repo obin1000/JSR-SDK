@@ -12,6 +12,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -33,6 +34,12 @@ bool isTestDevice(const jsr::PulserReceiverID &id) {
 
 /// Turns discovery on, waits up to 20 s for a test device and selects it.
 bool selectTestDevice(jsr::Manager &manager, jsr::PulserReceiverID &device) {
+  // Discovery only searches managed plugins, and none are by default.
+  for (const std::string &plugin : manager.getPluginNames()) {
+    if (testdevices::isHardwarePlugin(plugin)) {
+      manager.addManagedPlugin(plugin);
+    }
+  }
   manager.setDiscoveryEnable(true);
   for (int attempt = 0; attempt < 20; ++attempt) {
     for (const auto &id : manager.getPulserReceivers()) {
@@ -45,6 +52,31 @@ bool selectTestDevice(jsr::Manager &manager, jsr::PulserReceiverID &device) {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   return false;
+}
+
+/// A setting a test can switch back and forth so the device raises status
+/// events: the gain index, or else the receiver mode (an HB4 has no gain
+/// index). toggle(true) sets the other value, toggle(false) the original.
+/// Empty when the device supports neither.
+std::function<void(bool)> settingToggle(jsr::Manager &manager) {
+  if (manager.getGainIndexSupported()) {
+    const int original = manager.getGainIndex();
+    const int other = original == 0 ? 1 : 0;
+    return [&manager, original, other](bool changed) {
+      manager.setGainIndex(changed ? other : original);
+    };
+  }
+  if (manager.getReceiverModeThruSupported() &&
+      manager.getReceiverModeEchoSupported()) {
+    const JSR_ReceiverMode original = manager.getReceiverMode();
+    const JSR_ReceiverMode other = original == JSR_RECEIVER_MODE_ECHO
+                                       ? JSR_RECEIVER_MODE_THRU
+                                       : JSR_RECEIVER_MODE_ECHO;
+    return [&manager, original, other](bool changed) {
+      manager.setReceiverMode(changed ? other : original);
+    };
+  }
+  return {};
 }
 
 class JsrManagerIntegrationTest : public ::testing::Test {
@@ -117,13 +149,13 @@ TEST_F(JsrManagerIntegrationTest, ReceiverMode_RoundTrips) {
 }
 
 TEST_F(JsrManagerIntegrationTest, PropertyChange_RaisesStatusEvent) {
-  if (!manager->getGainIndexSupported()) {
-    SKIP_TEST("Gain index not supported");
+  const auto toggle = settingToggle(*manager);
+  if (!toggle) {
+    SKIP_TEST("Neither gain index nor receiver mode can be changed");
   }
   const int before = statusEvents.load();
-  const int original = manager->getGainIndex();
-  manager->setGainIndex(original == 0 ? 1 : 0);
-  manager->setGainIndex(original);
+  toggle(true);
+  toggle(false);
   for (int i = 0; i < 50 && statusEvents.load() == before; ++i) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
@@ -247,17 +279,15 @@ TEST_F(JsrManagerIntegrationTest,
   callsFromOtherThreads = 0;
   testThread = std::this_thread::get_id();
 
-  const bool gainSupported = manager->getGainIndexSupported();
-  const int originalGain = gainSupported ? manager->getGainIndex() : 0;
-  const int otherGain = originalGain == 0 ? 1 : 0;
+  const auto toggle = settingToggle(*manager);
 
   std::unique_ptr<CallbackLog> status;
   std::unique_ptr<CallbackLog> notify;
   int replacements = 0;
-  int gainChanges = 0;
+  int settingChanges = 0;
   const auto end = std::chrono::steady_clock::now() + std::chrono::seconds(15);
   auto nextDiscovery = std::chrono::steady_clock::now();
-  auto nextGain = std::chrono::steady_clock::now();
+  auto nextChange = std::chrono::steady_clock::now();
 
   while (std::chrono::steady_clock::now() < end) {
     ++replacements;
@@ -278,12 +308,11 @@ TEST_F(JsrManagerIntegrationTest,
     status = std::move(nextStatus); // Frees the previous user data right away.
     notify = std::move(nextNotify);
 
-    // Change the gain every 20 ms, while a status callback is set.
-    if (gainSupported && status &&
-        std::chrono::steady_clock::now() >= nextGain &&
+    // Change a setting every 20 ms, while a status callback is set.
+    if (toggle && status && std::chrono::steady_clock::now() >= nextChange &&
         manager->getIsPulserReceiverSelected()) {
-      manager->setGainIndex(++gainChanges % 2 == 0 ? originalGain : otherGain);
-      nextGain =
+      toggle(++settingChanges % 2 == 1);
+      nextChange =
           std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
     }
     if (std::chrono::steady_clock::now() >= nextDiscovery) {
@@ -297,12 +326,12 @@ TEST_F(JsrManagerIntegrationTest,
   ASSERT_EQ(JSR_SetNotifyCallback(handle, nullptr, nullptr), JSR_OK);
   status.reset();
   notify.reset();
-  if (gainSupported && manager->getIsPulserReceiverSelected()) {
-    manager->setGainIndex(originalGain);
+  if (toggle && manager->getIsPulserReceiverSelected()) {
+    toggle(false);
   }
 
-  std::cout << replacements << " replacements, " << gainChanges
-            << " gain changes; " << statusCalls.load() << " status and "
+  std::cout << replacements << " replacements, " << settingChanges
+            << " setting changes; " << statusCalls.load() << " status and "
             << notifyCalls.load() << " notify calls, "
             << callsFromOtherThreads.load() << " of them on other threads"
             << std::endl;
@@ -310,9 +339,9 @@ TEST_F(JsrManagerIntegrationTest,
       << "a replaced or removed callback ran after the call that replaced it "
          "returned (#14)";
   EXPECT_GT(replacements, 100);
-  if (gainChanges > 0) {
+  if (settingChanges > 0) {
     EXPECT_GT(statusCalls.load(), 0)
-        << "changing the gain raised no status events";
+        << "changing a setting raised no status events";
   }
   EXPECT_GT(statusCalls.load() + notifyCalls.load(), 0)
       << "the device raised no events during the test";

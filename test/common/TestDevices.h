@@ -17,6 +17,16 @@ namespace testdevices {
 /// The lab's devices: JB0104 (HB3-2, loaner), JB0118 (HB3-1), JC0100 (HB4).
 constexpr const char *kDefaultSerials = "JB0104,JB0118,JC0100";
 
+/// The SDK's simulator plugin. Discovery only searches managed plugins, so
+/// the integration tests add every loaded plugin as managed except this one:
+/// they want real devices, and it would open simulator windows.
+constexpr const char *kSimulatorPlugin = "JSRDotNET_DiagLib";
+
+/// Whether the integration tests manage a plugin before discovery.
+inline bool isHardwarePlugin(const std::string &plugin) {
+  return plugin != kSimulatorPlugin;
+}
+
 /// The environment variable that overrides kDefaultSerials.
 constexpr const char *kVariable = "JSR_TEST_DEVICE_SERIALS";
 

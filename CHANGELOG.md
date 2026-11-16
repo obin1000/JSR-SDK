@@ -1,7 +1,9 @@
 # Changelog
 Notable changes per release. Changes that can break a build or change behaviour come first in each release. Releases before 0.12.0 are on the [releases page](https://github.com/obin1000/JSR-SDK/releases).
 
-## 1.0.0-rc.1 (2026-11-12)
+## 1.0.0 (2026-11-16)
+The same library as the release candidate 1.0.0-rc.1 (2026-11-12), which passed the integration tests on a real pulser-receiver (an HB4) with MSVC and MinGW GCC. That closed #10, #13 and #14.
+
 1.0 makes the C API the SDK's only binary interface. From 1.0 on, the 1.x releases keep `jsr_sdk.h` and `jsr_sdk.hpp` compatible: they only add things. A program built with any 1.x release runs with the `JSR-SDK.dll` of any later 1.x release. `JSR_API_VERSION` stays 1, so programs built with 0.13 against `jsr_sdk.h` or `jsr_sdk.hpp` run with the 1.0 DLL too. The README's "Moving from JSRSDKManager.hpp" section shows how to move over.
 
 ### Changes that can break your build
@@ -27,6 +29,7 @@ Notable changes per release. Changes that can break a build or change behaviour 
 - CI runs the simulator tests under full page heap, which turns a use-after-free into a crash where it happens (#24, #41).
 - CI checks the formatting of the C and C++ code; `python tools/format.py` formats it (#21).
 - `clr_tests` compiles the DLL's implementation itself, so the parity test still compares the C API with it (#48).
+- The integration tests work on real hardware: they manage the hardware plugins before discovery, and skip features the device doesn't have (#50).
 
 ## 0.13.0 (2026-11-12)
 ### Changes that can break your build
