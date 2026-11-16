@@ -134,6 +134,11 @@ protected:
         for (size_t i = 0; i < pluginCount; ++i) {
           std::string pluginName(pluginBuffers[i]);
           std::cout << "  [" << i << "] " << pluginName << std::endl;
+          // Discovery only searches managed plugins, and none are by
+          // default.
+          if (testdevices::isHardwarePlugin(pluginName)) {
+            manager->AddManagedPlugin(pluginBuffers[i]);
+          }
         }
         std::cout << "=====================\n" << std::endl;
 
@@ -415,8 +420,7 @@ TEST_F(JSRSDKManagerIntegrationTest, GetSetGainIndex_ValidIndex_Success) {
   RequireDevice();
 
   if (!manager->getGainIndexSupported()) {
-    FAIL() << "Gain index not supported by device";
-    return;
+    GTEST_SKIP() << "Gain index not supported by device";
   }
 
   int maxIndex = manager->getGainIndexMax();
@@ -514,14 +518,14 @@ TEST_F(JSRSDKManagerIntegrationTest, GetSetHVSupply_ValidValue_Success) {
   RequireDevice();
 
   if (!manager->getHVSupplySupported()) {
-    FAIL() << "HV Supply not supported by device";
-    return;
+    GTEST_SKIP() << "HV Supply not supported by device";
   }
 
   double minHV = manager->getHVSupplyMin();
   double maxHV = manager->getHVSupplyMax();
 
-  EXPECT_LT(minHV, maxHV);
+  // Some devices have a fixed HV (an HB4: 330 V), so min can equal max.
+  EXPECT_LE(minHV, maxHV);
 
   // Set to minimum (safest)
   EXPECT_NO_THROW(manager->setHVSupply(minHV));
@@ -535,8 +539,7 @@ TEST_F(JSRSDKManagerIntegrationTest, GetHVMeasurement_ReturnsValidValue) {
   RequireDevice();
 
   if (!manager->getHVMeasurementSupported()) {
-    FAIL() << "HV Measurement not supported by device";
-    return;
+    GTEST_SKIP() << "HV Measurement not supported by device";
   }
 
   double hvMeasurement = manager->getHVMeasurement();
@@ -587,8 +590,7 @@ TEST_F(JSRSDKManagerIntegrationTest, GetSetTriggerEdgePolarity_Success) {
   RequireDevice();
 
   if (!manager->getTriggerEdgePolaritySupported()) {
-    FAIL() << "Trigger edge polarity not supported";
-    return;
+    GTEST_SKIP() << "Trigger edge polarity not supported";
   }
 
   // Try setting to RISING
@@ -623,11 +625,12 @@ TEST_F(JSRSDKManagerIntegrationTest, GetInfo_ReturnsNonEmpty) {
 
     manager->getInfo(buffers.data(), infoCount, 256);
 
-    // Verify info strings are not empty
+    // Devices can report empty lines (an HB4 does), but not only those.
+    bool anyText = false;
     for (size_t i = 0; i < infoCount; ++i) {
-      std::string infoStr(buffers[i]);
-      EXPECT_FALSE(infoStr.empty()) << "Info string " << i << " is empty";
+      anyText = anyText || buffers[i][0] != '\0';
     }
+    EXPECT_TRUE(anyText) << "Every info line is empty";
   }
 }
 
@@ -636,8 +639,7 @@ TEST_F(JSRSDKManagerIntegrationTest,
   RequireDevice();
 
   if (!manager->getUnitModelNameSupported()) {
-    FAIL() << "Unit model name not supported";
-    return;
+    GTEST_SKIP() << "Unit model name not supported";
   }
 
   char buffer[256];
@@ -652,8 +654,7 @@ TEST_F(JSRSDKManagerIntegrationTest,
   RequireDevice();
 
   if (!manager->getUnitSerialNumSupported()) {
-    FAIL() << "Unit serial number not supported";
-    return;
+    GTEST_SKIP() << "Unit serial number not supported";
   }
 
   char buffer[256];
@@ -672,8 +673,7 @@ TEST_F(JSRSDKManagerIntegrationTest, GetPulserFirmwareVer_ReturnsVersion) {
   RequireDevice();
 
   if (!manager->getPulserFirmwareVerSupported()) {
-    FAIL() << "Pulser firmware version not supported";
-    return;
+    GTEST_SKIP() << "Pulser firmware version not supported";
   }
 
   char buffer[256];
@@ -713,8 +713,7 @@ TEST_F(JSRSDKManagerIntegrationTest,
   RequireDevice();
 
   if (!manager->getIsPulserPresentSupported()) {
-    FAIL() << "Pulser presence detection not supported";
-    return;
+    GTEST_SKIP() << "Pulser presence detection not supported";
   }
 
   EXPECT_TRUE(manager->getIsPulserPresent());
@@ -736,8 +735,9 @@ TEST_F(JSRSDKManagerIntegrationTest,
 //  Cleanup Tests
 //--------------------------------------------------------------------------
 TEST_F(JSRSDKManagerIntegrationTest, Shutdown_Success) {
+  // Plugins loaded, and running once the fixture started discovery.
   C_MANAGER_STATE state = manager->getManagerState();
-  EXPECT_EQ(state, C_MANAGER_STATE::PLUGINS_LOADED);
+  EXPECT_NE(state, C_MANAGER_STATE::NOT_STARTED);
 
   EXPECT_NO_THROW(manager->Shutdown());
   state = manager->getManagerState();
