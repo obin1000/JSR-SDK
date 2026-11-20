@@ -3,8 +3,8 @@
     python tools/format.py           formats the files in place
     python tools/format.py --check   only reports files that need formatting
 
-It covers the tracked .c, .cpp, .h and .hpp files in src/, include/, test/
-and ci/, with the repository's .clang-format. CI runs --check with the
+It covers the tracked .c, .cpp, .h and .hpp files in src/, include/, test/, ci/
+and examples/, with the repository's .clang-format. CI runs --check with the
 clang-format version below; other versions may format a few lines
 differently. Install that version with:
 
@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DIRECTORIES = ['src', 'include', 'test', 'ci']
+DIRECTORIES = ['src', 'include', 'test', 'ci', 'examples']
 EXTENSIONS = {'.c', '.cpp', '.h', '.hpp'}
 VERSION = '23.1.4'
 

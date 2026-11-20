@@ -90,3 +90,26 @@ add_test(NAME find_package
           --build-options ${_find_package_options}
           --test-command find_package_check)
 set_tests_properties(find_package PROPERTIES TIMEOUT 300)
+
+# The example programs in examples/, the way their README builds them: a
+# separate project using the release through find_package(), with warnings as
+# errors. Its own CTest then runs every example; the simulator examples need
+# no hardware, and list_devices exits 0 when it finds none.
+set(_examples_options
+  "-DCMAKE_PREFIX_PATH=${JSR_SDK_DIR}"
+  "-DJSR_EXAMPLES_WERROR=ON"
+  "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+if(CMAKE_BUILD_TYPE)
+  list(APPEND _examples_options "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+endif()
+add_test(NAME examples
+  COMMAND ${CMAKE_CTEST_COMMAND} --build-and-test
+          "${CMAKE_CURRENT_SOURCE_DIR}/../../examples"
+          "${CMAKE_CURRENT_BINARY_DIR}/examples"
+          --build-generator "${CMAKE_GENERATOR}"
+          --build-config $<CONFIG>
+          --build-options ${_examples_options}
+          --test-command ${CMAKE_CTEST_COMMAND} --output-on-failure
+                         --build-config $<CONFIG>)
+set_tests_properties(examples PROPERTIES TIMEOUT 600)
