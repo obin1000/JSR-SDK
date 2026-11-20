@@ -203,6 +203,15 @@ jobs:
               "$($Matches[1])=$($Matches[2])" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
             }
           }
+          # Visual Studio's own clang-cl matches its standard library; the
+          # separate LLVM on the runner can be too old for it (STL1000:
+          # "expected Clang 22 or newer").
+          if ('${{ matrix.cc }}' -eq 'clang-cl') {
+            $llvm = Join-Path $vs 'VC\Tools\Llvm\x64\bin'
+            if (-not (Test-Path (Join-Path $llvm 'clang-cl.exe'))) { throw "Visual Studio's clang-cl is not installed" }
+            $llvm | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+            & (Join-Path $llvm 'clang-cl.exe') --version
+          }
 
       - name: Configure
         run: >
