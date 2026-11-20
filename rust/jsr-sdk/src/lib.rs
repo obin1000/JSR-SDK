@@ -40,8 +40,9 @@
 //!
 //! # The DLLs
 //! `JSR-SDK.dll`, `JSRDotNETSDK.dll` and the plugin DLLs must be next to the
-//! program. The `jsr-sdk-sys` build script copies them next to Cargo's build
-//! output, so `cargo run` and `cargo test` work; ship them with your program.
+//! program or in a folder on `PATH`. The `jsr-sdk-sys` build script gets them
+//! from a JSR-SDK release and puts them where Cargo finds them, so
+//! `cargo run` and `cargo test` work; ship them with your program.
 #![allow(clippy::new_without_default)]
 
 use jsr_sdk_sys as sys;
