@@ -1,0 +1,12 @@
+# The Rust crates of JSR-SDK. See README.md.
+[workspace]
+members = ["jsr-sdk-sys"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+# raw-dylib and import_name_type, which the bindings use, are stable since 1.71.
+rust-version = "1.71"
+license = "MIT"
+repository = "https://github.com/obin1000/JSR-SDK"
