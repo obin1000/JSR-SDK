@@ -21,6 +21,7 @@
 #define JSR_SDK_BUILDING
 #include "JSR-SDK/jsr_sdk.h"
 
+#include "AssemblyResolver.hpp"
 #include "SdkError.hpp"
 #include "SdkManager.hpp"
 
@@ -270,6 +271,9 @@ JSR_API int32_t JSR_CALL JSR_Create(JSR_Manager **manager) {
   return guarded([&] {
     JSR_Manager **out = required(manager, "manager");
     *out = nullptr;
+    // Before anything needs JSRDotNETSDK.dll: lets .NET find it next to this
+    // DLL, wherever the program is.
+    jsr::detail::installAssemblyResolver();
     SdkManager *created = jsr::detail::createSdkManager();
     if (created == nullptr) {
       throw jsr::detail::SdkError(C_ERROR_CODE::INTERNAL_SOFTWARE_FAULT,

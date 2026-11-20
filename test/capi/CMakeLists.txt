@@ -36,6 +36,28 @@ jsr_sdk_copy_runtime(capi_version_mismatch)
 add_test(NAME capi_version_mismatch COMMAND capi_version_mismatch)
 set_tests_properties(capi_version_mismatch PROPERTIES TIMEOUT 60)
 
+# The DLLs in a folder of their own, found through PATH: JSR-SDK.dll must
+# find JSRDotNETSDK.dll and the plugins' dependencies next to itself. The
+# program gets its own output folder, so no DLL sits next to it.
+set(_elsewhere "${CMAKE_CURRENT_BINARY_DIR}/dlls_elsewhere/$<CONFIG>")
+add_executable(capi_dlls_elsewhere dlls_elsewhere_check.c)
+target_link_libraries(capi_dlls_elsewhere PRIVATE JSR-SDK)
+set_target_properties(capi_dlls_elsewhere PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${_elsewhere}/program")
+get_property(_runtime_targets GLOBAL PROPERTY JSR_SDK_RUNTIME_TARGETS)
+set(_runtime_files "")
+foreach(_runtime_target IN LISTS _runtime_targets)
+  list(APPEND _runtime_files "$<TARGET_FILE:${_runtime_target}>")
+endforeach()
+add_custom_command(TARGET capi_dlls_elsewhere POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${_elsewhere}/dlls"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_runtime_files} "${_elsewhere}/dlls"
+  VERBATIM)
+add_test(NAME capi_dlls_elsewhere COMMAND capi_dlls_elsewhere)
+set_tests_properties(capi_dlls_elsewhere PROPERTIES
+  TIMEOUT 120
+  ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_elsewhere}/dlls")
+
 # The integration tests need a real pulser-receiver: run capi_tests by hand
 # with one attached for those.
 add_test(NAME capi_tests COMMAND capi_tests --gtest_filter=-*IntegrationTest.*)
