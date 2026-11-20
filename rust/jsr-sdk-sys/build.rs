@@ -1,5 +1,7 @@
-//! Finds the JSR-SDK DLLs and copies them next to Cargo's build output, so
-//! `cargo run`, `cargo test` and `cargo run --example` find them.
+//! Finds the JSR-SDK DLLs and puts them where programs built by Cargo find
+//! them: in a folder Cargo adds to PATH for `cargo run` and `cargo test`, and
+//! next to the programs and examples. Needs JSR-SDK 1.1.0 or later, whose
+//! JSR-SDK.dll finds its .NET assemblies next to itself.
 //!
 //! - With `JSR_SDK_DIR` set to an unpacked JSR-SDK release (or a checkout of
 //!   JSR-SDK after building the DLL), it uses that.
@@ -45,11 +47,28 @@ fn main() {
         other => panic!("JSR-SDK has no DLLs for the {other} architecture"),
     };
     let files = runtime_files(&root, arch);
-    for dir in output_dirs() {
-        fs::create_dir_all(&dir).unwrap();
-        for file in &files {
-            copy_if_changed(file, &dir.join(file.file_name().unwrap()));
-        }
+
+    // 1. A folder inside the target directory, announced as a link-search
+    //    path: Cargo puts such folders on PATH for `cargo run` and
+    //    `cargo test`, wherever its layout puts the programs. JSR-SDK.dll
+    //    (1.1.0 and later) finds its .NET assemblies next to itself.
+    let dll_dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("dlls");
+    copy_all(&files, &dll_dir);
+    println!("cargo:rustc-link-search=native={}", dll_dir.display());
+
+    // 2. Next to the programs and examples, so they also start outside
+    //    Cargo. Tests can't rely on this: newer Cargo runs them from a
+    //    folder per build.
+    if let Some(profile) = profile_dir() {
+        copy_all(&files, &profile);
+        copy_all(&files, &profile.join("examples"));
+    }
+}
+
+fn copy_all(files: &[PathBuf], dir: &Path) {
+    fs::create_dir_all(dir).unwrap();
+    for file in files {
+        copy_if_changed(file, &dir.join(file.file_name().unwrap()));
     }
 }
 
@@ -83,16 +102,15 @@ fn runtime_files(root: &Path, arch: &str) -> Vec<PathBuf> {
     files
 }
 
-/// Where Cargo puts programs: target/<profile>, and its deps/ (tests) and
-/// examples/. OUT_DIR is target/<profile>/build/<package>-<hash>/out.
-fn output_dirs() -> Vec<PathBuf> {
+/// target/<profile>, where Cargo puts programs: the parent of the `build`
+/// folder that holds OUT_DIR, in the old layout
+/// (build/<package>-<hash>/out) and the new one (build/<package>/<hash>/out).
+fn profile_dir() -> Option<PathBuf> {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let profile = out_dir
+    let build = out_dir
         .ancestors()
-        .nth(3)
-        .expect("unexpected OUT_DIR layout")
-        .to_path_buf();
-    vec![profile.join("deps"), profile.join("examples"), profile]
+        .find(|dir| dir.file_name().is_some_and(|name| name == "build"))?;
+    build.parent().map(Path::to_path_buf)
 }
 
 fn copy_if_changed(from: &Path, to: &Path) {
