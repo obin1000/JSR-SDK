@@ -6,6 +6,7 @@ Writes, relative to the repository root:
   include/JSR-SDK/jsr_sdk.hpp   the jsr::Manager wrapper
   test/clr/CApiParityTest.cpp       parity tests against the DLL's SdkManager
   rust/jsr-sdk-sys/src/bindings.rs  the raw Rust bindings, from jsr_sdk.h
+  rust/jsr-sdk/src/generated.rs     the Rust enums and Manager methods
 and formats them with clang-format and the repository's .clang-format, and
 the Rust files with rustfmt.
 
@@ -30,6 +31,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 import methods  # noqa: E402
+import rust_safe  # noqa: E402
 import rust_sys  # noqa: E402
 
 # Template -> generated file, relative to the repository root.
@@ -40,6 +42,7 @@ OUTPUTS = {
     'CApiParityTest.cpp.in': 'test/clr/CApiParityTest.cpp',
     'EnumParityTest.cpp.in': 'test/clr/EnumParityTest.cpp',
     'jsr_sdk_sys.rs.in': 'rust/jsr-sdk-sys/src/bindings.rs',
+    'jsr_sdk_rs.rs.in': 'rust/jsr-sdk/src/generated.rs',
 }
 
 
@@ -496,6 +499,8 @@ def render():
         OUTPUTS['EnumParityTest.cpp.in']: template('EnumParityTest.cpp.in')
             .replace('@TESTS@', gen_enum_parity_tests()),
         OUTPUTS['jsr_sdk_sys.rs.in']: rust_sys.render(template('jsr_sdk_sys.rs.in'), header),
+        OUTPUTS['jsr_sdk_rs.rs.in']: rust_safe.render(
+            template('jsr_sdk_rs.rs.in'), header, methods.SECTIONS, brief),
     }
 
 
