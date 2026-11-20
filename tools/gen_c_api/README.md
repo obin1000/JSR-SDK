@@ -10,6 +10,7 @@ generated from a method list rather than written by hand:
 | `include/JSR-SDK/jsr_sdk.hpp` | one `jsr::Manager` method per method |
 | `test/clr/CApiParityTest.cpp` | one parity test per getter and setter |
 | `test/clr/EnumParityTest.cpp` | one test per enum: the .NET SDK has the same names and values |
+| `rust/jsr-sdk-sys/src/bindings.rs` | the raw Rust bindings, parsed from the generated `jsr_sdk.h` (by `rust_sys.py`) |
 
 Everything else in those files (conventions, structs, callbacks, struct
 conversions, the test fixture) is written by hand in `templates/`.
@@ -22,9 +23,10 @@ conversions, the test fixture) is written by hand in `templates/`.
    python tools/gen_c_api/generate.py
    ```
 
-The generator needs Python 3 and `clang-format` (from LLVM; set `CLANG_FORMAT`
-if it isn't on `PATH`). It formats its output with the repository's
-`.clang-format`.
+The generator needs Python 3, `clang-format` (from LLVM; set `CLANG_FORMAT`
+if it isn't on `PATH`) and `rustfmt` (from rustup; or set `RUSTFMT`). It
+formats its C and C++ output with the repository's `.clang-format`, and the
+Rust output with rustfmt's defaults.
 
 ## Checks
 - `python tools/gen_c_api/generate.py --check` fails when a generated file
