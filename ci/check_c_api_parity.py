@@ -3,6 +3,7 @@
 - Every virtual method of the DLL's SdkManager has a JSR_* function in jsr_sdk.h.
 - Every JSR_* function declared in jsr_sdk.h is defined in src/jsr_sdk_c.cpp.
 - Every JSR_* function is used by the C++ wrapper in jsr_sdk.hpp.
+- Every JSR_* function is used by the Rust crate in rust/jsr-sdk.
 
 Run from the repository root: python ci/check_c_api_parity.py
 """
@@ -37,11 +38,14 @@ def main():
     header = read('include/JSR-SDK/jsr_sdk.h')
     source = read('src/jsr_sdk_c.cpp')
     wrapper = read('include/JSR-SDK/jsr_sdk.hpp')
+    rust = '\n'.join(p.read_text(encoding='utf-8')
+                     for p in sorted((ROOT / 'rust/jsr-sdk/src').glob('*.rs')))
 
     methods = sorted(set(re.findall(r'virtual\s+[^;(]*?\b(\w+)\s*\(', legacy)) - {'SdkManager'})
     declared = set(re.findall(r'\bJSR_CALL\s+JSR_(\w+)\s*\(', header))
     defined = set(re.findall(r'\bJSR_CALL\s+JSR_(\w+)\s*\(', source))
     used = set(re.findall(r'\bJSR_(\w+)\s*\(', wrapper))
+    used_by_rust = set(re.findall(r'\bJSR_(\w+)\s*\(', rust))
 
     errors = []
     for method in methods:
@@ -53,6 +57,8 @@ def main():
         errors.append(f'JSR_{name} is declared in jsr_sdk.h but not defined in jsr_sdk_c.cpp')
     for name in sorted(declared - used - WRAPPER_EXEMPT):
         errors.append(f'JSR_{name} is not used by jsr_sdk.hpp')
+    for name in sorted(declared - used_by_rust):
+        errors.append(f'JSR_{name} is not used by the Rust crate (rust/jsr-sdk)')
 
     print(f'{len(methods)} C++ methods, {len(declared)} C functions')
     for error in errors:

@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
+name = "jsr-sdk"
+version = "0.1.0"
+dependencies = [
+ "jsr-sdk-sys",
+]
+
+[[package]]
 name = "jsr-sdk-sys"
 version = "0.1.0"
