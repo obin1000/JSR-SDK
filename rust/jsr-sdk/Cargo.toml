@@ -1,0 +1,20 @@
+[package]
+name = "jsr-sdk"
+description = "Rust API for JSR-SDK: drive JSR (Imaginant) pulser-receivers through the JSRDotNETSDK"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "../README.md"
+keywords = ["jsr", "pulser-receiver", "ultrasound", "ndt"]
+categories = ["api-bindings", "hardware-support"]
+# A git dependency for now; crates.io comes later.
+publish = false
+
+[dependencies]
+jsr-sdk-sys = { path = "../jsr-sdk-sys", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc", "i686-pc-windows-msvc"]

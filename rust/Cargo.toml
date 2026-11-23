@@ -1,6 +1,6 @@
 # The Rust crates of JSR-SDK. See README.md.
 [workspace]
-members = ["jsr-sdk-sys"]
+members = ["jsr-sdk-sys", "jsr-sdk"]
 resolver = "2"
 
 [workspace.package]
