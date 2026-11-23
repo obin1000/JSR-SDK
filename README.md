@@ -109,6 +109,14 @@ int main(void) {
 }
 ```
 
+### Rust
+The [`jsr-sdk` crate](rust/README.md) wraps the C API for Rust: a `Manager` with every SDK method, `Result` errors, Rust enums and closure callbacks. Its build script gets the DLLs from a release. Use it from this repository for now:
+```toml
+[dependencies]
+jsr-sdk = { git = "https://github.com/obin1000/JSR-SDK" }
+```
+See [rust/README.md](rust/README.md) for the details and the examples (`cargo run --example simulator` needs no hardware).
+
 ### Moving from JSRSDKManager.hpp
 1.0 removed the old C++ interface, `JSR-SDK/JSRSDKManager.hpp` with `CreateJSRSDKManager()`, together with its `C_*` enums and C++ structs. It only worked with MSVC and clang-cl. `jsr_sdk.hpp` has the same methods and works with every compiler:
 

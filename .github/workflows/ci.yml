@@ -206,6 +206,15 @@ jobs:
       - name: Test
         run: cargo test --target ${{ matrix.target }}
 
+      # The examples that need no hardware: two use the SDK's simulator, and
+      # list_devices must cope with no device attached.
+      - name: Run the examples
+        run: |
+          foreach ($example in 'simulator', 'events', 'list_devices') {
+            cargo run --target ${{ matrix.target }} --example $example
+            if ($LASTEXITCODE -ne 0) { throw "The $example example failed" }
+          }
+
       # Without JSR_SDK_DIR the build script downloads the release it pins,
       # checks its SHA-256 and unpacks it, as it does for users of the crate.
       # This checks that path; the tests above already run against this

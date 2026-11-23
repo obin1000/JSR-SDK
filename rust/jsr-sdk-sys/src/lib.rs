@@ -16,8 +16,9 @@
 //! # The DLLs
 //! `JSR-SDK.dll` is linked by name (`raw-dylib`), so no import library is
 //! needed. At run time it, `JSRDotNETSDK.dll` and the plugin DLLs must be
-//! next to the program. The build script gets them from a JSR-SDK release and
-//! copies them next to Cargo's build output; see the crate's README.
+//! next to the program or in a folder on `PATH`. The build script gets them
+//! from a JSR-SDK release and puts them where `cargo run` and `cargo test`
+//! find them; see the crate's README.
 #![cfg_attr(not(windows), allow(unused))]
 #![allow(non_camel_case_types, non_upper_case_globals, non_snake_case)]
 #![no_std]
