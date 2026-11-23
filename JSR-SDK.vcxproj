@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AssemblyResolver.cpp" />
     <ClCompile Include="src\JSRSDKManager.cpp" />
     <ClCompile Include="src\JSRSDKWrapper.cpp" />
     <!-- Calls the user's callbacks: native with /EHsc, so a crash in one
@@ -51,6 +52,7 @@
     <ClInclude Include="src\types\enums\C_TRIGGER_SOURCE.h" />
     <ClInclude Include="src\types\events\NotifyEvent.h" />
     <ClInclude Include="src\types\events\StatusChangedEvent.h" />
+    <ClInclude Include="src\AssemblyResolver.hpp" />
     <ClInclude Include="src\CallbackGuard.hpp" />
     <ClInclude Include="src\JSRSDKWrapper.hpp" />
     <ClInclude Include="src\marshals\MarshalEnums.h" />
