@@ -215,13 +215,23 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "The $example example failed" }
           }
 
-      # Without JSR_SDK_DIR the build script downloads the release it pins and
-      # checks its SHA-256, as it does for users of the crate.
-      - name: Test with the downloaded release
+      # Without JSR_SDK_DIR the build script downloads the release it pins,
+      # checks its SHA-256 and unpacks it, as it does for users of the crate.
+      # This checks that path; the tests above already run against this
+      # build's DLLs.
+      - name: Check the release download
         if: matrix.checks
         run: |
           Remove-Item Env:JSR_SDK_DIR
-          cargo test -p jsr-sdk-sys --target ${{ matrix.target }} --target-dir target-download
+          cargo build -p jsr-sdk-sys --target ${{ matrix.target }} --target-dir target-download
+          if ($LASTEXITCODE -ne 0) { throw "Building with the downloaded release failed" }
+          $dlls = Get-ChildItem target-download -Recurse -Filter JSR-SDK.dll | Where-Object { $_.DirectoryName -like '*\dlls' }
+          if (-not $dlls) { throw "The build script didn't put JSR-SDK.dll in its dlls folder" }
+          $folder = $dlls[0].DirectoryName
+          foreach ($name in 'JSRDotNETSDK.dll', 'JSRDotNET_Diag.dll') {
+            if (-not (Test-Path (Join-Path $folder $name))) { throw "$name is missing from $folder" }
+          }
+          "Downloaded and checked: $folder"
 
   consumer:
     name: Consumer (${{ matrix.name }})
