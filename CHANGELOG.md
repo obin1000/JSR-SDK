@@ -1,6 +1,10 @@
 # Changelog
 Notable changes per release. Changes that can break a build or change behaviour come first in each release. Releases before 0.12.0 are on the [releases page](https://github.com/obin1000/JSR-SDK/releases).
 
+## Unreleased (1.1.0)
+### Added
+- **The DLLs work from any folder.** `JSR-SDK.dll` now finds `JSRDotNETSDK.dll` and the plugins' dependencies next to itself, not only next to the program, so the DLLs can be found through `PATH` or loaded from another language. Programs with the DLLs next to them behave as before.
+
 ## 1.0.0 (2026-11-16)
 The same library as the release candidate 1.0.0-rc.1 (2026-11-12), which passed the integration tests on a real pulser-receiver (an HB4) with MSVC and MinGW GCC. That closed #10, #13 and #14.
 
