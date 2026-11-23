@@ -118,17 +118,28 @@ if(JSR_SDK_INCLUDE_SIMPLEHID)
     register_jsr_dll("SimpleHID")
 endif()
 
+# The copy script; a global property, so the function finds it from any
+# directory (add_subdirectory gives this file a scope of its own).
+set_property(GLOBAL PROPERTY JSR_SDK_COPY_SCRIPT
+    "${CMAKE_CURRENT_LIST_DIR}/JSR-SDKCopyRuntime.cmake")
+
 # Copies JSR-SDK.dll, JSRDotNETSDK.dll and the enabled plugin DLLs next to
 # <target> after every build, so the program runs from its build directory.
 # Works with every compiler, including MinGW, where the plugins aren't linked.
+# Several programs in one folder may copy at the same time; the script copes
+# with that (see JSR-SDKCopyRuntime.cmake).
 function(jsr_sdk_copy_runtime target)
     get_property(runtime_targets GLOBAL PROPERTY JSR_SDK_RUNTIME_TARGETS)
+    get_property(copy_script GLOBAL PROPERTY JSR_SDK_COPY_SCRIPT)
     set(runtime_files "")
     foreach(runtime_target IN LISTS runtime_targets)
         list(APPEND runtime_files "$<TARGET_FILE:${runtime_target}>")
     endforeach()
+    list(JOIN runtime_files "$<SEMICOLON>" files_argument)
     add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${runtime_files} "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND}
+                "-DFILES=${files_argument}"
+                "-DDESTINATION=$<TARGET_FILE_DIR:${target}>"
+                -P "${copy_script}"
         VERBATIM)
 endfunction()
