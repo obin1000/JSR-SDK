@@ -157,6 +157,73 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # The Rust crates in rust/, against the DLLs this run built (JSR_SDK_DIR).
+  # The bindings link JSR-SDK.dll by name (raw-dylib), so the GNU target
+  # needs no import library.
+  rust:
+    name: Rust (${{ matrix.target }})
+    needs: build
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            checks: true
+          - target: i686-pc-windows-msvc
+          - target: x86_64-pc-windows-gnu
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: rust
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download release layout
+        uses: actions/download-artifact@v8
+        with:
+          name: jsr-sdk
+          path: jsr-sdk
+
+      - name: Set up Rust
+        run: |
+          rustup update stable --no-self-update
+          rustup default stable
+          rustup target add ${{ matrix.target }}
+          rustup component add rustfmt clippy
+          rustc --version
+          "JSR_SDK_DIR=$env:GITHUB_WORKSPACE\jsr-sdk" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Check formatting
+        if: matrix.checks
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --target ${{ matrix.target }} --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --target ${{ matrix.target }}
+
+      # Without JSR_SDK_DIR the build script downloads the release it pins,
+      # checks its SHA-256 and unpacks it, as it does for users of the crate.
+      # This checks that path; the tests above already run against this
+      # build's DLLs.
+      - name: Check the release download
+        if: matrix.checks
+        run: |
+          Remove-Item Env:JSR_SDK_DIR
+          cargo build -p jsr-sdk-sys --target ${{ matrix.target }} --target-dir target-download
+          if ($LASTEXITCODE -ne 0) { throw "Building with the downloaded release failed" }
+          $dlls = Get-ChildItem target-download -Recurse -Filter JSR-SDK.dll | Where-Object { $_.DirectoryName -like '*\dlls' }
+          if (-not $dlls) { throw "The build script didn't put JSR-SDK.dll in its dlls folder" }
+          $folder = $dlls[0].DirectoryName
+          foreach ($name in 'JSRDotNETSDK.dll', 'JSRDotNET_Diag.dll') {
+            if (-not (Test-Path (Join-Path $folder $name))) { throw "$name is missing from $folder" }
+          }
+          "Downloaded and checked: $folder"
+
   consumer:
     name: Consumer (${{ matrix.name }})
     needs: build

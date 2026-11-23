@@ -5,13 +5,16 @@ Writes, relative to the repository root:
   src/jsr_sdk_c.cpp             its implementation
   include/JSR-SDK/jsr_sdk.hpp   the jsr::Manager wrapper
   test/clr/CApiParityTest.cpp       parity tests against the DLL's SdkManager
-and formats them with clang-format and the repository's .clang-format.
+  rust/jsr-sdk-sys/src/bindings.rs  the raw Rust bindings, from jsr_sdk.h
+and formats them with clang-format and the repository's .clang-format, and
+the Rust files with rustfmt.
 
 Usage:
   python tools/gen_c_api/generate.py           regenerate the files
   python tools/gen_c_api/generate.py --check   fail if they are out of date
 
-Set CLANG_FORMAT to the clang-format executable if it isn't on PATH.
+Set CLANG_FORMAT to the clang-format executable, or RUSTFMT to rustfmt, if
+they aren't on PATH.
 """
 import argparse
 import difflib
@@ -27,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 import methods  # noqa: E402
+import rust_sys  # noqa: E402
 
 # Template -> generated file, relative to the repository root.
 OUTPUTS = {
@@ -35,6 +39,7 @@ OUTPUTS = {
     'jsr_sdk.hpp.in': 'include/JSR-SDK/jsr_sdk.hpp',
     'CApiParityTest.cpp.in': 'test/clr/CApiParityTest.cpp',
     'EnumParityTest.cpp.in': 'test/clr/EnumParityTest.cpp',
+    'jsr_sdk_sys.rs.in': 'rust/jsr-sdk-sys/src/bindings.rs',
 }
 
 
@@ -476,10 +481,11 @@ def render():
         c_funcs.append('')
         w_funcs.append('')
     tests = [t for e in ENTRIES for t in (getter_test(e), setter_test(e)) if t]
+    header = (template('jsr_sdk.h.in')
+              .replace('@ENUMS@', enums_h)
+              .replace('@FUNCTIONS@', '\n'.join(h_funcs).rstrip() + '\n'))
     return {
-        OUTPUTS['jsr_sdk.h.in']: template('jsr_sdk.h.in')
-            .replace('@ENUMS@', enums_h)
-            .replace('@FUNCTIONS@', '\n'.join(h_funcs).rstrip() + '\n'),
+        OUTPUTS['jsr_sdk.h.in']: header,
         OUTPUTS['jsr_sdk_c.cpp.in']: template('jsr_sdk_c.cpp.in')
             .replace('@ENUM_ASSERTS@', enum_asserts)
             .replace('@FUNCTIONS@', '\n'.join(c_funcs).rstrip() + '\n'),
@@ -489,6 +495,7 @@ def render():
             .replace('@TESTS@', '\n'.join(tests)),
         OUTPUTS['EnumParityTest.cpp.in']: template('EnumParityTest.cpp.in')
             .replace('@TESTS@', gen_enum_parity_tests()),
+        OUTPUTS['jsr_sdk_sys.rs.in']: rust_sys.render(template('jsr_sdk_sys.rs.in'), header),
     }
 
 
@@ -502,9 +509,22 @@ def clang_format():
     return exe
 
 
+def rustfmt():
+    exe = os.environ.get('RUSTFMT') or shutil.which('rustfmt')
+    if not exe:
+        sys.exit('rustfmt not found: install Rust (rustup) or set RUSTFMT')
+    return exe
+
+
 def format_files(paths):
-    style = f'--style=file:{ROOT / ".clang-format"}'
-    subprocess.run([clang_format(), '-i', style, *map(str, paths)], check=True)
+    paths = [str(p) for p in paths]
+    cpp = [p for p in paths if not p.endswith('.rs')]
+    rust = [p for p in paths if p.endswith('.rs')]
+    if cpp:
+        style = f'--style=file:{ROOT / ".clang-format"}'
+        subprocess.run([clang_format(), '-i', style, *cpp], check=True)
+    if rust:
+        subprocess.run([rustfmt(), '--edition', '2021', *rust], check=True)
 
 
 def line_ending(path):

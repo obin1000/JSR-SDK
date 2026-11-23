@@ -407,3 +407,6 @@ VERSION
 
 # CMake build folders (tests, consumer checks)
 /build
+
+# Cargo build output of the Rust crates
+rust/target/

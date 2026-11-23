@@ -1,0 +1,19 @@
+[package]
+name = "jsr-sdk-sys"
+description = "Raw bindings to the C API of JSR-SDK, for JSR (Imaginant) pulser-receivers through the JSRDotNETSDK"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["jsr", "pulser-receiver", "ultrasound", "ffi"]
+categories = ["external-ffi-bindings", "hardware-support"]
+# Exports DEP_JSR_SDK_ROOT (the unpacked release) to dependents' build scripts.
+links = "JSR-SDK"
+# A git dependency for now; crates.io comes later.
+publish = false
+
+[package.metadata.docs.rs]
+# Windows-only, like the SDK.
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc", "i686-pc-windows-msvc"]
